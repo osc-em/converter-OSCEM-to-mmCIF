@@ -1,0 +1,102 @@
+Instrument.Microscope	_em_imaging.microscope_model
+Instrument.Illumination	_em_imaging.illumination_mode 
+Instrument.Imaging	_em_imaging.mode
+Instrument.Electron_source	_em_imaging.electron_source 
+Instrument.Acceleration_Voltage	_em_imaging.accelerating_voltage 
+Instrument.C2_Aperture	_em_imaging.c2_aperture_diameter
+Instrument.CS	_em_imaging.nominal_cs 
+Instrument.Nominal_defocus.Minimal	_em_imaging.nominal_defocus_min
+Instrument.Nominal_defocus.Maximal	_em_imaging.nominal_defocus_max
+Instrument.Calibrated_defocus.Minimal	_em_imaging.calibrated_defocus_min
+Instrument.Calibrated_defocus.Maximal	_em_imaging.calibrated_defocus_max
+Instrument.Nominal_magnification	_em_imaging.nominal_magnification 
+Instrument.Calibrated_magnification	_em_imaging.calibrated_magnification
+Instrument.Holder	_em_imaging.specimen_holder_model
+Instrument.Holder_cryogen	
+Instrument.Temperature	_em_imaging.temperature 
+Instrument.Temperature.Minimal	_em_imaging.recording_temperature_minimum
+Instrument.Temperature.Maximal	_em_imaging.recording_temperature_maximum
+Instrument.Alignment_procedure	_em_imaging.alignment_procedure 
+Instrument.Software	_em_software.category ['IMAGE ACQUISITION']
+Instrument.Detector	_em_image_recording.film_or_detector_model
+Instrument.Detector_mode	_em_image_recording.detector_mode  
+Instrument.Dose_per_image	_em_image_recording.avg_electron_dose_per_image
+Instrument.Energy_filter.Used	
+Instrument.Energy_filter.Model	_em_imaging_optics.energyfilter_name
+Instrument.Energy_filter.Width	_em_imaging_optics.energyfilter_slit_width
+Instrument.Image_size.Height	_em_image_scans.dimension_height(?)
+Instrument.Image_size.Width	_em_image_scans.dimension_width(?)
+Instrument.Datetime	_em_imaging.date
+Instrument.Exposure_time	_em_image_recording.average_exposure_time
+Instrument.Tilt_angle.Minimal	_em_imaging.tilt_angle_min 
+Instrument.Tilt_angle.Maximal	_em_imaging.tilt_angle_max
+Instrument.Tilt_angle.Increment	_em_imaging.tilt_angle_increment(present?)
+Instrument.Cryogen	_em_imaging.cryogen
+Instrument.Frames_per_movie	_em_image_scans.frames_per_image
+Instrument.Grids_imaged	_em_image_recording.num_grids_imaged
+Instrument.Images_generated	_em_image_recording.num_real_images
+Instrument.Binning	_refine_ls_shell.pdbx_total_number_of_bins_used
+Instrument.Pixel_size	_em_3d_reconstruction.nominal_pixel_size/_em_3d_reconstruction.actual_pixel_size
+Instrument.Specialist_Optics.Phaseplate.Used	
+Instrument.Specialist_Optics.Phaseplate.Type	
+Instrument.Specialist_Optics.Spherical_Aberration_Corrector.Used	_em_imaging_optics.sph_aberration_corrector
+Instrument.Specialist_Optics.Spherical_Aberration_Corrector.Type	
+Instrument.Specialist_Optics.Chromatic_Aberration_Corrector.Used	_em_imaging_optics.chr_aberration_corrector
+Instrument.Specialist_Optics.Chromatic_Aberration_Corrector.Type	
+Instrument.Beamshift.x	
+Instrument.Beamshift.y	
+Instrument.Beamtilt.x	
+Instrument.Beamtilt.y	
+Instrument.Imageshift.x	
+Instrument.Imageshift.y	
+Instrument.TiltAxisAngle	
+Instrument.Beamtiltgroups	
+Instrument.Gainref_FlipRotate	
+Grant.Grant_ID	_pdbx_audit_support.grant_number 
+Grant.Funding_agency	_pdbx_audit_support.funding_organization
+Author.Name.FirstName	_pdbx_contact_author.name_first
+Author.Name.LastName	_pdbx_contact_author.name_last
+Author.Email	_pdbx_contact_author.email
+Author.Phone	_pdbx_contact_author.phone
+Author.ORCID	_pdbx_contact_author.identifier_ORCID
+Author.Organization.Name_org	
+Author.Organization.Type_org	_pdbx_contact_author.organization_type
+Author.Role	_pdbx_contact_author.role
+Author.Country	_pdbx_contact_author.country
+Sample.Overall_Molecule.Type	_entity.type 
+Sample.Overall_Molecule.Name	_em_entity_assembly.name
+Sample.Overall_Molecule.Source	_entity.src_method
+Sample.Overall_Molecule.Molecular_weight	_entity.formula_weight
+Sample.Molecules.Type	_entity_poly.type
+Sample.Molecules.Name	_pdbx_entity_branch_descriptor.descriptor
+Sample.Molecules.Class	_em_entity_assembly.type
+Sample.Molecules.Sequence	_entity_poly.pdbx_seq_one_letter_code
+Sample.Molecules.Natural_source	_em_entity_assembly_naturalsource.organism
+Sample.Molecules.Taxonomy_ID_source	_em_entity_assembly_naturalsource.ncbi_tax_id 
+Sample.Molecules.Expression_system	_em_entity_assembly_recombinant.organism
+Sample.Molecules.Taxonomy_ID_expression	_em_entity_assembly_recombinant.ncbi_tax_id
+Sample.Molecules.Gene_name	_entity_src_gen.pdbx_gene_src_gene
+Sample.Ligands.present	_pdbx_entry_details.has_ligand_of_interest
+Sample.Ligands.SMILE	_pdbx_item_description.description(present)
+Sample.Ligands.Reference	
+Sample.Specimen.Buffer	_em_buffer.details
+Sample.Specimen.Concentration	_em_specimen.concentration
+Sample.Specimen.pH	_em_buffer.pH
+Sample.Specimen.Vitrification	_em_specimen.vitrification_applied
+Sample.Specimen.Vitrification_cryogen	_em_vitrification.cryogen_name
+Sample.Specimen.Humidity	_em_vitrification.humidity 
+Sample.Specimen.Temperature	_em_vitrification.chamber_temperature
+Sample.Specimen.Staining	_em_specimen.staining_applied
+Sample.Specimen.Embedding	_em_specimen.embedding_applied 
+Sample.Specimen.Shadowing	_em_specimen.shadowing_applied
+Sample.Grid.Manufacturer	_em_sample_support.grid_type
+Sample.Grid.Material	_em_sample_support.grid_material
+Sample.Grid.Mesh	_em_sample_support.grid_mesh_size
+Sample.Grid.Film_support	
+Sample.Grid.Film_material	_em_support_film.material
+Sample.Grid.Film_topology	_em_support_film.topology 
+Sample.Grid.Film_thickness	_em_support_film.thickness 
+Sample.Grid.Pretreatment_type	_em_grid_pretreatment.type
+Sample.Grid.Pretreatment_time	_em_grid_pretreatment.time
+Sample.Grid.Pretreatment_pressure	_em_grid_pretreatment.pressure
+Sample.Grid.Pretreatment_atmosphere	_em_grid_pretreatment.atmosphere 
