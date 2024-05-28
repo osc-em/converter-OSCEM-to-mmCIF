@@ -9,6 +9,8 @@ The file mapper.tsv is produced by extracting two relevant columns from [convers
 * specify both Instrument and Sample JSON files ( It is assumed that JSON files pass validation against OSCEM schemas)
 * specify the mapper file
 * TODO specify the output file
+
+  
 `./converter.go .../OSCEM_Schemas/Instrument/test_data_valid.json .../OSCEM_Schemas/Sample/Sample_valid.json mapper.tsv`
 
 
