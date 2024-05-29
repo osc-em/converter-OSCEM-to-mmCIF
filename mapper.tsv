@@ -13,7 +13,7 @@ Instrument.Nominal_magnification	_em_imaging.nominal_magnification
 Instrument.Calibrated_magnification	_em_imaging.calibrated_magnification
 Instrument.Holder	_em_imaging.specimen_holder_model
 Instrument.Holder_cryogen	
-Instrument.Temperature	_em_imaging.temperature 
+Instrument.Temperature	_em_imaging.temperature
 Instrument.Temperature.Minimal	_em_imaging.recording_temperature_minimum
 Instrument.Temperature.Maximal	_em_imaging.recording_temperature_maximum
 Instrument.Alignment_procedure	_em_imaging.alignment_procedure 
@@ -99,4 +99,4 @@ Sample.Grid.Film_thickness	_em_support_film.thickness
 Sample.Grid.Pretreatment_type	_em_grid_pretreatment.type
 Sample.Grid.Pretreatment_time	_em_grid_pretreatment.time
 Sample.Grid.Pretreatment_pressure	_em_grid_pretreatment.pressure
-Sample.Grid.Pretreatment_atmosphere	_em_grid_pretreatment.atmosphere 
+Sample.Grid.Pretreatment_atmosphere	_em_grid_pretreatment.atmosphere

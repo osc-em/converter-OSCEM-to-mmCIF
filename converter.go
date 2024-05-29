@@ -6,34 +6,54 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
-func get_keys(mymap map[string]any) []string {
-	keys := make([]string, len(mymap))
+func getKeys[K string, V any](m map[string]V) []string {
+	keys := make([]string, len(m))
 	i := 0
-	for k := range mymap {
+	for k := range m {
 		keys[i] = k
 		i++
 	}
 	return keys
 }
-func key_concat(sArray []string, sep string) string {
-	s := ""
-	for i := range sArray {
-		if sArray[i] != "" {
-			s += sArray[i]
-			if i != 0 {
-				s += sep
-			}
+
+func keyConcat(s1, s2 string) string {
+	if s1 != "" {
+		return s1 + "." + s2
+	} else {
+		return s2
+	}
+}
+
+func itemParent(item string) string {
+	return strings.Split(item, ".")[0]
+}
+
+func findElemByItem(item string, mapper map[string]string, toMmCIF bool) []string {
+	elements := make([]string, len(mapper))
+	if toMmCIF {
+		i := 0
+		for e := range mapper {
+			elements[i] = mapper[e]
+			i++
+		}
+	} else {
+		elements = getKeys(mapper)
+	}
+	var simElem []string
+	for i := range elements {
+		if itemParent(elements[i]) == item {
+			simElem = append(simElem, elements[i])
 		}
 	}
-	return s
+	return simElem
 }
 func visit(mymap map[string]any, my_json_path string, my_long_properties map[string]any, lenVal int, valI int) map[string]any {
-	keys := get_keys(mymap)
+	keys := getKeys(mymap)
 	for _, k := range keys {
-		key := []string{my_json_path, k}
-		jsonFlat := key_concat(key, ".")
+		jsonFlat := keyConcat(my_json_path, k)
 		if nestedMap, ok := mymap[k].(map[string]any); ok {
 			visit(nestedMap, jsonFlat, my_long_properties, lenVal, valI)
 		} else if nestedSl, ok := mymap[k].([]any); ok {
@@ -120,26 +140,94 @@ func formatMapper(path string, toMmCIF bool) map[string]string {
 	}
 	return mapper
 }
-
-func valueMapper(nameMapper map[string]string, valuesMap map[string]string) []string {
-	// values are mapped to the mmcif properties
-	mappedVal := make([]string, len(nameMapper))
-	i := 0
-	for k := range valuesMap {
-		if _, ok := nameMapper[k]; ok {
-			//if v, ok2 := valuesMap[k].([]string); ok2 {
-			mappedVal[i] = nameMapper[k] + "   " + valuesMap[k]
-			i++
-			//}
+func getKeyByValue(value string, m map[string]string) string {
+	for k, v := range m {
+		if v == value {
+			return k
 		}
 	}
-	return mappedVal
+	return ""
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func getLongest(s []string) int {
+	var r int
+	for _, a := range s {
+		if len(a) > r {
+			r = len(a)
+		}
+	}
+	return r
+}
+func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string {
+	// values are mapped to the mmcif properties
+	mappedVal := make([]string, 0, len(nameMapper))
+	var str strings.Builder
+	str.WriteString("data_someID?\n#\n")
+	for jsonName := range valuesMap {
+		PDBxName := nameMapper[jsonName]
+		if PDBxName == "" {
+			continue // because translation is iterating on json, it still contains elements that don't exist in mmcif
+		}
+		if contains(mappedVal, PDBxName) {
+			continue
+		}
+		elements := findElemByItem(itemParent(PDBxName), nameMapper, true)
+
+		if valSlice, ok := valuesMap[jsonName].([]string); ok {
+			if valSlice == nil {
+				continue // not required in mmCIF
+			}
+			str.WriteString("loop_\n")
+
+			for _, e := range elements {
+				fmt.Fprintf(&str, "%s\n", e)
+				mappedVal = append(mappedVal, e)
+			}
+			for i := range len(valSlice) {
+				for _, e := range elements {
+					jsonKey := getKeyByValue(e, nameMapper)
+					if slice, ok := valuesMap[jsonKey].([]string); ok {
+						fmt.Fprintf(&str, "%s ", slice[i])
+					} else {
+						log.Printf("This element has no multiple values! Possibly %s element is not required in the JSON schema", jsonKey)
+					}
+				}
+				str.WriteString("\n")
+			}
+			str.WriteString("#\n")
+		} else {
+			l := getLongest(elements) + 5
+			for _, e := range elements {
+				jsonKey := getKeyByValue(e, nameMapper)
+				if valuesMap[jsonKey] == nil {
+					continue // not required in mmCIF
+				}
+				formatString := fmt.Sprintf("%%-%ds", l)
+				fmt.Fprintf(&str, formatString, e)
+
+				fmt.Fprintf(&str, "%s\n", valuesMap[jsonKey])
+				mappedVal = append(mappedVal, e)
+			}
+			str.WriteString("#\n")
+		}
+	}
+	return str.String()
 }
 
 func main() {
 	jsonInstr := os.Args[1]
 	jsonSample := os.Args[2]
 	jsonToMmCif := os.Args[3]
+	mmCIFpath := os.Args[4]
 
 	mapInstr := readJson(jsonInstr)
 	mapSample := readJson(jsonSample)
@@ -154,10 +242,27 @@ func main() {
 
 	mapper := formatMapper(jsonToMmCif, true)
 
-	// fix me
-	//mmCIFlines := valueMapper(mapper, mapJson)
+	mmCIFlines := valueMapper(mapper, mapJson)
+	//fmt.Println(mmCIFlines)
 
 	// now write to cif file
+
+	// Open the file, create it if it doesn't exist, and truncate it if it does
+	file, err := os.OpenFile(mmCIFpath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Printf("Error opening file: %v\n", err)
+		return
+	}
+	defer file.Close() // Ensure the file is closed after the operation
+
+	// Write the string to the file
+	_, err = file.WriteString(mmCIFlines)
+	if err != nil {
+		fmt.Printf("Error writing to file: %v\n", err)
+		return
+	}
+
+	fmt.Println("String successfully written to the file.")
 }
 
-// go run converter.go ../OSCEM_Schemas/Instrument/test_data_valid.json ../OSCEM_Schemas/Sample/Sample_valid.json /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/mapper.tsv
+// go run converter.go ../OSCEM_Schemas/Instrument/test_data_valid.json ../OSCEM_Schemas/Sample/Sample_valid.json /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/mapper.tsv /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/output.txt
