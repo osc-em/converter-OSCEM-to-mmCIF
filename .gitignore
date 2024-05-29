@@ -41,3 +41,6 @@ conversions.xlsx
 # python script to create tsv from it
 mapper_file_creation.py
 
+
+
+.DS_Store/
