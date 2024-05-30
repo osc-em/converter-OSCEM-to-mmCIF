@@ -17,26 +17,26 @@ Instrument.Temperature	_em_imaging.temperature
 Instrument.Temperature.Minimal	_em_imaging.recording_temperature_minimum
 Instrument.Temperature.Maximal	_em_imaging.recording_temperature_maximum
 Instrument.Alignment_procedure	_em_imaging.alignment_procedure 
-Instrument.Software	_em_software.category ['IMAGE ACQUISITION']
+Instrument.Software	_em_software.category
 Instrument.Detector	_em_image_recording.film_or_detector_model
 Instrument.Detector_mode	_em_image_recording.detector_mode  
 Instrument.Dose_per_image	_em_image_recording.avg_electron_dose_per_image
 Instrument.Energy_filter.Used	
 Instrument.Energy_filter.Model	_em_imaging_optics.energyfilter_name
 Instrument.Energy_filter.Width	_em_imaging_optics.energyfilter_slit_width
-Instrument.Image_size.Height	_em_image_scans.dimension_height(?)
-Instrument.Image_size.Width	_em_image_scans.dimension_width(?)
+Instrument.Image_size.Height	_em_image_scans.dimension_height
+Instrument.Image_size.Width	_em_image_scans.dimension_width
 Instrument.Datetime	_em_imaging.date
 Instrument.Exposure_time	_em_image_recording.average_exposure_time
 Instrument.Tilt_angle.Minimal	_em_imaging.tilt_angle_min 
 Instrument.Tilt_angle.Maximal	_em_imaging.tilt_angle_max
-Instrument.Tilt_angle.Increment	_em_imaging.tilt_angle_increment(present?)
+Instrument.Tilt_angle.Increment	_em_imaging.tilt_angle_increment
 Instrument.Cryogen	_em_imaging.cryogen
 Instrument.Frames_per_movie	_em_image_scans.frames_per_image
 Instrument.Grids_imaged	_em_image_recording.num_grids_imaged
 Instrument.Images_generated	_em_image_recording.num_real_images
 Instrument.Binning	_refine_ls_shell.pdbx_total_number_of_bins_used
-Instrument.Pixel_size	_em_3d_reconstruction.nominal_pixel_size/_em_3d_reconstruction.actual_pixel_size
+Instrument.Pixel_size	_em_3d_reconstruction.nominal_pixel_size
 Instrument.Specialist_Optics.Phaseplate.Used	
 Instrument.Specialist_Optics.Phaseplate.Type	
 Instrument.Specialist_Optics.Spherical_Aberration_Corrector.Used	_em_imaging_optics.sph_aberration_corrector
@@ -77,7 +77,7 @@ Sample.Molecules.Expression_system	_em_entity_assembly_recombinant.organism
 Sample.Molecules.Taxonomy_ID_expression	_em_entity_assembly_recombinant.ncbi_tax_id
 Sample.Molecules.Gene_name	_entity_src_gen.pdbx_gene_src_gene
 Sample.Ligands.present	_pdbx_entry_details.has_ligand_of_interest
-Sample.Ligands.SMILE	_pdbx_item_description.description(present)
+Sample.Ligands.SMILE	_pdbx_item_description.description
 Sample.Ligands.Reference	
 Sample.Specimen.Buffer	_em_buffer.details
 Sample.Specimen.Concentration	_em_specimen.concentration

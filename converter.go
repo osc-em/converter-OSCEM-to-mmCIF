@@ -171,7 +171,7 @@ func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string 
 	// values are mapped to the mmcif properties
 	mappedVal := make([]string, 0, len(nameMapper))
 	var str strings.Builder
-	str.WriteString("data_someID?\n#\n")
+	str.WriteString("data_some-ID\n#\n")
 	for jsonName := range valuesMap {
 		PDBxName := nameMapper[jsonName]
 		if PDBxName == "" {
@@ -181,7 +181,7 @@ func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string 
 			continue
 		}
 		elements := findElemByItem(itemParent(PDBxName), nameMapper, true)
-
+		var valueString string
 		if valSlice, ok := valuesMap[jsonName].([]string); ok {
 			if valSlice == nil {
 				continue // not required in mmCIF
@@ -195,8 +195,14 @@ func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string 
 			for i := range len(valSlice) {
 				for _, e := range elements {
 					jsonKey := getKeyByValue(e, nameMapper)
+
 					if slice, ok := valuesMap[jsonKey].([]string); ok {
-						fmt.Fprintf(&str, "%s ", slice[i])
+						if strings.Contains(slice[i], " ") {
+							valueString = fmt.Sprintf("'%s' ", slice[i])
+						} else {
+							valueString = fmt.Sprintf("%s ", slice[i])
+						}
+						fmt.Fprintf(&str, "%s", valueString)
 					} else {
 						log.Printf("This element has no multiple values! Possibly %s element is not required in the JSON schema", jsonKey)
 					}
@@ -204,7 +210,7 @@ func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string 
 				str.WriteString("\n")
 			}
 			str.WriteString("#\n")
-		} else {
+		} else if _, ok := valuesMap[jsonName].(string); ok {
 			l := getLongest(elements) + 5
 			for _, e := range elements {
 				jsonKey := getKeyByValue(e, nameMapper)
@@ -213,11 +219,21 @@ func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string 
 				}
 				formatString := fmt.Sprintf("%%-%ds", l)
 				fmt.Fprintf(&str, formatString, e)
+				if jsonValue, ok := valuesMap[jsonKey].(string); ok {
 
-				fmt.Fprintf(&str, "%s\n", valuesMap[jsonKey])
+					if strings.Contains(jsonValue, " ") {
+						valueString = fmt.Sprintf("'%s'\n", jsonValue)
+					} else {
+						valueString = fmt.Sprintf("%s\n", jsonValue)
+					}
+					fmt.Fprintf(&str, "%s", valueString)
+				}
+
 				mappedVal = append(mappedVal, e)
 			}
 			str.WriteString("#\n")
+		} else {
+			fmt.Println("Problem appeared while unmarshalling JSON")
 		}
 	}
 	return str.String()
