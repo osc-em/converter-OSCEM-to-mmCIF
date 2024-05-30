@@ -11,9 +11,9 @@ The file mapper.tsv is produced by extracting two relevant columns from [convers
 * specify the output file
 
   
-`./converter.go .../OSCEM_Schemas/Instrument/test_data_valid.json .../OSCEM_Schemas/Sample/Sample_valid.json mapper.tsv output.cif`
+`go run converter.go .../OSCEM_Schemas/Instrument/test_data_valid.json .../OSCEM_Schemas/Sample/Sample_valid.json mapper.tsv output.cif`
 
 
 ## TBA
-* values are not sorted nicely e.g name and surname don't follow each other (see output.cif)
+* values are not sorted nicely, but alphabetically - e.g first and last name don't follow each other (see output.cif)
 * mmCIF to JSON converter. This, however, is different: EMDB enables download of a very rich mmCIF files with coordinates data. The converter will only create the JSON based on OSCEM schema.

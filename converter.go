@@ -250,7 +250,7 @@ func main() {
 	// Open the file, create it if it doesn't exist, and truncate it if it does
 	file, err := os.OpenFile(mmCIFpath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
-		fmt.Printf("Error opening file: %v\n", err)
+		log.Fatal("Error opening file: ", err)
 		return
 	}
 	defer file.Close() // Ensure the file is closed after the operation
@@ -258,7 +258,7 @@ func main() {
 	// Write the string to the file
 	_, err = file.WriteString(mmCIFlines)
 	if err != nil {
-		fmt.Printf("Error writing to file: %v\n", err)
+		log.Fatal("Error writing to file: ", err)
 		return
 	}
 
