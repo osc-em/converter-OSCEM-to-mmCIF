@@ -42,3 +42,5 @@ conversions.xlsx
 mapper_file_creation.py
 
 .DS_Store
+
+parseDict/dictionaryParser_old.txt

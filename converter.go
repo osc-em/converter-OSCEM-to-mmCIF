@@ -54,17 +54,18 @@ func visit(mymap map[string]any, my_json_path string, my_long_properties map[str
 	keys := getKeys(mymap)
 	for _, k := range keys {
 		jsonFlat := keyConcat(my_json_path, k)
-		if nestedMap, ok := mymap[k].(map[string]any); ok {
+		switch nestedMap := mymap[k].(type) {
+		case map[string]any:
 			visit(nestedMap, jsonFlat, my_long_properties, lenVal, valI)
-		} else if nestedSl, ok := mymap[k].([]any); ok {
-			for i, jsonSlice := range nestedSl {
+		case []any:
+			for i, jsonSlice := range nestedMap {
 				if js, ok := jsonSlice.(map[string]any); ok {
-					visit(js, jsonFlat, my_long_properties, len(nestedSl), i)
+					visit(js, jsonFlat, my_long_properties, len(nestedMap), i)
 				} else {
-					log.Fatal("Weirrd case ")
+					log.Fatal("Weird case ")
 				}
 			}
-		} else {
+		default:
 			if lenVal == 1 {
 				my_long_properties[jsonFlat] = fmt.Sprint(mymap[k])
 			} else {
@@ -182,7 +183,8 @@ func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string 
 		}
 		elements := findElemByItem(itemParent(PDBxName), nameMapper, true)
 		var valueString string
-		if valSlice, ok := valuesMap[jsonName].([]string); ok {
+		switch valSlice := valuesMap[jsonName].(type) {
+		case []string:
 			if valSlice == nil {
 				continue // not required in mmCIF
 			}
@@ -210,7 +212,7 @@ func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string 
 				str.WriteString("\n")
 			}
 			str.WriteString("#\n")
-		} else if _, ok := valuesMap[jsonName].(string); ok {
+		case string:
 			l := getLongest(elements) + 5
 			for _, e := range elements {
 				jsonKey := getKeyByValue(e, nameMapper)
@@ -232,7 +234,7 @@ func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string 
 				mappedVal = append(mappedVal, e)
 			}
 			str.WriteString("#\n")
-		} else {
+		default:
 			fmt.Println("Problem appeared while unmarshalling JSON")
 		}
 	}
@@ -259,7 +261,6 @@ func main() {
 	mapper := formatMapper(jsonToMmCif, true)
 
 	mmCIFlines := valueMapper(mapper, mapJson)
-	//fmt.Println(mmCIFlines)
 
 	// now write to cif file
 
@@ -281,4 +282,4 @@ func main() {
 	fmt.Println("String successfully written to the file.")
 }
 
-// go run converter.go ../OSCEM_Schemas/Instrument/test_data_valid.json ../OSCEM_Schemas/Sample/Sample_valid.json /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/mapper.tsv /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/output.txt
+// go run converter.go ../OSCEM_Schemas/Instrument/test_data_valid.json ../OSCEM_Schemas/Sample/Sample_valid.json /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/data/mapper.tsv /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/data/output.cif
