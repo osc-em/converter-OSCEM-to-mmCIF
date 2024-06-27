@@ -1,20 +1,20 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 )
 
 func getKeys[K string, V any](m map[string]V) []string {
-	keys := make([]string, len(m))
-	i := 0
+	keys := make([]string, 0)
 	for k := range m {
-		keys[i] = k
-		i++
+		keys = append(keys, k)
 	}
 	return keys
 }
@@ -113,7 +113,6 @@ func formatMapper(path string, toMmCIF bool) map[string]string {
 	reader := csv.NewReader(file)
 	reader.Comma = '\t'
 	records, err := reader.ReadAll()
-
 	if err != nil {
 		log.Fatal("Error reading records", err)
 	}
@@ -124,7 +123,7 @@ func formatMapper(path string, toMmCIF bool) map[string]string {
 			l++
 		}
 	}
-	mapper := make(map[string]string, l)
+	mapper := make(map[string]string, 0)
 	if toMmCIF {
 		// json properties are mapped to the mmcif properties, missing ones are skipped
 		for _, eachrecord := range records {
@@ -168,70 +167,151 @@ func getLongest(s []string) int {
 	}
 	return r
 }
-func valueMapper(nameMapper map[string]string, valuesMap map[string]any) string {
-	// values are mapped to the mmcif properties
+
+func detailLines(line string, details bool) bool {
+	if strings.HasPrefix(line, ";") {
+		if details {
+			details = false
+		} else {
+			details = true
+		}
+	}
+	return details
+}
+
+func parseDict(dictFile *os.File) (map[string][]string, map[string]string) {
+
+	reSaveDataItem := regexp.MustCompile(`save_[a-zA-Z0-9]+[a-zA-Z0-9]+`)
+	reSaveDataItemChild := regexp.MustCompile(`save__([a-zA-Z1-9_.]+)`)
+	reUnits := regexp.MustCompile(`_item_units.code`)
+
+	scanner := bufio.NewScanner(dictFile)
+
+	var dataItems = make(map[string][]string)
+	var units = make(map[string]string)
+	var dataItem string
+	var details bool
+
+	i := 0
+
+	var category string
+	var itemsCategory []string
+
+	for scanner.Scan() {
+		i++
+		// ignore multi-line comment/detail lines
+		details = detailLines(scanner.Text(), details)
+		if details {
+			continue
+		}
+
+		// grab the save__ elements
+		matchDataItem := reSaveDataItem.MatchString(scanner.Text())
+		if matchDataItem {
+			dataItem = strings.Split(scanner.Text(), "save_")[1]
+			itemsCategory = make([]string, 0)
+		}
+		// once dataItem was grabbed scan for category properties within it:
+		matchCategory := reSaveDataItemChild.MatchString(scanner.Text())
+		if matchCategory {
+			category = strings.Split(scanner.Text(), ".")[1]
+			itemsCategory = append(itemsCategory, category)
+			dataItems[dataItem] = itemsCategory
+		}
+		// once category was grabbed, scan if this category has a specific units defintion
+		matchUnits := reUnits.MatchString(scanner.Text())
+		if matchUnits {
+			units[dataItem+"."+category] = strings.Fields(scanner.Text())[1]
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return dataItems, units
+}
+
+func valueMapper(nameMapper map[string]string, PDBxItems map[string][]string, valuesMap map[string]any) string {
+	// values from JSON are mapped to the mmcif properties
 	mappedVal := make([]string, 0, len(nameMapper))
 	var str strings.Builder
-	str.WriteString("data_some-ID\n#\n")
+	str.WriteString("data_myID\n#\n")
 	for jsonName := range valuesMap {
 		PDBxName := nameMapper[jsonName]
 		if PDBxName == "" {
 			continue // because translation is iterating on json, it still contains elements that don't exist in mmcif
 		}
+		var orderedElements = PDBxItems[itemParent(PDBxName)[1:]]
 		if contains(mappedVal, PDBxName) {
 			continue
 		}
 		elements := findElemByItem(itemParent(PDBxName), nameMapper, true)
 		var valueString string
 		switch valSlice := valuesMap[jsonName].(type) {
-		case []string:
+		case []string: // loop notation
 			if valSlice == nil {
 				continue // not required in mmCIF
 			}
 			str.WriteString("loop_\n")
 
-			for _, e := range elements {
-				fmt.Fprintf(&str, "%s\n", e)
-				mappedVal = append(mappedVal, e)
-			}
-			for i := range len(valSlice) {
-				for _, e := range elements {
-					jsonKey := getKeyByValue(e, nameMapper)
+			// list category names
+			// instead of all find elements use the ordered list from parsing the dictionary
 
-					if slice, ok := valuesMap[jsonKey].([]string); ok {
-						if strings.Contains(slice[i], " ") {
-							valueString = fmt.Sprintf("'%s' ", slice[i])
-						} else {
-							valueString = fmt.Sprintf("%s ", slice[i])
+			for _, oE := range orderedElements {
+				for _, e := range elements {
+					if oE == strings.Split(e, ".")[1] {
+						fmt.Fprintf(&str, "%s\n", e)
+						mappedVal = append(mappedVal, e)
+					}
+				}
+			}
+			// write the values
+			for i := range len(valSlice) {
+				for _, oE := range orderedElements {
+					for _, e := range elements {
+						if oE == strings.Split(e, ".")[1] {
+							jsonKey := getKeyByValue(e, nameMapper)
+
+							if slice, ok := valuesMap[jsonKey].([]string); ok {
+								if strings.Contains(slice[i], " ") {
+									valueString = fmt.Sprintf("'%s' ", slice[i]) // if name contains whitespaces enclose it in single quotes
+								} else {
+									valueString = fmt.Sprintf("%s ", slice[i]) // take value as is
+								}
+							} else { // if name is present in both OSCEM and PDBx but no value is available set it as unknown
+								valueString = "? "
+							}
+							fmt.Fprintf(&str, "%s", valueString)
 						}
-						fmt.Fprintf(&str, "%s", valueString)
-					} else {
-						log.Printf("This element has no multiple values! Possibly %s element is not required in the JSON schema", jsonKey)
 					}
 				}
 				str.WriteString("\n")
 			}
 			str.WriteString("#\n")
-		case string:
+		case string: // simple list of categories
 			l := getLongest(elements) + 5
-			for _, e := range elements {
-				jsonKey := getKeyByValue(e, nameMapper)
-				if valuesMap[jsonKey] == nil {
-					continue // not required in mmCIF
-				}
-				formatString := fmt.Sprintf("%%-%ds", l)
-				fmt.Fprintf(&str, formatString, e)
-				if jsonValue, ok := valuesMap[jsonKey].(string); ok {
+			for _, oE := range orderedElements {
+				for _, e := range elements {
+					if oE == strings.Split(e, ".")[1] {
 
-					if strings.Contains(jsonValue, " ") {
-						valueString = fmt.Sprintf("'%s'\n", jsonValue)
-					} else {
-						valueString = fmt.Sprintf("%s\n", jsonValue)
+						jsonKey := getKeyByValue(e, nameMapper)
+						if valuesMap[jsonKey] == nil {
+							continue // not required in mmCIF
+						}
+						formatString := fmt.Sprintf("%%-%ds", l)
+						fmt.Fprintf(&str, formatString, e)
+						if jsonValue, ok := valuesMap[jsonKey].(string); ok {
+
+							if strings.Contains(jsonValue, " ") {
+								valueString = fmt.Sprintf("'%s'\n", jsonValue)
+							} else {
+								valueString = fmt.Sprintf("%s\n", jsonValue)
+							}
+							fmt.Fprintf(&str, "%s", valueString)
+						}
+
+						mappedVal = append(mappedVal, e)
 					}
-					fmt.Fprintf(&str, "%s", valueString)
 				}
-
-				mappedVal = append(mappedVal, e)
 			}
 			str.WriteString("#\n")
 		default:
@@ -245,11 +325,20 @@ func main() {
 	jsonInstr := os.Args[1]
 	jsonSample := os.Args[2]
 	jsonToMmCif := os.Args[3]
-	mmCIFpath := os.Args[4]
+	dictFile, err := os.Open(os.Args[4])
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dictFile.Close()
 
+	mmCIFpath := os.Args[5]
+	unitsPath := os.Args[6]
+
+	// read all input json files and create one map from them all
 	mapInstr := readJson(jsonInstr)
 	mapSample := readJson(jsonSample)
 
+	// create one mapping for all the JSON contents: key - value
 	mapJson := make(map[string]any, len(mapInstr)+len(mapSample))
 	for i := range mapInstr {
 		mapJson[i] = mapInstr[i]
@@ -258,9 +347,25 @@ func main() {
 		mapJson[i] = mapSample[i]
 	}
 
+	// create a map containing OSCEM - PDBx naming mappings
 	mapper := formatMapper(jsonToMmCif, true)
 
-	mmCIFlines := valueMapper(mapper, mapJson)
+	// parse PDBx dictionary to retrieve order of data items and units
+	dataItems, units := parseDict(dictFile)
+
+	// use only a map of dataItems that will be needed my mapper
+	var PDBxdataItems = make(map[string][]string)
+	for k, v := range dataItems {
+		for _, mV := range mapper {
+			if "_"+k == strings.Split(mV, ".")[0] {
+				PDBxdataItems[k] = v
+				break
+			}
+		}
+	}
+
+	// create mmCIF text
+	mmCIFlines := valueMapper(mapper, PDBxdataItems, mapJson)
 
 	// now write to cif file
 
@@ -280,6 +385,27 @@ func main() {
 	}
 
 	fmt.Println("String successfully written to the file.")
+
+	// Open the file, create it if it doesn't exist, and truncate it if it does
+	fileUnits, err := os.OpenFile(unitsPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal("Error opening file: ", err)
+		return
+	}
+	defer file.Close() // Ensure the file is closed after the operation
+
+	//var unitsString = ""
+	var unitsString strings.Builder
+	unitsString.WriteString("")
+	for k, v := range units {
+		fmt.Fprintf(&unitsString, "%s,%s\n", k, v)
+	}
+	// Write the string to the file
+	_, err = fileUnits.WriteString(unitsString.String())
+	if err != nil {
+		log.Fatal("Error writing to file: ", err)
+		return
+	}
 }
 
-// go run converter.go ../OSCEM_Schemas/Instrument/test_data_valid.json ../OSCEM_Schemas/Sample/Sample_valid.json /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/data/mapper.tsv /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/data/output.cif
+// go run converter.go ../OSCEM_Schemas/Instrument/test_data_valid.json ../OSCEM_Schemas/Sample/Sample_valid.json /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/data/mapper.tsv ./data/mmcif_pdbx_v50.dic /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/output.cif /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/units.csv
