@@ -277,8 +277,8 @@ func valueMapper(nameMapper map[string]string, PDBxItems map[string][]string, va
 								} else {
 									valueString = fmt.Sprintf("%s ", slice[i]) // take value as is
 								}
-							} else { // if name is present in both OSCEM and PDBx but no value is available set it as unknown
-								valueString = "? "
+							} else { // if name is present in both OSCEM and PDBx but no value is available set it as "omitted"
+								valueString = ". "
 							}
 							fmt.Fprintf(&str, "%s", valueString)
 						}
