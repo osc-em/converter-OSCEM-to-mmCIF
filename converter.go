@@ -1,13 +1,12 @@
 package main
 
 import (
-	"bufio"
+	converter "converter/converterUtils"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -168,68 +167,6 @@ func getLongest(s []string) int {
 	return r
 }
 
-func detailLines(line string, details bool) bool {
-	if strings.HasPrefix(line, ";") {
-		if details {
-			details = false
-		} else {
-			details = true
-		}
-	}
-	return details
-}
-
-func parseDict(dictFile *os.File) (map[string][]string, map[string]string) {
-
-	reSaveDataItem := regexp.MustCompile(`save_[a-zA-Z0-9]+[a-zA-Z0-9]+`)
-	reSaveDataItemChild := regexp.MustCompile(`save__([a-zA-Z1-9_.]+)`)
-	reUnits := regexp.MustCompile(`_item_units.code`)
-
-	scanner := bufio.NewScanner(dictFile)
-
-	var dataItems = make(map[string][]string)
-	var units = make(map[string]string)
-	var dataItem string
-	var details bool
-
-	i := 0
-
-	var category string
-	var itemsCategory []string
-
-	for scanner.Scan() {
-		i++
-		// ignore multi-line comment/detail lines
-		details = detailLines(scanner.Text(), details)
-		if details {
-			continue
-		}
-
-		// grab the save__ elements
-		matchDataItem := reSaveDataItem.MatchString(scanner.Text())
-		if matchDataItem {
-			dataItem = strings.Split(scanner.Text(), "save_")[1]
-			itemsCategory = make([]string, 0)
-		}
-		// once dataItem was grabbed scan for category properties within it:
-		matchCategory := reSaveDataItemChild.MatchString(scanner.Text())
-		if matchCategory {
-			category = strings.Split(scanner.Text(), ".")[1]
-			itemsCategory = append(itemsCategory, category)
-			dataItems[dataItem] = itemsCategory
-		}
-		// once category was grabbed, scan if this category has a specific units defintion
-		matchUnits := reUnits.MatchString(scanner.Text())
-		if matchUnits {
-			units[dataItem+"."+category] = strings.Fields(scanner.Text())[1]
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-	return dataItems, units
-}
-
 func valueMapper(nameMapper map[string]string, PDBxItems map[string][]string, valuesMap map[string]any) string {
 	// values from JSON are mapped to the mmcif properties
 	mappedVal := make([]string, 0, len(nameMapper))
@@ -351,7 +288,7 @@ func main() {
 	mapper := formatMapper(jsonToMmCif, true)
 
 	// parse PDBx dictionary to retrieve order of data items and units
-	dataItems, units := parseDict(dictFile)
+	dataItems, units := converter.ParseDict(dictFile)
 
 	// use only a map of dataItems that will be needed my mapper
 	var PDBxdataItems = make(map[string][]string)
