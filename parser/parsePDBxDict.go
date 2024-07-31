@@ -1,4 +1,4 @@
-package main
+package parser
 
 import (
 	"bufio"
@@ -20,13 +20,12 @@ func detailLines(line string, details bool) bool {
 	return details
 }
 
-func main() {
-	dictFile, err := os.Open(os.Args[1])
+func PDBxDict(path string, relevantNames []string) (map[string][]string, map[string]string) {
+	dictFile, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error while reading the file ", err)
 	}
 	defer dictFile.Close()
-
 	reSaveDataItem := regexp.MustCompile(`save_[a-zA-Z0-9]+[a-zA-Z0-9]+`)
 	reSaveDataItemChild := regexp.MustCompile(`save__([a-zA-Z1-9_.]+)`)
 	reUnits := regexp.MustCompile(`_item_units.code`)
@@ -38,13 +37,13 @@ func main() {
 	var dataItem string
 	var details bool
 
-	i := 0
+	//i := 0
 
 	var category string
 	var itemsCategory []string
 
 	for scanner.Scan() {
-		i++
+		//i++
 		// ignore multi-line comment/detail lines
 		details = detailLines(scanner.Text(), details)
 		if details {
@@ -61,8 +60,13 @@ func main() {
 		matchCategory := reSaveDataItemChild.MatchString(scanner.Text())
 		if matchCategory {
 			category = strings.Split(scanner.Text(), ".")[1]
-			itemsCategory = append(itemsCategory, category)
-			dataItems[dataItem] = itemsCategory
+			for c := range relevantNames {
+				if strings.Split(relevantNames[c], ".")[1] == category {
+					itemsCategory = append(itemsCategory, category)
+					dataItems[dataItem] = itemsCategory
+					break
+				}
+			}
 		}
 		// once category was grabbed, scan if this category has a specific units defintion
 		matchUnits := reUnits.MatchString(scanner.Text())
@@ -70,25 +74,9 @@ func main() {
 			units[dataItem+"."+category] = strings.Fields(scanner.Text())[1]
 		}
 	}
+	fmt.Println(dataItems)
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println(dataItems)
-	fmt.Println(units)
-	file, err := os.OpenFile(os.Args[2], os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		log.Fatal("Error opening file: ", err)
-		return
-	}
-	defer file.Close() // Ensure the file is closed after the operation
-
-	// Write the string to the file
-	_, err = file.WriteString("bla")
-	if err != nil {
-		log.Fatal("Error writing to file: ", err)
-		return
-	}
-	//fmt.Println(dataItem)
-
+	return dataItems, units
 }

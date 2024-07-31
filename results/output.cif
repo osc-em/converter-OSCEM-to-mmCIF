@@ -15,6 +15,32 @@ _em_imaging.recording_temperature_maximum     -170
 _em_imaging.c2_aperture_diameter              70
 _em_imaging.cryogen                           LN2
 #
+_entity_poly.type                         polypeptide
+#
+_em_image_recording.average_exposure_time           3
+_em_image_recording.avg_electron_dose_per_image     50
+_em_image_recording.film_or_detector_model          'Falcon 4i'
+_em_image_recording.num_grids_imaged                1
+_em_image_recording.num_real_images                 30000
+#
+loop_
+_pdbx_contact_author.email
+_pdbx_contact_author.name_first
+_pdbx_contact_author.name_last
+_pdbx_contact_author.country
+_pdbx_contact_author.phone
+_pdbx_contact_author.role
+_pdbx_contact_author.organization_type
+john.doe@gmail.com John Doe Switzerland +4132112312 . Academic 
+jane.doe@gmail.com Jane Doe Switzerland +4132112312 . Academic 
+#
+_entity.formula_weight     3e+06
+_entity.src_method         yeast
+#
+_em_specimen.concentration             0.3
+_em_specimen.shadowing_applied         false
+_em_specimen.staining_applied          false
+_em_specimen.vitrification_applied     false
 #
 _em_imaging.microscope_model                  Titan
 _em_imaging.specimen_holder_model             'Autogrid holder'
@@ -31,27 +57,37 @@ _em_imaging.recording_temperature_maximum     -170
 _em_imaging.c2_aperture_diameter              70
 _em_imaging.cryogen                           LN2
 #
-_em_specimen.concentration             0.3
-_em_specimen.shadowing_applied         false
-_em_specimen.staining_applied          false
-_em_specimen.vitrification_applied     false
+_em_imaging.microscope_model                  Titan
+_em_imaging.specimen_holder_model             'Autogrid holder'
+_em_imaging.date                              today:4-5-2024
+_em_imaging.mode                              Brightfield
+_em_imaging.nominal_defocus_min               -1
+_em_imaging.nominal_defocus_max               -2.5
+_em_imaging.calibrated_defocus_min            -1
+_em_imaging.calibrated_defocus_max            -2.5
+_em_imaging.tilt_angle_max                    0
+_em_imaging.calibrated_magnification          125666
+_em_imaging.recording_temperature_minimum     -190
+_em_imaging.recording_temperature_maximum     -170
+_em_imaging.c2_aperture_diameter              70
+_em_imaging.cryogen                           LN2
 #
-_em_vitrification.cryogen_name            None
-_em_vitrification.chamber_temperature     300
+_em_entity_assembly_naturalsource.organism         yeast
 #
-_em_image_recording.average_exposure_time           3
-_em_image_recording.avg_electron_dose_per_image     50
-_em_image_recording.film_or_detector_model          'Falcon 4i'
-_em_image_recording.num_grids_imaged                1
-_em_image_recording.num_real_images                 30000
+_em_entity_assembly.type     'None of these'
+_em_entity_assembly.name     Ribosome
+#
+_em_grid_pretreatment.pressure        1e-06
+_em_grid_pretreatment.time            30
+_em_grid_pretreatment.type            'Glow discharge'
 #
 loop_
 _pdbx_audit_support.funding_organization
 SNF 
 SNF 
 #
-_em_entity_assembly_recombinant.ncbi_tax_id     GCA_003054445.1
-_em_entity_assembly_recombinant.organism        'Pichia kudriavzevii'
+_em_vitrification.cryogen_name            None
+_em_vitrification.chamber_temperature     300
 #
 loop_
 _pdbx_contact_author.email
@@ -64,101 +100,30 @@ _pdbx_contact_author.organization_type
 john.doe@gmail.com John Doe Switzerland +4132112312 . Academic 
 jane.doe@gmail.com Jane Doe Switzerland +4132112312 . Academic 
 #
-_em_entity_assembly_naturalsource.organism         yeast
-#
-_em_imaging.microscope_model                  Titan
-_em_imaging.specimen_holder_model             'Autogrid holder'
-_em_imaging.date                              today:4-5-2024
-_em_imaging.mode                              Brightfield
-_em_imaging.nominal_defocus_min               -1
-_em_imaging.nominal_defocus_max               -2.5
-_em_imaging.calibrated_defocus_min            -1
-_em_imaging.calibrated_defocus_max            -2.5
-_em_imaging.tilt_angle_max                    0
-_em_imaging.calibrated_magnification          125666
-_em_imaging.recording_temperature_minimum     -190
-_em_imaging.recording_temperature_maximum     -170
-_em_imaging.c2_aperture_diameter              70
-_em_imaging.cryogen                           LN2
-#
-_entity_poly.type                         polypeptide
-#
-_em_imaging.microscope_model                  Titan
-_em_imaging.specimen_holder_model             'Autogrid holder'
-_em_imaging.date                              today:4-5-2024
-_em_imaging.mode                              Brightfield
-_em_imaging.nominal_defocus_min               -1
-_em_imaging.nominal_defocus_max               -2.5
-_em_imaging.calibrated_defocus_min            -1
-_em_imaging.calibrated_defocus_max            -2.5
-_em_imaging.tilt_angle_max                    0
-_em_imaging.calibrated_magnification          125666
-_em_imaging.recording_temperature_minimum     -190
-_em_imaging.recording_temperature_maximum     -170
-_em_imaging.c2_aperture_diameter              70
-_em_imaging.cryogen                           LN2
-#
-_em_grid_pretreatment.pressure       1e-06
-_em_grid_pretreatment.time           30
-_em_grid_pretreatment.type           'Glow discharge'
-#
-_em_sample_support.grid_material      Au
-_em_sample_support.grid_mesh_size     300
-_em_sample_support.grid_type          Quantifoil
-#
-_em_specimen.concentration             0.3
-_em_specimen.shadowing_applied         false
-_em_specimen.staining_applied          false
-_em_specimen.vitrification_applied     false
-#
-_entity.formula_weight     3e+06
-_entity.src_method         yeast
-#
-_em_imaging.microscope_model                  Titan
-_em_imaging.specimen_holder_model             'Autogrid holder'
-_em_imaging.date                              today:4-5-2024
-_em_imaging.mode                              Brightfield
-_em_imaging.nominal_defocus_min               -1
-_em_imaging.nominal_defocus_max               -2.5
-_em_imaging.calibrated_defocus_min            -1
-_em_imaging.calibrated_defocus_max            -2.5
-_em_imaging.tilt_angle_max                    0
-_em_imaging.calibrated_magnification          125666
-_em_imaging.recording_temperature_minimum     -190
-_em_imaging.recording_temperature_maximum     -170
-_em_imaging.c2_aperture_diameter              70
-_em_imaging.cryogen                           LN2
-#
-_em_imaging.microscope_model                  Titan
-_em_imaging.specimen_holder_model             'Autogrid holder'
-_em_imaging.date                              today:4-5-2024
-_em_imaging.mode                              Brightfield
-_em_imaging.nominal_defocus_min               -1
-_em_imaging.nominal_defocus_max               -2.5
-_em_imaging.calibrated_defocus_min            -1
-_em_imaging.calibrated_defocus_max            -2.5
-_em_imaging.tilt_angle_max                    0
-_em_imaging.calibrated_magnification          125666
-_em_imaging.recording_temperature_minimum     -190
-_em_imaging.recording_temperature_maximum     -170
-_em_imaging.c2_aperture_diameter              70
-_em_imaging.cryogen                           LN2
-#
-_em_entity_assembly.type     'None of these'
-_em_entity_assembly.name     Ribosome
-#
-_em_image_scans.dimension_height     4096
-_em_image_scans.dimension_width      4096
-_em_image_scans.frames_per_image     45
-#
-_em_3d_reconstruction.nominal_pixel_size     0.3
-#
 _em_imaging_optics.energyfilter_slit_width      10
 _em_imaging_optics.energyfilter_name            Selectris
 #
-_em_vitrification.cryogen_name            None
-_em_vitrification.chamber_temperature     300
+_em_image_scans.frames_per_image     45
 #
+_em_imaging.microscope_model                  Titan
+_em_imaging.specimen_holder_model             'Autogrid holder'
+_em_imaging.date                              today:4-5-2024
+_em_imaging.mode                              Brightfield
+_em_imaging.nominal_defocus_min               -1
+_em_imaging.nominal_defocus_max               -2.5
+_em_imaging.calibrated_defocus_min            -1
+_em_imaging.calibrated_defocus_max            -2.5
+_em_imaging.tilt_angle_max                    0
+_em_imaging.calibrated_magnification          125666
+_em_imaging.recording_temperature_minimum     -190
+_em_imaging.recording_temperature_maximum     -170
+_em_imaging.c2_aperture_diameter              70
+_em_imaging.cryogen                           LN2
+#
+_em_entity_assembly_recombinant.ncbi_tax_id     GCA_003054445.1
+_em_entity_assembly_recombinant.organism        'Pichia kudriavzevii'
+#
+_em_buffer.pH          7
 #
 _em_image_recording.average_exposure_time           3
 _em_image_recording.avg_electron_dose_per_image     50
@@ -166,12 +131,42 @@ _em_image_recording.film_or_detector_model          'Falcon 4i'
 _em_image_recording.num_grids_imaged                1
 _em_image_recording.num_real_images                 30000
 #
-_em_buffer.pH          7
+_em_imaging.microscope_model                  Titan
+_em_imaging.specimen_holder_model             'Autogrid holder'
+_em_imaging.date                              today:4-5-2024
+_em_imaging.mode                              Brightfield
+_em_imaging.nominal_defocus_min               -1
+_em_imaging.nominal_defocus_max               -2.5
+_em_imaging.calibrated_defocus_min            -1
+_em_imaging.calibrated_defocus_max            -2.5
+_em_imaging.tilt_angle_max                    0
+_em_imaging.calibrated_magnification          125666
+_em_imaging.recording_temperature_minimum     -190
+_em_imaging.recording_temperature_maximum     -170
+_em_imaging.c2_aperture_diameter              70
+_em_imaging.cryogen                           LN2
+#
+_em_sample_support.grid_material      Au
+_em_sample_support.grid_mesh_size     300
+_em_sample_support.grid_type          Quantifoil
+#
+_em_imaging.microscope_model                  Titan
+_em_imaging.specimen_holder_model             'Autogrid holder'
+_em_imaging.date                              today:4-5-2024
+_em_imaging.mode                              Brightfield
+_em_imaging.nominal_defocus_min               -1
+_em_imaging.nominal_defocus_max               -2.5
+_em_imaging.calibrated_defocus_min            -1
+_em_imaging.calibrated_defocus_max            -2.5
+_em_imaging.tilt_angle_max                    0
+_em_imaging.calibrated_magnification          125666
+_em_imaging.recording_temperature_minimum     -190
+_em_imaging.recording_temperature_maximum     -170
+_em_imaging.c2_aperture_diameter              70
+_em_imaging.cryogen                           LN2
 #
 _pdbx_entity_branch_descriptor.descriptor     Ribosome_
 #
-_em_software.category     SerialEM
-#
 _em_imaging.microscope_model                  Titan
 _em_imaging.specimen_holder_model             'Autogrid holder'
 _em_imaging.date                              today:4-5-2024
@@ -186,35 +181,27 @@ _em_imaging.recording_temperature_minimum     -190
 _em_imaging.recording_temperature_maximum     -170
 _em_imaging.c2_aperture_diameter              70
 _em_imaging.cryogen                           LN2
-#
-_em_imaging.microscope_model                  Titan
-_em_imaging.specimen_holder_model             'Autogrid holder'
-_em_imaging.date                              today:4-5-2024
-_em_imaging.mode                              Brightfield
-_em_imaging.nominal_defocus_min               -1
-_em_imaging.nominal_defocus_max               -2.5
-_em_imaging.calibrated_defocus_min            -1
-_em_imaging.calibrated_defocus_max            -2.5
-_em_imaging.tilt_angle_max                    0
-_em_imaging.calibrated_magnification          125666
-_em_imaging.recording_temperature_minimum     -190
-_em_imaging.recording_temperature_maximum     -170
-_em_imaging.c2_aperture_diameter              70
-_em_imaging.cryogen                           LN2
-#
-_entity.formula_weight     3e+06
-_entity.src_method         yeast
-#
-loop_
-_pdbx_contact_author.email
-_pdbx_contact_author.name_first
-_pdbx_contact_author.name_last
-_pdbx_contact_author.country
-_pdbx_contact_author.phone
-_pdbx_contact_author.role
-_pdbx_contact_author.organization_type
-john.doe@gmail.com John Doe Switzerland +4132112312 . Academic 
-jane.doe@gmail.com Jane Doe Switzerland +4132112312 . Academic 
 #
 _pdbx_entry_details.has_ligand_of_interest     false
+#
+_em_imaging.microscope_model                  Titan
+_em_imaging.specimen_holder_model             'Autogrid holder'
+_em_imaging.date                              today:4-5-2024
+_em_imaging.mode                              Brightfield
+_em_imaging.nominal_defocus_min               -1
+_em_imaging.nominal_defocus_max               -2.5
+_em_imaging.calibrated_defocus_min            -1
+_em_imaging.calibrated_defocus_max            -2.5
+_em_imaging.tilt_angle_max                    0
+_em_imaging.calibrated_magnification          125666
+_em_imaging.recording_temperature_minimum     -190
+_em_imaging.recording_temperature_maximum     -170
+_em_imaging.c2_aperture_diameter              70
+_em_imaging.cryogen                           LN2
+#
+loop_
+_pdbx_audit_support.funding_organization
+SNF 
+SNF 
+#
 #

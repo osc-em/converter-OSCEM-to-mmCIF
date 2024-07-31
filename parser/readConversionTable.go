@@ -1,27 +1,15 @@
-package converter
+package parser
 
 import (
+	"converter/converterUtils"
 	"encoding/csv"
 	"log"
 	"os"
 )
 
-func stringJoiner(stringsArray []string) string {
-	var joinedString string
-	for i := range stringsArray {
-		if stringsArray[i] != "" {
-			if joinedString != "" {
-				joinedString += "."
-			}
-			joinedString += stringsArray[i]
-		}
-	}
-	return joinedString
-}
+func ConversionTable(path string) (map[string]string, map[string]string) {
 
-func ReadConversionTable(conversionsFile string) (map[string]string, map[string]string) {
-	//conversionsFile := os.Args[1]
-	file, err := os.Open(conversionsFile)
+	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Error while reading the file ", err)
 	}
@@ -60,15 +48,15 @@ func ReadConversionTable(conversionsFile string) (map[string]string, map[string]
 	}
 
 	for j := range records[0] {
-		if records[0][j] == "units" {
+		if records[0][j] == "unitsExplicit" {
 			indexUnits = j
 			break
 		}
 	}
 	for _, r := range records[1:] {
 		if r[indexPDB] != "" {
-			mapperProperty[stringJoiner(r[0:oscemFields])] = r[indexPDB]
-			mapperUnits[stringJoiner(r[0:oscemFields])] = r[indexUnits]
+			mapperProperty[converterUtils.StringJoiner(r[0:oscemFields])] = r[indexPDB]
+			mapperUnits[converterUtils.StringJoiner(r[0:oscemFields])] = r[indexUnits]
 		}
 	}
 	return mapperProperty, mapperUnits
