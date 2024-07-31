@@ -1,0 +1,923 @@
+
+save_em_imaging
+   _category.description     
+;  Data items in the EM_IMAGING category record details about
+   the parameters used in imaging the sample in the electron microscope.
+;
+
+   _category.id              em_imaging
+   _category.mandatory_code  no
+   #
+   loop_
+   _category_key.name
+     "_em_imaging.entry_id"  
+     "_em_imaging.id"  
+   #
+   loop_
+   _category_group.id
+     inclusive_group  
+     em_group         
+   #
+   _category_examples.detail  
+;  Example 1 - based on PDB entry 1DYL and laboratory records for the
+                structure corresponding to PDB entry 1DYL
+;
+
+   _category_examples.case    
+;
+   _em_imaging.entry_id               1DYL
+   _em_imaging.id                     1
+   _em_imaging.sample_support_id      1
+   _em_imaging.microscope_model       'FEI/PHILIPS CM200 FEG'
+   _em_imaging.specimen_holder_type   'cryotransfer'
+   _em_imaging.specimen_holder_model  'gatan 626-0300'
+   _em_imaging.details                .
+   _em_imaging.date                   1998-15-06
+   _em_imaging.accelerating_voltage   200
+   _em_imaging.illumination_mode      'bright field'
+   _em_imaging.mode                   'low dose'
+   _em_imaging.nominal_cs             2.0
+   _em_imaging.nominal_defocus_min    975
+   _em_imaging.nominal_defocus_max    7600
+   _em_imaging.tilt_angle_min         0
+   _em_imaging.tilt_angle_max         0
+   _em_imaging.nominal_magnification  50000
+   _em_imaging.calibrated_magnification .
+   _em_imaging.electron_source        'FEG'
+   _em_imaging.energy_filter          .
+   _em_imaging.energy_window          .
+   _em_imaging.temperature            95
+   _em_imaging.detector_distance      .
+   _em_imaging.recording_temperature_minimum  .
+   _em_imaging.recording_temperature_maximum  .
+;
+
+   #
+   _pdbx_category_context.type         EMDB_PUBLIC
+   _pdbx_category_context.category_id  em_imaging
+   #
+save_
+#
+save__em_imaging.entry_id
+   _item_description.description  "  This data item is a pointer to _entry.id in the ENTRY category."
+   #
+   _item.name            "_em_imaging.entry_id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  yes
+   #
+   _item_type.code  code
+   #
+   _item_linked.child_name   "_em_imaging.entry_id"
+   _item_linked.parent_name  "_entry.id"
+   #
+save_
+#
+save__em_imaging.id
+   _item_description.description  "   PRIMARY KEY"
+   #
+   _item.name            "_em_imaging.id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  yes
+   #
+   _item_type.code  code
+   #
+save_
+#
+save__em_imaging.astigmatism
+   _item_description.description  "   astigmatism"
+   #
+   _item.name            "_em_imaging.astigmatism"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  text
+   #
+save_
+#
+save__em_imaging.electron_beam_tilt_params
+   _item_description.description  "   electron beam tilt params"
+   #
+   _item.name            "_em_imaging.electron_beam_tilt_params"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  text
+   #
+save_
+#
+save__em_imaging.residual_tilt
+   _item_description.description  "   Residual tilt of the electron beam (in miliradians)"
+   #
+   _item.name            "_em_imaging.residual_tilt"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  milliradians
+   #
+   _item_range.minimum  0.0
+   _item_range.maximum  .
+   #
+save_
+#
+save__em_imaging.sample_support_id
+   _item_description.description  
+; This data item is a pointer to _em_sample_support.id in
+  the EM_SAMPLE_SUPPORT category.
+;
+
+   #
+   _item.name            "_em_imaging.sample_support_id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  code
+   #
+   _pdbx_item_context.type       WWPDB_LOCAL
+   _pdbx_item_context.item_name  "_em_imaging.sample_support_id"
+   #
+save_
+#
+save__em_imaging.detector_id
+   _item_description.description  
+;   The value of _em_imaging.detector_id must uniquely identify
+    the type of detector used in the experiment.
+;
+
+   #
+   _item.name            "_em_imaging.detector_id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  code
+   #
+   _pdbx_item_context.type       WWPDB_LOCAL
+   _pdbx_item_context.item_name  "_em_imaging.detector_id"
+   #
+save_
+#
+save__em_imaging.scans_id
+   _item_description.description  
+; The value of _em_imaging.scans_id must uniquely identify
+  the image_scans used in the experiment.
+;
+
+   #
+   _item.name            "_em_imaging.scans_id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  code
+   #
+   _pdbx_item_context.type       WWPDB_LOCAL
+   _pdbx_item_context.item_name  "_em_imaging.scans_id"
+   #
+save_
+#
+save__em_imaging.microscope_id
+   _item_description.description  
+; This data item is a pointer to _em_microscope.id in
+  the EM_MICROSCOPE category.
+;
+
+   #
+   _item.name            "_em_imaging.microscope_id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  code
+   #
+   _pdbx_item_context.type       WWPDB_LOCAL
+   _pdbx_item_context.item_name  "_em_imaging.microscope_id"
+   #
+save_
+#
+save__em_imaging.microscope_model
+   _item_description.description  "  The name of the model of microscope."
+   #
+   _item.name            "_em_imaging.microscope_model"
+   _item.category_id     em_imaging
+   _item.mandatory_code  yes
+   #
+   _item_type.code  line
+   #
+   loop_
+   _item_enumeration.name
+   _item_enumeration.value
+   _item_enumeration.detail
+     "_em_imaging.microscope_model"  "FEI MORGAGNI"                 .  
+     "_em_imaging.microscope_model"  "FEI POLARA 300"               .  
+     "_em_imaging.microscope_model"  "FEI TALOS ARCTICA"            .  
+     "_em_imaging.microscope_model"  "FEI TECNAI 10"                .  
+     "_em_imaging.microscope_model"  "FEI TECNAI 12"                .  
+     "_em_imaging.microscope_model"  "FEI TECNAI 20"                .  
+     "_em_imaging.microscope_model"  "FEI TECNAI F20"               .  
+     "_em_imaging.microscope_model"  "FEI TECNAI F30"               .  
+     "_em_imaging.microscope_model"  "FEI TECNAI ARCTICA"           .  
+     "_em_imaging.microscope_model"  "FEI TECNAI SPHERA"            .  
+     "_em_imaging.microscope_model"  "FEI TECNAI SPIRIT"            .  
+     "_em_imaging.microscope_model"  "FEI TITAN"                    .  
+     "_em_imaging.microscope_model"  "FEI TITAN KRIOS"              .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM10"             .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM12"             .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM120T"           .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM200FEG"         .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM200FEG/SOPHIE"  .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM200FEG/ST"      .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM200FEG/UT"      .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM200T"           .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM300FEG/HE"      .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM300FEG/ST"      .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS CM300FEG/T"       .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS EM400"            .  
+     "_em_imaging.microscope_model"  "FEI/PHILIPS EM420"            .  
+     "_em_imaging.microscope_model"  "HITACHI EF2000"               .  
+     "_em_imaging.microscope_model"  "HITACHI EF3000"               .  
+     "_em_imaging.microscope_model"  "HITACHI H7600"                .  
+     "_em_imaging.microscope_model"  "HITACHI HF2000"               .  
+     "_em_imaging.microscope_model"  "HITACHI HF3000"               .  
+     "_em_imaging.microscope_model"  "HITACHI H3000 UHVEM"          .  
+     "_em_imaging.microscope_model"  "HITACHI H-9500SD"             .  
+     "_em_imaging.microscope_model"  "JEOL 100B"                    .  
+     "_em_imaging.microscope_model"  "JEOL 100CX"                   .  
+     "_em_imaging.microscope_model"  "JEOL 1000EES"                 .  
+     "_em_imaging.microscope_model"  "JEOL 1010"                    .  
+     "_em_imaging.microscope_model"  "JEOL 1200"                    .  
+     "_em_imaging.microscope_model"  "JEOL 1200EX"                  .  
+     "_em_imaging.microscope_model"  "JEOL 1200EXII"                .  
+     "_em_imaging.microscope_model"  "JEOL 1230"                    .  
+     "_em_imaging.microscope_model"  "JEOL 1400"                    .  
+     "_em_imaging.microscope_model"  "JEOL 1400/HR + YPS FEG"       .  
+     "_em_imaging.microscope_model"  "JEOL 2000EX"                  .  
+     "_em_imaging.microscope_model"  "JEOL 2000EXII"                .  
+     "_em_imaging.microscope_model"  "JEOL 2010"                    .  
+     "_em_imaging.microscope_model"  "JEOL 2010F"                   .  
+     "_em_imaging.microscope_model"  "JEOL 2010HT"                  .  
+     "_em_imaging.microscope_model"  "JEOL 2010HC"                  .  
+     "_em_imaging.microscope_model"  "JEOL 2010UHR"                 .  
+     "_em_imaging.microscope_model"  "JEOL 2011"                    .  
+     "_em_imaging.microscope_model"  "JEOL 2100"                    .  
+     "_em_imaging.microscope_model"  "JEOL 2100F"                   .  
+     "_em_imaging.microscope_model"  "JEOL 2200FS"                  .  
+     "_em_imaging.microscope_model"  "JEOL 2200FSC"                 .  
+     "_em_imaging.microscope_model"  "JEOL 3000SFF"                 .  
+     "_em_imaging.microscope_model"  "JEOL 3100FEF"                 .  
+     "_em_imaging.microscope_model"  "JEOL 3100FFC"                 .  
+     "_em_imaging.microscope_model"  "JEOL 3200FS"                  .  
+     "_em_imaging.microscope_model"  "JEOL 3200FSC"                 .  
+     "_em_imaging.microscope_model"  "JEOL KYOTO-3000SFF"           .  
+     "_em_imaging.microscope_model"  "JEOL 3200FSC"                 .  
+     "_em_imaging.microscope_model"  "JEOL 4000"                    .  
+     "_em_imaging.microscope_model"  "JEOL 4000EX"                  .  
+     "_em_imaging.microscope_model"  "JEOL CRYO ARM 200"            .  
+     "_em_imaging.microscope_model"  "JEOL CRYO ARM 300"            .  
+     "_em_imaging.microscope_model"  "SIEMENS SULEIKA"              .  
+     "_em_imaging.microscope_model"  "TFS GLACIOS"                  .  
+     "_em_imaging.microscope_model"  "TFS KRIOS"                    .  
+     "_em_imaging.microscope_model"  "TFS TALOS"                    .  
+     "_em_imaging.microscope_model"  "TFS TALOS F200C"              .  
+     "_em_imaging.microscope_model"  "TFS TALOS L120C"              .  
+     "_em_imaging.microscope_model"  "TFS TUNDRA"                   .  
+     "_em_imaging.microscope_model"  "ZEISS LEO912"                 .  
+     "_em_imaging.microscope_model"  "ZEISS LIBRA120PLUS"           .  
+   #
+save_
+#
+save__em_imaging.specimen_holder_type
+   _item_description.description  " The type of specimen holder used during imaging."
+   #
+   _item.name            "_em_imaging.specimen_holder_type"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  text
+   #
+   _item_examples.case  cryo
+   #
+save_
+#
+save__em_imaging.specimen_holder_model
+   _item_description.description  " The name of the model of specimen holder used during imaging."
+   #
+   _item.name            "_em_imaging.specimen_holder_model"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  line
+   #
+   loop_
+   _item_enumeration.name
+   _item_enumeration.value
+   _item_enumeration.detail
+     "_em_imaging.specimen_holder_model"  "FEI TITAN KRIOS AUTOGRID HOLDER"                                             .  
+     "_em_imaging.specimen_holder_model"  "FISCHIONE 2550"                                                              .  
+     "_em_imaging.specimen_holder_model"  "FISCHIONE INSTRUMENTS DUAL AXIS TOMOGRAPHY HOLDER"                           .  
+     "_em_imaging.specimen_holder_model"  "GATAN 626 SINGLE TILT LIQUID NITROGEN CRYO TRANSFER HOLDER"                  .  
+     "_em_imaging.specimen_holder_model"  "GATAN 910 MULTI-SPECIMEN SINGLE TILT CRYO TRANSFER HOLDER"                   .  
+     "_em_imaging.specimen_holder_model"  "GATAN 914 HIGH TILT LIQUID NITROGEN CRYO TRANSFER TOMOGRAPHY HOLDER"         .  
+     "_em_imaging.specimen_holder_model"  "GATAN 915 DOUBLE TILT LIQUID NITROGEN CRYO TRANSFER HOLDER"                  .  
+     "_em_imaging.specimen_holder_model"  "GATAN CHDT 3504 DOUBLE TILT HIGH RESOLUTION NITROGEN COOLING HOLDER"         .  
+     "_em_imaging.specimen_holder_model"  "GATAN CT3500 SINGLE TILT LIQUID NITROGEN CRYO TRANSFER HOLDER"               .  
+     "_em_imaging.specimen_holder_model"  "GATAN CT3500TR SINGLE TILT ROTATION LIQUID NITROGEN CRYO TRANSFER HOLDER"    .  
+     "_em_imaging.specimen_holder_model"  "GATAN ELSA 698 SINGLE TILT LIQUID NITROGEN CRYO TRANSFER HOLDER"             .  
+     "_em_imaging.specimen_holder_model"  "GATAN HC 3500 SINGLE TILT HEATING/NITROGEN COOLING HOLDER"                   .  
+     "_em_imaging.specimen_holder_model"  "GATAN HCHDT 3010 DOUBLE TILT HIGH RESOLUTION HELIUM COOLING HOLDER"          .  
+     "_em_imaging.specimen_holder_model"  "GATAN HCHST 3008 SINGLE TILT HIGH RESOLUTION HELIUM COOLING HOLDER"          .  
+     "_em_imaging.specimen_holder_model"  "GATAN HELIUM"                                                                .  
+     "_em_imaging.specimen_holder_model"  "GATAN LIQUID NITROGEN"                                                       .  
+     "_em_imaging.specimen_holder_model"  "GATAN UHRST 3500 SINGLE TILT ULTRA HIGH RESOLUTION NITROGEN COOLING HOLDER"  .  
+     "_em_imaging.specimen_holder_model"  "GATAN ULTDT ULTRA LOW TEMPERATURE DOUBLE TILT HELIUM COOLING HOLDER"         .  
+     "_em_imaging.specimen_holder_model"  "GATAN ULTST ULTRA LOW TEMPERATURE SINGLE TILT HELIUM COOLING HOLDER"         .  
+     "_em_imaging.specimen_holder_model"  "HOME BUILD"                                                                  .  
+     "_em_imaging.specimen_holder_model"  JEOL                                                                          .  
+     "_em_imaging.specimen_holder_model"  "JEOL CRYOSPECPORTER"                                                         .  
+     "_em_imaging.specimen_holder_model"  "JEOL 3200FSC CRYOHOLDER"                                                     .  
+     "_em_imaging.specimen_holder_model"  "PHILIPS ROTATION HOLDER"                                                     .  
+     "_em_imaging.specimen_holder_model"  "SIDE ENTRY, EUCENTRIC"                                                       .  
+     "_em_imaging.specimen_holder_model"  OTHER                                                                         .  
+   #
+save_
+#
+save__em_imaging.details
+   _item_description.description  " Any additional imaging details."
+   #
+   _item.name            "_em_imaging.details"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  text
+   #
+   _item_examples.case  " Preliminary grid screening was performed manually."
+   #
+save_
+#
+save__em_imaging.date
+   _item_description.description  
+; Date (YYYY-MM-DD) of imaging experiment or the date at which
+  a series of experiments began.
+;
+
+   #
+   _item.name            "_em_imaging.date"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  yyyy-mm-dd
+   #
+   _item_examples.case  2001-05-08
+   #
+save_
+#
+save__em_imaging.accelerating_voltage
+   _item_description.description  "  A value of accelerating voltage (in kV) used for imaging."
+   #
+   _item.name            "_em_imaging.accelerating_voltage"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _pdbx_item.name            "_em_imaging.accelerating_voltage"
+   _pdbx_item.mandatory_code  yes
+   #
+   _item_type.code  int
+   #
+   _item_units.code  kilovolts
+   #
+   _item_examples.case  300
+   #
+   loop_
+   _item_range.maximum
+   _item_range.minimum
+     0  0  
+     .  0  
+   #
+   loop_
+   _pdbx_item_range.name
+   _pdbx_item_range.minimum
+   _pdbx_item_range.maximum
+     "_em_imaging.accelerating_voltage"    0    0  
+     "_em_imaging.accelerating_voltage"    0  400  
+     "_em_imaging.accelerating_voltage"  400  400  
+   #
+save_
+#
+save__em_imaging.illumination_mode
+   _item_description.description  " The mode of illumination."
+   #
+   _item.name            "_em_imaging.illumination_mode"
+   _item.category_id     em_imaging
+   _item.mandatory_code  yes
+   #
+   _item_type.code  line
+   #
+   loop_
+   _item_enumeration.name
+   _item_enumeration.value
+   _item_enumeration.detail
+     "_em_imaging.illumination_mode"  "FLOOD BEAM"  .  
+     "_em_imaging.illumination_mode"  "SPOT SCAN"   .  
+     "_em_imaging.illumination_mode"  OTHER         .  
+   #
+save_
+#
+save__em_imaging.mode
+   _item_description.description  "  The mode of imaging."
+   #
+   _item.name            "_em_imaging.mode"
+   _item.category_id     em_imaging
+   _item.mandatory_code  yes
+   #
+   _item_type.code  line
+   #
+   loop_
+   _item_enumeration.name
+   _item_enumeration.value
+   _item_enumeration.detail
+     "_em_imaging.mode"  4D-STEM         .  
+     "_em_imaging.mode"  "BRIGHT FIELD"  .  
+     "_em_imaging.mode"  "DARK FIELD"    .  
+     "_em_imaging.mode"  DIFFRACTION     .  
+     "_em_imaging.mode"  OTHER           .  
+   #
+save_
+#
+save__em_imaging.nominal_cs
+   _item_description.description  
+; The spherical aberration coefficient (Cs) in millimeters,
+  of the objective lens.
+;
+
+   #
+   _item.name            "_em_imaging.nominal_cs"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  millimetres
+   #
+   _item_examples.case  2.0
+   #
+   loop_
+   _item_range.minimum
+   _item_range.maximum
+      0   0  
+      0  20  
+     20  20  
+   #
+save_
+#
+save__em_imaging.nominal_defocus_min
+   _item_description.description  
+;   The minimum defocus value of the objective lens (in nanometers) used
+    to obtain the recorded images. Negative values refer to overfocus.
+;
+
+   #
+   _item.name            "_em_imaging.nominal_defocus_min"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _pdbx_item_type.name  "_em_imaging.nominal_defocus_min"
+   _pdbx_item_type.code  int
+   #
+   _item_units.code  nanometers
+   #
+   _item_examples.case  1200
+   #
+   _pdbx_item_range.name     "_em_imaging.nominal_defocus_min"
+   _pdbx_item_range.minimum  -20000
+   _pdbx_item_range.maximum  20000
+   #
+save_
+#
+save__em_imaging.nominal_defocus_max
+   _item_description.description  
+;   The maximum defocus value of the objective lens (in nanometers) used
+    to obtain the recorded images. Negative values refer to overfocus.
+;
+
+   #
+   _item.name            "_em_imaging.nominal_defocus_max"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _pdbx_item_type.name  "_em_imaging.nominal_defocus_max"
+   _pdbx_item_type.code  int
+   #
+   _item_units.code  nanometers
+   #
+   _item_examples.case  5000
+   #
+   _pdbx_item_range.name     "_em_imaging.nominal_defocus_max"
+   _pdbx_item_range.minimum  -20000
+   _pdbx_item_range.maximum  20000
+   #
+save_
+#
+save__em_imaging.calibrated_defocus_min
+   _item_description.description  
+;   The minimum calibrated defocus value of the objective lens (in nanometers) used
+    to obtain the recorded images. Negative values refer to overfocus.
+;
+
+   #
+   _item.name            "_em_imaging.calibrated_defocus_min"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  nanometers
+   #
+   _item_examples.case  1200
+   #
+   _pdbx_item_range.name     "_em_imaging.calibrated_defocus_min"
+   _pdbx_item_range.minimum  200
+   _pdbx_item_range.maximum  10000
+   #
+save_
+#
+save__em_imaging.calibrated_defocus_max
+   _item_description.description  
+;   The maximum calibrated defocus value of the objective lens (in nanometers) used
+    to obtain the recorded images. Negative values refer to overfocus.
+;
+
+   #
+   _item.name            "_em_imaging.calibrated_defocus_max"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  nanometers
+   #
+   _item_examples.case  5000
+   #
+   loop_
+   _item_range.minimum
+   _item_range.maximum
+     -30000  -30000  
+     -30000   30000  
+      30000   30000  
+   #
+save_
+#
+save__em_imaging.tilt_angle_min
+   _item_description.description  
+;  The minimum angle at which the specimen was tilted to obtain
+   recorded images.
+;
+
+   #
+   _item.name            "_em_imaging.tilt_angle_min"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  degrees
+   #
+   _item_examples.case  -70
+   #
+save_
+#
+save__em_imaging.tilt_angle_max
+   _item_description.description  
+;  The maximum angle at which the specimen was tilted to obtain
+   recorded images.
+;
+
+   #
+   _item.name            "_em_imaging.tilt_angle_max"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  degrees
+   #
+   _item_examples.case  70
+   #
+save_
+#
+save__em_imaging.nominal_magnification
+   _item_description.description  "  The magnification indicated by the microscope readout."
+   #
+   _item.name            "_em_imaging.nominal_magnification"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  int
+   #
+   _item_examples.case  60000
+   #
+   _item_range.minimum  1000
+   _item_range.maximum  500000
+   #
+save_
+#
+save__em_imaging.calibrated_magnification
+   _item_description.description  
+;  The magnification value obtained for a known standard just
+   prior to, during or just after the imaging experiment.
+;
+
+   #
+   _item.name            "_em_imaging.calibrated_magnification"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  int
+   #
+   _item_examples.case  61200
+   #
+   _item_range.minimum  1
+   _item_range.maximum  .
+   #
+   _pdbx_item_range.name     "_em_imaging.calibrated_magnification"
+   _pdbx_item_range.minimum  1000
+   _pdbx_item_range.maximum  100000
+   #
+save_
+#
+save__em_imaging.electron_source
+   _item_description.description  " The source of electrons. The electron gun."
+   #
+   _item.name            "_em_imaging.electron_source"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _pdbx_item.name            "_em_imaging.electron_source"
+   _pdbx_item.mandatory_code  yes
+   #
+   _item_type.code  line
+   #
+   loop_
+   _pdbx_item_enumeration.name
+   _pdbx_item_enumeration.value
+   _pdbx_item_enumeration.detail
+     "_em_imaging.electron_source"  "FIELD EMISSION GUN"  .  
+     "_em_imaging.electron_source"  LAB6                  .  
+     "_em_imaging.electron_source"  "TUNGSTEN HAIRPIN"    .  
+     "_em_imaging.electron_source"  OTHER                 .  
+   #
+save_
+#
+save__em_imaging.electron_dose
+   _item_description.description  " The electron dose received by the specimen (electrons per square angstrom)."
+   #
+   _item.name            "_em_imaging.electron_dose"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  electrons_angstrom_squared
+   #
+   _item_examples.case  0.9
+   #
+   _pdbx_item_context.type       WWPDB_DEPRECATED
+   _pdbx_item_context.item_name  "_em_imaging.electron_dose"
+   #
+   _item_related.related_name   "_em_image_recording.avg_electron_dose_per_image"
+   _item_related.function_code  replacedby
+   #
+save_
+#
+save__em_imaging.energy_filter
+   _item_description.description  "   The type of energy filter spectrometer apparatus."
+   #
+   _item.name            "_em_imaging.energy_filter"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  line
+   #
+   _item_examples.case  FEI
+   #
+   _pdbx_item_context.type       WWPDB_DEPRECATED
+   _pdbx_item_context.item_name  "_em_imaging.energy_filter"
+   #
+   _item_related.related_name   "_em_imaging_optics.energyfilter_name"
+   _item_related.function_code  replacedby
+   #
+save_
+#
+save__em_imaging.energy_window
+   _item_description.description  "   The energy filter range in electron volts (eV)set by spectrometer."
+   #
+   _item.name            "_em_imaging.energy_window"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  line
+   #
+   _item_units.code  electron_volts
+   #
+   _item_examples.case  "0 - 15"
+   #
+   _pdbx_item_context.type       WWPDB_DEPRECATED
+   _pdbx_item_context.item_name  "_em_imaging.energy_window"
+   #
+   loop_
+   _item_related.related_name
+   _item_related.function_code
+     "_em_imaging_optics.energyfilter_lower"  replacedby  
+     "_em_imaging_optics.energyfilter_upper"  replacedby  
+   #
+save_
+#
+save__em_imaging.citation_id
+   _item_description.description  
+;    This data item is a pointer to _citation.id in
+     the CITATION category.
+;
+
+   #
+   _item.name            "_em_imaging.citation_id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_linked.child_name   "_em_imaging.citation_id"
+   _item_linked.parent_name  "_citation.id"
+   #
+   _item_type.code  code
+   #
+save_
+#
+save__em_imaging.temperature
+   _item_description.description  
+;    The mean specimen stage temperature (in kelvin) during imaging
+     in the microscope.
+;
+
+   #
+   _item.name            "_em_imaging.temperature"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  kelvins
+   #
+   _item_examples.case  70
+   #
+save_
+#
+save__em_imaging.detector_distance
+   _item_description.description  
+;    The camera length (in millimeters). The camera length is the
+     product of the objective focal length and the combined magnification
+     of the intermediate and projector lenses when the microscope is
+     operated in the diffraction mode.
+;
+
+   #
+   _item.name            "_em_imaging.detector_distance"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  millimetres
+   #
+save_
+#
+save__em_imaging.recording_temperature_minimum
+   _item_description.description  
+;    The specimen temperature minimum (kelvin) for the duration
+     of imaging.
+;
+
+   #
+   _item.name            "_em_imaging.recording_temperature_minimum"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  kelvins
+   #
+   _item_range.minimum  0.0
+   _item_range.maximum  .
+   #
+   _pdbx_item_range.name     "_em_imaging.recording_temperature_minimum"
+   _pdbx_item_range.minimum  2
+   _pdbx_item_range.maximum  310
+   #
+save_
+#
+save__em_imaging.recording_temperature_maximum
+   _item_description.description  
+;    The specimen temperature maximum (kelvin) for the duration
+     of imaging.
+;
+
+   #
+   _item.name            "_em_imaging.recording_temperature_maximum"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  kelvins
+   #
+   _item_examples.case  70
+   #
+   _item_range.minimum  0.0
+   _item_range.maximum  .
+   #
+   _pdbx_item_range.name     "_em_imaging.recording_temperature_maximum"
+   _pdbx_item_range.minimum  2
+   _pdbx_item_range.maximum  310
+   #
+save_
+#
+save__em_imaging.alignment_procedure
+   _item_description.description  "  The type of procedure used to align the microscope electron beam."
+   #
+   _item.name            "_em_imaging.alignment_procedure"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  line
+   #
+   loop_
+   _item_enumeration.value
+     NONE  
+     BASIC  
+     "ZEMLIN TABLEAU"  
+     "COMA FREE"  
+     OTHER  
+   #
+save_
+#
+save__em_imaging.c2_aperture_diameter
+   _item_description.description  
+; The open diameter of the c2 condenser lens,
+  in microns.
+;
+
+   #
+   _item.name            "_em_imaging.c2_aperture_diameter"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  microns
+   #
+   _item_examples.case  100
+   #
+   loop_
+   _item_range.minimum
+   _item_range.maximum
+       1    1  
+       1  150  
+     150  150  
+   #
+   _pdbx_item_range.name     "_em_imaging.c2_aperture_diameter"
+   _pdbx_item_range.minimum  50
+   _pdbx_item_range.maximum  150
+   #
+save_
+#
+save__em_imaging.specimen_id
+   _item_description.description  "  Foreign key to the EM_SPECIMEN category"
+   #
+   _item.name            "_em_imaging.specimen_id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  yes
+   #
+   _item_type.code  code
+   #
+   _item_linked.child_name   "_em_imaging.specimen_id"
+   _item_linked.parent_name  "_em_specimen.id"
+   #
+save_
+#
+save__em_imaging.cryogen
+   _item_description.description  
+;    Cryogen type used to maintain the specimen stage temperature during imaging
+     in the microscope.
+;
+
+   #
+   _item.name            "_em_imaging.cryogen"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  text
+   #
+   loop_
+   _item_enumeration.value
+     NITROGEN  
+     HELIUM    
+   #
+save_

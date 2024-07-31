@@ -2,7 +2,6 @@ package parser
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -21,6 +20,7 @@ func detailLines(line string, details bool) bool {
 }
 
 func PDBxDict(path string, relevantNames []string) (map[string][]string, map[string]string) {
+
 	dictFile, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Error while reading the file ", err)
@@ -37,13 +37,11 @@ func PDBxDict(path string, relevantNames []string) (map[string][]string, map[str
 	var dataItem string
 	var details bool
 
-	//i := 0
-
 	var category string
+	var categoryDataItem string
 	var itemsCategory []string
 
 	for scanner.Scan() {
-		//i++
 		// ignore multi-line comment/detail lines
 		details = detailLines(scanner.Text(), details)
 		if details {
@@ -59,10 +57,11 @@ func PDBxDict(path string, relevantNames []string) (map[string][]string, map[str
 		// once dataItem was grabbed scan for category properties within it:
 		matchCategory := reSaveDataItemChild.MatchString(scanner.Text())
 		if matchCategory {
-			category = strings.Split(scanner.Text(), ".")[1]
+			category = strings.Split(scanner.Text(), "save_")[1]
+			categoryDataItem = strings.Split(category, ".")[1]
 			for c := range relevantNames {
-				if strings.Split(relevantNames[c], ".")[1] == category {
-					itemsCategory = append(itemsCategory, category)
+				if relevantNames[c] == category {
+					itemsCategory = append(itemsCategory, categoryDataItem)
 					dataItems[dataItem] = itemsCategory
 					break
 				}
@@ -74,7 +73,6 @@ func PDBxDict(path string, relevantNames []string) (map[string][]string, map[str
 			units[dataItem+"."+category] = strings.Fields(scanner.Text())[1]
 		}
 	}
-	fmt.Println(dataItems)
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
