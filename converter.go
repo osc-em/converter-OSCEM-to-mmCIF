@@ -36,7 +36,7 @@ func main() {
 	mapper, OSCEMunits := parser.ConversionTable(conversionFile)
 
 	// parse PDBx dictionary to retrieve order of data items and units
-	dataItems, _ := parser.PDBxDict(dictFile, converterUtils.GetValues(mapper))
+	dataItems := parser.PDBxDict(dictFile, converterUtils.GetValues(mapper))
 
 	// use only a map of dataItems that will be needed my mapper
 	var PDBxdataItems = make(map[string][]string)
