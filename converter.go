@@ -39,7 +39,8 @@ func main() {
 	dataItems := parser.PDBxDict(dictFile, converterUtils.GetValues(mapper))
 
 	// use only a map of dataItems that will be needed my mapper
-	var PDBxdataItems = make(map[string][]string)
+	var PDBxdataItems = make(map[string][]converterUtils.PDBxItem)
+
 	for k, v := range dataItems {
 		for _, mV := range mapper {
 			if "_"+k == strings.Split(mV, ".")[0] {
