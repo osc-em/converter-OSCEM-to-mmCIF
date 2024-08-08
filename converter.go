@@ -39,19 +39,19 @@ func main() {
 	dataItems := parser.PDBxDict(dictFile, converterUtils.GetValues(mapper))
 
 	// use only a map of dataItems that will be needed my mapper
-	var PDBxdataItems = make(map[string][]converterUtils.PDBxItem)
+	//var PDBxdataItems = make(map[string][]converterUtils.PDBxItem)
 
-	for k, v := range dataItems {
-		for _, mV := range mapper {
-			if "_"+k == strings.Split(mV, ".")[0] {
-				PDBxdataItems[k] = v
-				break
-			}
-		}
-	}
+	// for k, v := range dataItems {
+	// 	for _, mV := range mapper {
+	// 		if "_"+k == strings.Split(mV, ".")[0] {
+	// 			PDBxdataItems[k] = v
+	// 			break
+	// 		}
+	// 	}
+	// }
 
 	// create mmCIF text
-	mmCIFlines := parser.ToMmCIF(mapper, PDBxdataItems, mapJson)
+	mmCIFlines := parser.ToMmCIF(mapper, dataItems, mapJson, OSCEMunits)
 
 	// now write to cif file
 

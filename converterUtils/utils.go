@@ -56,3 +56,14 @@ func GetLongest(s []string) int {
 	}
 	return r
 }
+
+type PDBxItem struct {
+	//CategoryItem string
+	CategoryID string
+	Name       string
+	Unit       string
+	ValueType  string
+	RangeMin   float64
+	RangeMax   float64
+	EnumValues []string
+}
