@@ -1,6 +1,9 @@
+// Package converterUtils provides set of simple functions that are required in converter Package
 package converterUtils
 
+// GetKeys returns a slice of string arrays with values in map. A key must be a string value.
 func GetKeys[K string, V any](m map[string]V) []string {
+
 	keys := make([]string, 0)
 	for k := range m {
 		keys = append(keys, k)
@@ -8,57 +11,10 @@ func GetKeys[K string, V any](m map[string]V) []string {
 	return keys
 }
 
-func GetValues[K string, V string](m map[string]string) []string {
-	values := make([]string, 0)
-	for _, v := range m {
-		values = append(values, v)
-	}
-	return values
-}
-
-func GetKeyByValue(value string, m map[string]string) string {
-	for k, v := range m {
-		if v == value {
-			return k
-		}
-	}
-	return ""
-}
-
-func StringJoiner(stringsArray []string) string {
-	var joinedString string
-	for i := range stringsArray {
-		if stringsArray[i] != "" {
-			if joinedString != "" {
-				joinedString += "."
-			}
-			joinedString += stringsArray[i]
-		}
-	}
-	return joinedString
-}
-
-func Contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
-func GetLongest(s []string) int {
-	var r int
-	for _, a := range s {
-		if len(a) > r {
-			r = len(a)
-		}
-	}
-	return r
-}
-
+// PDBxItem type defines attributes of the data item property in PDBx dictionary.
+// It contains most important fields, such as name of the item and its parental catrgory,
+// type of value it should take on and units, range or allowed values if there are any.
 type PDBxItem struct {
-	//CategoryItem string
 	CategoryID string
 	Name       string
 	Unit       string

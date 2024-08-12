@@ -10,28 +10,50 @@ import (
 	"strings"
 )
 
-func itemParent(item string) string {
+// for a property category.dataItem extract the category name i.e. string before dot
+func itemCategory(item string) string {
 	return strings.Split(item, ".")[0]
 }
 
-func findElemByItem(item string, mapper map[string]string, toMmCIF bool) []string {
-	elements := make([]string, len(mapper))
-	if toMmCIF {
-		i := 0
-		for e := range mapper {
-			elements[i] = mapper[e]
-			i++
-		}
-	} else {
-		elements = converterUtils.GetKeys(mapper)
-	}
-	var simElem []string
-	for i := range elements {
-		if itemParent(elements[i]) == item {
-			simElem = append(simElem, elements[i])
+// find all data items that have the same category as item
+func findItemByCategory(item string, mapper map[string]string) []string {
+	itemsInCategory := make([]string, 0)
+	for _, v := range mapper {
+		if itemCategory(v) == item {
+			itemsInCategory = append(itemsInCategory, v)
 		}
 	}
-	return simElem
+	return itemsInCategory
+}
+
+func getKeyByValue(value string, m map[string]string) string {
+	for k, v := range m {
+		if v == value {
+			return k
+		}
+	}
+	return ""
+}
+
+// is element e in the slice s?
+func sliceContains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+// given a slice of strings get the length of a longest in it
+func getLongest(s []string) int {
+	var r int
+	for _, a := range s {
+		if len(a) > r {
+			r = len(a)
+		}
+	}
+	return r
 }
 
 func valueInRange(value string, rMin float64, rMax float64, unitOSCEM string, unitPDBx string, name string, name2 string) bool {
@@ -78,25 +100,29 @@ func valueInEnum(value string, enumFromPDBx []string, dataItem string) string {
 	}
 	return strings.ToUpper(value)
 }
+
 func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string]any, OSCEMunits map[string]string) string {
-	// values from JSON are mapped to the mmcif properties
+	// keeps track of values from JSON that have already been mapped to the PDBx properties
 	mappedVal := make([]string, 0, len(nameMapper))
 	var str strings.Builder
 	str.WriteString("data_myID\n#\n")
 	for jsonName := range valuesMap {
 		PDBxName := nameMapper[jsonName]
 		if PDBxName == "_em_imaging.tilt_angle_increment" {
-			fmt.Println("_em_imaging.tilt_angle_increment is not filled in Properly in PDBx and might not really exist!")
+			fmt.Println("_em_imaging.tilt_angle_increment is not filled in properly in PDBx and might not really exist!")
 			continue
 		}
 		if PDBxName == "" {
 			continue // because translation is iterating on json, it still contains elements that don't exist in mmcif
 		}
-		var orderedElements = PDBxItems[itemParent(PDBxName)]
-		if converterUtils.Contains(mappedVal, PDBxName) {
+		//extract correct order for PDBx category
+		var orderedItems = PDBxItems[itemCategory(PDBxName)]
+		//fmt.Println(mappedVal, itemCategory(PDBxName))
+		if sliceContains(mappedVal, itemCategory(PDBxName)) {
 			continue
 		}
-		elements := findElemByItem(itemParent(PDBxName), nameMapper, true)
+
+		inSameCategory := findItemByCategory(itemCategory(PDBxName), nameMapper)
 
 		var valueString string
 		switch valSlice := valuesMap[jsonName].(type) {
@@ -109,23 +135,23 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 			// list category names
 			// instead of all find elements use the ordered list from parsing the dictionary
 
-			for _, oE := range orderedElements {
-				for _, e := range elements {
+			for _, oE := range orderedItems {
+				for _, e := range inSameCategory {
 					if oE.Name == strings.Split(e, ".")[1] {
 						fmt.Fprintf(&str, "%s\n", e)
-						mappedVal = append(mappedVal, e)
+						mappedVal = append(mappedVal, oE.CategoryID)
 					}
 				}
 			}
 			// write the values
 			for i := range len(valSlice) {
-				for _, oE := range orderedElements {
-					for _, e := range elements {
+				for _, oE := range orderedItems {
+					for _, e := range inSameCategory {
 						if oE.Name == strings.Split(e, ".")[1] {
-							jsonKey := converterUtils.GetKeyByValue(e, nameMapper)
+
+							jsonKey := getKeyByValue(e, nameMapper)
 							if slice, ok := valuesMap[jsonKey].([]string); ok {
 								//now based on the found struct implement range matching, units matching and enum matching
-
 								if oE.ValueType == "int" || oE.ValueType == "float" {
 									valueInRange := valueInRange(slice[i], oE.RangeMin, oE.RangeMax, OSCEMunits[jsonKey], oE.Unit, jsonKey, oE.Name)
 									if !valueInRange {
@@ -151,11 +177,11 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 			}
 			str.WriteString("#\n")
 		case string: // simple list of categories
-			l := converterUtils.GetLongest(elements) + 5
-			for _, oE := range orderedElements {
-				for _, e := range elements {
+			l := getLongest(inSameCategory) + 5
+			for _, oE := range orderedItems {
+				for _, e := range inSameCategory {
 					if oE.Name == strings.Split(e, ".")[1] {
-						jsonKey := converterUtils.GetKeyByValue(e, nameMapper)
+						jsonKey := getKeyByValue(e, nameMapper)
 						if valuesMap[jsonKey] == nil {
 							continue // not required in mmCIF
 						}
@@ -178,7 +204,7 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 							fmt.Fprintf(&str, "%s", valueString)
 						}
 
-						mappedVal = append(mappedVal, e)
+						mappedVal = append(mappedVal, oE.CategoryID)
 					}
 				}
 			}

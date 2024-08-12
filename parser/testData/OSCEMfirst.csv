@@ -1,0 +1,7 @@
+OSCEM,,,,from XML,From MDOC,from EMD,for PRZ,in PDBx/mmCIF,type,Ontology suggestions,comments,optionals,units,crunchfromxml,crunchfrommdoc
+,,,,,,,,,,,,,,,
+Instrument,Microscope,,,MicroscopeImage.microscopeData.instrument.InstrumentModel,,"Instrument.InstrumentClass, Instrument.InstrumentId, Instrument.InstrumentModel, Instrument.Manufacturer",,_em_imaging.microscope_model,String,,,,,,
+Instrument,Illumination,,,MicroscopeImage.microscopeData.optics.IlluminationMode,,Optics.IlluminationMode,,_em_imaging.illumination_mode ,String,,,,,,
+Instrument,Imaging,,,MicroscopeImage.microscopeData.optics.ColumnOperatingTemSubMode,ImagingMode,Optics.TemOperatingSubMode,,_em_imaging.mode,String,,,,,,
+Instrument,Electron_source,,,MicroscopeImage.microscopeData.gun.Sourcetype,Source,Acquisition.SourceType,,_em_imaging.electron_source ,String,https://purls.helmholtz-metadaten.de/emg/EMG_00000045,,,,,
+Instrument,Acceleration,Voltage,,MicroscopeImage.microscopeData.gun.AccelerationVoltage,Voltage,Optics.AccelerationVoltage,,_em_imaging.accelerating_voltage ,Int,https://purls.helmholtz-metadaten.de/emg/EMG_00000004,,,kV,0.001,

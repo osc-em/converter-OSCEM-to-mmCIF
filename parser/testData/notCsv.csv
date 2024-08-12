@@ -1,0 +1,4 @@
+OSCEM         PDBx    units
+Instrument  Microscope      _em_imaging.Microscope  
+Instrument  Nominal_defocus Minimal _em_imaging.nominal_defocus_min nm
+Instrument	Nominal_defocus	Maximal _em_imaging.nominal_defocus_max nm

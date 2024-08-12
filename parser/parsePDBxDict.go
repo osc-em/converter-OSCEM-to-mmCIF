@@ -13,9 +13,9 @@ import (
 
 func extractRangeValue(line string) float64 {
 	if len(strings.Fields(line)) > 1 {
-		range_val := strings.Fields(line)[1]
-		if range_val != "." {
-			value, err := strconv.ParseFloat(range_val, 64) // ( how to distnguish 0 from +inf? --> happens more often)
+		rangeVal := strings.Fields(line)[1]
+		if rangeVal != "." {
+			value, err := strconv.ParseFloat(rangeVal, 64) // ( how to distnguish 0 from +inf? --> happens more often)
 			if err != nil {
 				log.Fatal("not a numeric value found to be a range", err)
 			}
@@ -25,6 +25,10 @@ func extractRangeValue(line string) float64 {
 	return math.NaN()
 }
 
+// PDBxDict parses full dictionary and returns a map, where key is data category name and value is slice of structs ordered the same way as in the dictionary.
+// This struct contains relevant properties of a data item in the dictionary.
+// PDBx contains a few thousands of data items. For a single experiment done with a certain technique it is redundant no keep track of most of data items as they are highly specific to this technique.
+// To avoid that relevantNames argument makes this functionrecord only data items references in the slice.
 func PDBxDict(path string, relevantNames []string) map[string][]converterUtils.PDBxItem {
 
 	dictFile, err := os.Open(path)
@@ -112,13 +116,8 @@ func PDBxDict(path string, relevantNames []string) map[string][]converterUtils.P
 				enumValues = make([]string, 0)
 
 				dataItems[key] = append(dataItems[key], newItem)
-				//orderedItems = append(orderedItems, newItem)
 			}
 		}
-		// if matchEnd && flagCategory && !flagItem {
-		// 	dataItems[key] = orderedItems
-		// }
-
 		// grab the save__ elements
 		matchCategory := reSaveCategory.MatchString(scanner.Text())
 
@@ -188,9 +187,6 @@ func PDBxDict(path string, relevantNames []string) map[string][]converterUtils.P
 					recordEnumFlag = false
 					enumMatchCount = 0
 				} else {
-					// if strings.Contains(scanner.Text(), "\"") {
-					// 	splittedEnum := strings.Split(scanner.Text(), "\"")
-					// 	enumValues = append(enumValues, splittedEnum[enumMatchCount*2+1])
 					splittedEnum := reSplitEnum.Split(scanner.Text(), -1)
 					valueEnum := splittedEnum[enumMatchCount+1]
 					if string(valueEnum[0]) == "\"" {
@@ -201,7 +197,6 @@ func PDBxDict(path string, relevantNames []string) map[string][]converterUtils.P
 			}
 		}
 	}
-
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
