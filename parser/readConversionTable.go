@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func stringJoiner(stringsArray []string) string {
@@ -13,7 +14,7 @@ func stringJoiner(stringsArray []string) string {
 			if joinedString != "" {
 				joinedString += "."
 			}
-			joinedString += stringsArray[i]
+			joinedString += strings.TrimSpace(stringsArray[i]) // trim all leading and trailing whitespaces
 		}
 	}
 	return joinedString

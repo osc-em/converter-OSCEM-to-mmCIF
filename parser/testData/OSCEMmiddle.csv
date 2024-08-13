@@ -4,6 +4,6 @@ MicroscopeImage.microscopeData.instrument.InstrumentModel,,"Instrument.Instrumen
 MicroscopeImage.microscopeData.optics.IlluminationMode,,Optics.IlluminationMode,,_em_imaging.illumination_mode ,String,,Instrument,Illumination,,,,,,,
 MicroscopeImage.microscopeData.optics.ColumnOperatingTemSubMode,ImagingMode,Optics.TemOperatingSubMode,,_em_imaging.mode,String,,Instrument,Imaging,,,,,,,
 MicroscopeImage.microscopeData.gun.Sourcetype,Source,Acquisition.SourceType,,_em_imaging.electron_source ,String,https://purls.helmholtz-metadaten.de/emg/EMG_00000045,Instrument,Electron_source,,,,,,,
-MicroscopeImage.microscopeData.gun.AccelerationVoltage,Voltage,Optics.AccelerationVoltage,,_em_imaging.accelerating_voltage ,Int,https://purls.helmholtz-metadaten.de/emg/EMG_00000004,Instrument,Acceleration_Voltage,,,,,kV,0.001,
+MicroscopeImage.microscopeData.gun.AccelerationVoltage,Voltage,Optics.AccelerationVoltage ,,_em_imaging.accelerating_voltage ,Int,https://purls.helmholtz-metadaten.de/emg/EMG_00000004,Instrument,Acceleration_Voltage,,,,,kV,0.001,
 Aperture[C2].Name,,CustomProperties.Aperture[C2].Name.value,,_em_imaging.c2_aperture_diameter,Int,,Instrument,C2_Aperture,,,,,µm,,
 ,CS,,,_em_imaging.nominal_cs ,Float64,,Instrument,CS,,,,,mm,,
