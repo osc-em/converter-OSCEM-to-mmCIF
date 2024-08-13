@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // for a property category.dataItem extract the category name i.e. string before dot
@@ -54,6 +55,16 @@ func getLongest(s []string) int {
 		}
 	}
 	return r
+}
+
+func validateDateIsRFC3339(date string) string {
+	t, err := time.Parse(time.RFC3339, date)
+	if err != nil {
+		fmt.Println(err)
+		log.Printf("Date seems to be in the wrong format! We expect RFC3339 format, provided date %s is not.", date)
+		return ""
+	}
+	return t.Format(time.DateOnly)
 }
 
 func valueInRange(value string, rMin float64, rMax float64, unitOSCEM string, unitPDBx string, name string, name2 string) bool {
@@ -157,6 +168,8 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 									if !valueInRange {
 										log.Printf("Value %s of property %s is not in range of [ %f, %f ]!\n", slice[i], jsonKey, oE.RangeMin, oE.RangeMax)
 									}
+								} else if oE.ValueType == "yyyy-mm-dd" {
+									slice[i] = validateDateIsRFC3339(slice[i])
 								} else if len(oE.EnumValues) > 0 {
 									slice[i] = valueInEnum(slice[i], oE.EnumValues, oE.Name)
 								}
@@ -193,6 +206,8 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 								if !valueInRange {
 									log.Printf("Value %s of property %s is not in range of [ %f, %f ]!\n", jsonValue, jsonKey, oE.RangeMin, oE.RangeMax)
 								}
+							} else if oE.ValueType == "yyyy-mm-dd" {
+								jsonValue = validateDateIsRFC3339(jsonValue)
 							} else if len(oE.EnumValues) > 0 {
 								jsonValue = valueInEnum(jsonValue, oE.EnumValues, oE.Name)
 							}
