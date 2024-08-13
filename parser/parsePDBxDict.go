@@ -25,17 +25,32 @@ func extractRangeValue(line string) float64 {
 	return math.NaN()
 }
 
+func AssignCategories(dataItems []converterUtils.PDBxItem) map[string][]converterUtils.PDBxItem {
+	var itemsInCategory = make(map[string][]converterUtils.PDBxItem)
+	for i := range dataItems {
+		category := dataItems[i].CategoryID
+		val, ok := itemsInCategory[category]
+		if ok {
+			itemsInCategory[category] = append(val, dataItems[i])
+		} else {
+			itemsInCategory[category] = []converterUtils.PDBxItem{dataItems[i]}
+		}
+	}
+	return itemsInCategory
+}
+
 // PDBxDict parses full dictionary and returns a map, where key is data category name and value is slice of structs ordered the same way as in the dictionary.
 // This struct contains relevant properties of a data item in the dictionary.
 // PDBx contains a few thousands of data items. For a single experiment done with a certain technique it is redundant no keep track of most of data items as they are highly specific to this technique.
 // To avoid that relevantNames argument makes this functionrecord only data items references in the slice.
-func PDBxDict(path string, relevantNames []string) map[string][]converterUtils.PDBxItem {
+func PDBxDict(path string, relevantNames []string) []converterUtils.PDBxItem {
 
 	dictFile, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Error while reading the file ", err)
 	}
 	defer dictFile.Close()
+
 	reSaveCategory := regexp.MustCompile(`save_[a-zA-Z0-9]+[a-zA-Z0-9]+`)
 	reSaveItem := regexp.MustCompile(`save__([a-zA-Z1-9_.]+)`)
 	reSaveEnd := regexp.MustCompile(`save_$`)
@@ -49,8 +64,8 @@ func PDBxDict(path string, relevantNames []string) map[string][]converterUtils.P
 
 	scanner := bufio.NewScanner(dictFile)
 
-	var dataItems = make(map[string][]converterUtils.PDBxItem)
-	//var flagCategory = false
+	var dataItems = make([]converterUtils.PDBxItem, 0)
+
 	var flagItem = false   // Am I within a PDBx property definition?
 	var details bool       // Am I inside of a multi-line comment
 	var presentInJson bool // Is this PDBx property present in OSC-EM?
@@ -67,8 +82,6 @@ func PDBxDict(path string, relevantNames []string) map[string][]converterUtils.P
 	var rangeMinValue float64 = math.NaN()
 	var rangeMaxValue float64 = math.NaN()
 	var enumValues []string
-
-	var key string
 
 	enumMatchCount := 0
 	recordEnumFlag := false
@@ -115,15 +128,14 @@ func PDBxDict(path string, relevantNames []string) map[string][]converterUtils.P
 				rangeMaxValue = math.NaN()
 				enumValues = make([]string, 0)
 
-				dataItems[key] = append(dataItems[key], newItem)
+				dataItems = append(dataItems, newItem)
 			}
 		}
 		// grab the save__ elements
 		matchCategory := reSaveCategory.MatchString(scanner.Text())
 
 		if matchCategory {
-			//flagCategory = true
-			key = strings.Split(strings.Split(scanner.Text(), "save")[1], ".")[0]
+			continue
 		}
 		// grab the save__ elements
 		matchItem := reSaveItem.MatchString(scanner.Text())

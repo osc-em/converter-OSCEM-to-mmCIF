@@ -68,6 +68,7 @@ func main() {
 
 	// parse PDBx dictionary to retrieve order of data items and units
 	dataItems := parser.PDBxDict(dictFile, getValues(mapper))
+	dataItemsPerCategory := parser.AssignCategories((dataItems))
 
 	// use only a map of dataItems that will be needed my mapper
 	//var PDBxdataItems = make(map[string][]converterUtils.PDBxItem)
@@ -82,7 +83,7 @@ func main() {
 	// }
 
 	// create mmCIF text
-	mmCIFlines := parser.ToMmCIF(mapper, dataItems, mapJson, unitsOSCEM)
+	mmCIFlines := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM)
 
 	// now write to cif file
 
