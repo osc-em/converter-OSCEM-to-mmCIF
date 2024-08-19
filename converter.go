@@ -2,6 +2,7 @@ package main
 
 import (
 	"converter/parser"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -17,18 +18,35 @@ func getValues[K string, V string](m map[string]string) []string {
 }
 
 func main() {
-	jsonInstr := os.Args[1]
-	jsonSample := os.Args[2]
 
-	conversionFile := os.Args[3]
-	dictFile := os.Args[4]
+	//var json string
+	appendToMmCif := flag.Bool("append", true, "append metadata to existing mmCIF")
+	mmCIFInputPath := flag.String("mmCIFfile", "", "path to existing mmCIF file with atoms information")
+	conversionFile := flag.String("conversions", "", "path to a CSV file with conversions table")
+	dictFile := flag.String("dic", "", "path to PDBx dictionary")
+	mmCIFOutputPath := flag.String("output", "", "path for a new mmCIF file")
 
-	mmCIFpath := os.Args[5]
-	//unitsPath := os.Args[6]
+	// flag.StringVar(&json, "json", "", "pass any number of json files")
+	// flag.Parse()
+	// jsonFiles := flag.Args()
+	// fmt.Println(jsonFiles)
+
+	// // create one mapping for all the JSON contents: key - value
+	// mapJson := make(map[string]any, 0)
+	// for i := range jsonFiles {
+	// 	mapFromJson := parser.FromJson(jsonFiles[i])
+	// 	for j := range mapFromJson {
+	// 		mapJson[j] = mapFromJson[j]
+	// 	}
+	// }
+
+	jsonInstr := flag.String("instrument", "", "JSON file with instrument data")
+	jsonSample := flag.String("sample", "", "JSON file with sample data")
+	flag.Parse()
 
 	// read all input json files and create one map from them all
-	mapInstr := parser.FromJson(jsonInstr)
-	mapSample := parser.FromJson(jsonSample)
+	mapInstr := parser.FromJson(*jsonInstr)
+	mapSample := parser.FromJson(*jsonSample)
 
 	// create one mapping for all the JSON contents: key - value
 	mapJson := make(map[string]any, len(mapInstr)+len(mapSample))
@@ -40,17 +58,17 @@ func main() {
 	}
 
 	// read the conversion table by column:
-	namesOSCEM, err := parser.ConversionTableReadColumn(conversionFile, "OSCEM")
+	namesOSCEM, err := parser.ConversionTableReadColumn(*conversionFile, "OSCEM")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	namesPDBx, err := parser.ConversionTableReadColumn(conversionFile, "in PDBx/mmCIF")
+	namesPDBx, err := parser.ConversionTableReadColumn(*conversionFile, "in PDBx/mmCIF")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	units, err := parser.ConversionTableReadColumn(conversionFile, "unitsExplicit")
+	units, err := parser.ConversionTableReadColumn(*conversionFile, "unitsExplicit")
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -67,28 +85,15 @@ func main() {
 	}
 
 	// parse PDBx dictionary to retrieve order of data items and units
-	dataItems := parser.PDBxDict(dictFile, getValues(mapper))
+	dataItems := parser.PDBxDict(*dictFile, getValues(mapper))
 	dataItemsPerCategory := parser.AssignCategories((dataItems))
 
-	// use only a map of dataItems that will be needed my mapper
-	//var PDBxdataItems = make(map[string][]converterUtils.PDBxItem)
-
-	// for k, v := range dataItems {
-	// 	for _, mV := range mapper {
-	// 		if "_"+k == strings.Split(mV, ".")[0] {
-	// 			PDBxdataItems[k] = v
-	// 			break
-	// 		}
-	// 	}
-	// }
-
-	// create mmCIF text
-	mmCIFlines := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM)
+	// create mmCIF text and write it to a file
+	mmCIFText := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM, *appendToMmCif, *mmCIFInputPath)
 
 	// now write to cif file
-
 	// Open the file, create it if it doesn't exist, and truncate it if it does
-	file, err := os.OpenFile(mmCIFpath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	file, err := os.OpenFile(*mmCIFOutputPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal("Error opening file: ", err)
 		return
@@ -96,35 +101,15 @@ func main() {
 	defer file.Close() // Ensure the file is closed after the operation
 
 	// Write the string to the file
-	_, err = file.WriteString(mmCIFlines)
+	_, err = file.WriteString(mmCIFText)
 	if err != nil {
 		log.Fatal("Error writing to file: ", err)
 		return
 	}
-
 	fmt.Println("String successfully written to the file.")
-
-	// // Open the file, create it if it doesn't exist, and truncate it if it does
-	// fileUnits, err := os.OpenFile(unitsPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	// if err != nil {
-	// 	log.Fatal("Error opening file: ", err)
-	// 	return
-	// }
-	// defer file.Close() // Ensure the file is closed after the operation
-
-	// //var unitsString = ""
-	// var unitsString strings.Builder
-	// unitsString.WriteString("")
-	// for k, v := range unitsOSCEM {
-	// 	fmt.Fprintf(&unitsString, "%s,%s\n", k, v)
-	// }
-	// // Write the string to the file
-	// _, err = fileUnits.WriteString(unitsString.String())
-	// if err != nil {
-	// 	log.Fatal("Error writing to file: ", err)
-	// 	return
-	// }
 
 }
 
-// go run converter.go data/data_instrument.json data/data_sample.json /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv ./data/mmcif_pdbx_v50.dic /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/output.cif /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/units.csv
+// go run converter.go -append=false -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/output.cif -instrument data/data_instrument.json -sample data/data_sample.json
+
+// go run converter.go -append=true -mmCIFfile /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/data/K3DAK4_full__real_space_refined_000.cif -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/outputAppended.cif -instrument data/data_instrument.json -sample data/data_sample.json

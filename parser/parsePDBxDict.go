@@ -86,9 +86,7 @@ func PDBxDict(path string, relevantNames []string) []converterUtils.PDBxItem {
 	enumMatchCount := 0
 	recordEnumFlag := false
 
-	var l = 0
 	for scanner.Scan() {
-		l++
 		// ignore multi-line comment/detail lines
 		if strings.HasPrefix(scanner.Text(), ";") {
 

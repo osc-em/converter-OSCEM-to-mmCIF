@@ -1,10 +1,12 @@
 package parser
 
 import (
+	"bufio"
 	"converter/converterUtils"
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -46,15 +48,15 @@ func sliceContains(s []string, e string) bool {
 	return false
 }
 
-// given a slice of strings get the length of a longest in it
-func getLongest(s []string) int {
-	var r int
-	for _, a := range s {
-		if len(a) > r {
-			r = len(a)
+// given a slice of PDBx items get the length of a longest data item name in it (because the category is the same)
+func getLongestPDBxItem(s []converterUtils.PDBxItem) int {
+	var l int
+	for i := range s {
+		if len(s[i].Name) > l {
+			l = len(s[i].Name)
 		}
 	}
-	return r
+	return l + len(s[0].CategoryID) + 1
 }
 
 func validateDateIsRFC3339(date string) string {
@@ -67,7 +69,7 @@ func validateDateIsRFC3339(date string) string {
 	return t.Format(time.DateOnly)
 }
 
-func valueInRange(value string, rMin float64, rMax float64, unitOSCEM string, unitPDBx string, name string, name2 string) bool {
+func validateRange(value string, rMin float64, rMax float64, unitOSCEM string, unitPDBx string, name string, name2 string) bool {
 	if unitOSCEM == unitPDBx {
 		v, err := strconv.ParseFloat(value, 64)
 		if err != nil {
@@ -88,7 +90,7 @@ func valueInRange(value string, rMin float64, rMax float64, unitOSCEM string, un
 		return true
 	}
 }
-func valueInEnum(value string, enumFromPDBx []string, dataItem string) string {
+func validateEnum(value string, enumFromPDBx []string, dataItem string) string {
 	if value == "true" {
 		return "YES"
 	} else if value == "false" {
@@ -112,121 +114,187 @@ func valueInEnum(value string, enumFromPDBx []string, dataItem string) string {
 	return strings.ToUpper(value)
 }
 
-func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string]any, OSCEMunits map[string]string) string {
-	// keeps track of values from JSON that have already been mapped to the PDBx properties
-	mappedVal := make([]string, 0, len(nameMapper))
+func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, unitsOSCEM string) string {
+
+	//now based on the found struct implement range matching, units matching and enum matching
+	if dataItem.ValueType == "int" || dataItem.ValueType == "float" {
+		validateRange := validateRange(value, dataItem.RangeMin, dataItem.RangeMax, unitsOSCEM, dataItem.Unit, jsonKey, dataItem.Name)
+		if !validateRange {
+			log.Printf("Value %s of property %s is not in range of [ %f, %f ]!\n", value, jsonKey, dataItem.RangeMin, dataItem.RangeMax)
+		}
+	} else if dataItem.ValueType == "yyyy-mm-dd" {
+		value = validateDateIsRFC3339(value)
+	} else if len(dataItem.EnumValues) > 0 {
+		value = validateEnum(value, dataItem.EnumValues, dataItem.Name)
+	}
+
+	if strings.Contains(value, " ") {
+		value = fmt.Sprintf("'%s' ", value) // if name contains whitespaces enclose it in single quotes
+	} else {
+		value = fmt.Sprintf("%s ", value) // take value as is
+	}
+	return value
+}
+
+func getOrderCategories(parsedCategories []string) []string {
+	var order []string
+	var processed []string
+	// sort based on the pre-defined (administrative, polymer related entities, ligand (non-polymer) related instances, and structure level description)
+	for _, category := range converterUtils.PDBxCategoriesOrder {
+		category = "_" + category
+		if sliceContains(parsedCategories, category) {
+			order = append(order, category)
+			processed = append(processed, category)
+		}
+	}
+	// add the rest not atom-related in some order (it can be random)
+	for _, c := range parsedCategories {
+		if !sliceContains(processed, c) && !sliceContains(converterUtils.PDBxCategoriesOrderAtom, c) {
+			order = append(order, c)
+		}
+	}
+	// add atoms categories
+	for _, category := range converterUtils.PDBxCategoriesOrderAtom {
+		category = "_" + category
+		order = append(order, category)
+	}
+	return order
+}
+
+func parseMmCIF(path string) (string, map[string]string) {
+	dictFile, err := os.Open(path)
+	if err != nil {
+		log.Fatal("Error while reading the file ", err)
+	}
+	defer dictFile.Close()
+	scanner := bufio.NewScanner(dictFile)
+
+	var dataName string
+	var category string
+	var mmCIFfields = make(map[string]string, 0)
+
 	var str strings.Builder
-	str.WriteString("data_myID\n#\n")
-	for jsonName := range valuesMap {
-		PDBxName := nameMapper[jsonName]
-		if PDBxName == "_em_imaging.tilt_angle_increment" {
-			fmt.Println("_em_imaging.tilt_angle_increment is not filled in properly in PDBx and might not really exist!")
-			continue
-		}
-		if PDBxName == "" {
-			continue // because translation is iterating on json, it still contains elements that don't exist in mmcif
-		}
-		//extract correct order for PDBx category
-		var orderedItems = PDBxItems[itemCategory(PDBxName)]
-		//fmt.Println(mappedVal, itemCategory(PDBxName))
-		if sliceContains(mappedVal, itemCategory(PDBxName)) {
-			continue
-		}
 
-		inSameCategory := findItemByCategory(itemCategory(PDBxName), nameMapper)
+	l := 0
+	inCategoryFlag := true
+	for scanner.Scan() {
+		// first line is the name
+		if l == 0 {
+			dataName = scanner.Text()
+		}
+		// break between categories is denoted by # in PDB-related software, Phenix uses an empty line.
+		if strings.HasPrefix(scanner.Text(), "#") || len(strings.Fields(scanner.Text())) == 0 {
 
-		var valueString string
-		switch valSlice := valuesMap[jsonName].(type) {
-		case []string: // loop notation
-			if valSlice == nil {
-				continue // not required in mmCIF
+			//category ends, appends to the map
+			if category != "" {
+				mmCIFfields[category] = str.String()
+				str.Reset()
+				inCategoryFlag = true // record the next category name
 			}
-			str.WriteString("loop_\n")
+		} else {
+			if !strings.HasPrefix(scanner.Text(), "loop_") {
 
-			// list category names
-			// instead of all find elements use the ordered list from parsing the dictionary
-
-			for _, oE := range orderedItems {
-				for _, e := range inSameCategory {
-					if oE.Name == strings.Split(e, ".")[1] {
-						fmt.Fprintf(&str, "%s\n", e)
-						mappedVal = append(mappedVal, oE.CategoryID)
-					}
+				if inCategoryFlag {
+					category = strings.Split(strings.Fields(scanner.Text())[0], ".")[0]
+					inCategoryFlag = false
 				}
 			}
-			// write the values
-			for i := range len(valSlice) {
-				for _, oE := range orderedItems {
-					for _, e := range inSameCategory {
-						if oE.Name == strings.Split(e, ".")[1] {
+			str.WriteString(scanner.Text() + "\n")
 
-							jsonKey := getKeyByValue(e, nameMapper)
-							if slice, ok := valuesMap[jsonKey].([]string); ok {
-								//now based on the found struct implement range matching, units matching and enum matching
-								if oE.ValueType == "int" || oE.ValueType == "float" {
-									valueInRange := valueInRange(slice[i], oE.RangeMin, oE.RangeMax, OSCEMunits[jsonKey], oE.Unit, jsonKey, oE.Name)
-									if !valueInRange {
-										log.Printf("Value %s of property %s is not in range of [ %f, %f ]!\n", slice[i], jsonKey, oE.RangeMin, oE.RangeMax)
-									}
-								} else if oE.ValueType == "yyyy-mm-dd" {
-									slice[i] = validateDateIsRFC3339(slice[i])
-								} else if len(oE.EnumValues) > 0 {
-									slice[i] = valueInEnum(slice[i], oE.EnumValues, oE.Name)
-								}
+		}
+		l++
+	}
+	return dataName, mmCIFfields
+}
+func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string]any, OSCEMunits map[string]string, appendToMmCif bool, mmCIFpath string) string {
+	var dataName string
+	var mmCIFCategories map[string]string
+	if appendToMmCif {
+		dataName, mmCIFCategories = parseMmCIF(mmCIFpath)
+	} else {
+		dataName = "data_myID"
+	}
 
-								if strings.Contains(slice[i], " ") {
-									valueString = fmt.Sprintf("'%s' ", slice[i]) // if name contains whitespaces enclose it in single quotes
-								} else {
-									valueString = fmt.Sprintf("%s ", slice[i]) // take value as is
-								}
-							} else { // if name is present in both OSCEM and PDBx but no value is available set it as "omitted"
-								valueString = ". "
-							}
-							fmt.Fprintf(&str, "%s", valueString)
-						}
-					}
-				}
-				str.WriteString("\n")
+	// keeps track of values from JSON that have already been mapped to the PDBx properties
+	var str strings.Builder
+	str.WriteString(dataName + "\n#\n") //write the data Identifier in the header
+
+	parsedCategories := make([]string, 0)
+	for k := range PDBxItems {
+		parsedCategories = append(parsedCategories, k)
+	}
+	allCategories := getOrderCategories(parsedCategories)
+	for _, category := range allCategories {
+		catDI, ok := PDBxItems[category]
+		if ok {
+			_, ok := mmCIFCategories[category]
+			if ok {
+				log.Printf("Category %s exists both in metadata from JSON files and in existing mmCIF file! Data in mmCIF will be substituted by data from JSON", category)
 			}
-			str.WriteString("#\n")
-		case string: // simple list of categories
-			l := getLongest(inSameCategory) + 5
-			for _, oE := range orderedItems {
-				for _, e := range inSameCategory {
-					if oE.Name == strings.Split(e, ".")[1] {
-						jsonKey := getKeyByValue(e, nameMapper)
+			// this category exists in PDBx items (as extracted only to relevant OSCEM names) --> extract this input
+			var key string
+			// need to loop here through all data items in category, as it reflects the order of data items in PDBx, it still might not exist in json
+			// loop until we find first key that exists in json
+			for i := range catDI {
+				key = getKeyByValue(catDI[i].CategoryID+"."+catDI[i].Name, nameMapper)
+				_, ok := valuesMap[key]
+				if ok {
+					break
+				}
+			}
+			switch jsonValueType := valuesMap[key].(type) {
+			case []string: // loop notation
+				str.WriteString("loop_\n")
+				for _, dataItem := range catDI {
+					// check the length of all first and throw an error in case that they have different length?? can that be? e.g two authors and for one the property Phone is not there?
+					jsonKey := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+					if valuesMap[jsonKey] == nil {
+						continue // not required and not provided in OSCEM
+					}
+					fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
+				}
+				for v := range jsonValueType {
+					for _, dataItem := range catDI {
+						jsonKey := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+
 						if valuesMap[jsonKey] == nil {
-							continue // not required in mmCIF
+							continue // key was not required and not provided in OSCEM
 						}
-						formatString := fmt.Sprintf("%%-%ds", l)
-						fmt.Fprintf(&str, formatString, e)
-						if jsonValue, ok := valuesMap[jsonKey].(string); ok {
-							if oE.ValueType == "int" || oE.ValueType == "float" {
-								valueInRange := valueInRange(jsonValue, oE.RangeMin, oE.RangeMax, OSCEMunits[jsonKey], oE.Unit, jsonKey, oE.Name)
-								if !valueInRange {
-									log.Printf("Value %s of property %s is not in range of [ %f, %f ]!\n", jsonValue, jsonKey, oE.RangeMin, oE.RangeMax)
-								}
-							} else if oE.ValueType == "yyyy-mm-dd" {
-								jsonValue = validateDateIsRFC3339(jsonValue)
-							} else if len(oE.EnumValues) > 0 {
-								jsonValue = valueInEnum(jsonValue, oE.EnumValues, oE.Name)
-							}
-							if strings.Contains(jsonValue, " ") {
-								valueString = fmt.Sprintf("'%s'\n", jsonValue)
-							} else {
-								valueString = fmt.Sprintf("%s\n", jsonValue)
-							}
+						if correctSlice, ok := valuesMap[jsonKey].([]string); ok {
+							valueString := checkValue(dataItem, correctSlice[v], jsonKey, OSCEMunits[jsonKey])
 							fmt.Fprintf(&str, "%s", valueString)
 						}
-
-						mappedVal = append(mappedVal, oE.CategoryID)
 					}
+					str.WriteString("\n")
 				}
+				str.WriteString("#\n")
+
+			case string:
+				l := getLongestPDBxItem(catDI) + 5
+				for _, dataItem := range catDI {
+					jsonKey := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+					if valuesMap[jsonKey] == nil {
+						continue // not required in mmCIF
+					}
+					formatString := fmt.Sprintf("%%-%ds", l)
+					fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
+					if jsonValue, ok := valuesMap[jsonKey].(string); ok {
+						valueString := checkValue(dataItem, jsonValue, jsonKey, OSCEMunits[jsonKey])
+						fmt.Fprintf(&str, "%s", valueString)
+					}
+					str.WriteString("\n")
+				}
+				str.WriteString("#\n")
+			default:
+				fmt.Printf("Problem appeared while unmarshalling JSON: %s for key %s\n", jsonValueType, key)
 			}
-			str.WriteString("#\n")
-		default:
-			fmt.Println("Problem appeared while unmarshalling JSON")
+
+		}
+		mmCifLines, ok := mmCIFCategories[category]
+		if ok {
+			str.WriteString(mmCifLines)
 		}
 	}
 	return str.String()
+
 }

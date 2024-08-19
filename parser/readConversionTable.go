@@ -104,7 +104,7 @@ func ConversionTableReadColumn(path string, column string) ([]string, error) {
 
 	if !colExists {
 
-		return columnValues, fmt.Errorf("Column %s does not exist in table %s", column, path)
+		return columnValues, fmt.Errorf("column %s does not exist in table %s", column, path)
 	}
 
 	for _, r := range records[1:] {
