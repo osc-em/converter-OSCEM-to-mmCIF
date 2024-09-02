@@ -1,0 +1,339 @@
+save_category1
+   _category.description     
+;  Data items in the category category record details about
+   the parameters used in imaging the sample in the electron microscope.
+;
+
+   _category.id              category1
+   _category.mandatory_code  no
+   #
+   loop_
+   _category_key.name
+     "_category1.name1"  
+     "_category1.name2"  
+   #
+   loop_
+   _category_group.id
+     inclusive_group  
+     em_group         
+   #
+   _category_examples.detail  
+;  Example 1 - based on PDB entry 1DYL and laboratory records for the
+                structure corresponding to PDB entry 1DYL
+;
+
+   _category_examples.case    
+;
+   _category1.entry_id               1DYL
+   _category1.id                     1
+   _category1.sample_support_id      1
+   _category1.microscope_model       'FEI/PHILIPS CM200 FEG'
+   _category1.specimen_holder_type   'cryotransfer'
+   _category1.specimen_holder_model  'gatan 626-0300'
+   _category1.details                .
+   _category1.date                   1998-15-06
+   _category1.accelerating_voltage   200
+   _category1.illumination_mode      'bright field'
+   _category1.mode                   'low dose'
+   _category1.nominal_cs             2.0
+   _category1.nominal_defocus_min    975
+   _category1.nominal_defocus_max    7600
+   _category1.tilt_angle_min         0
+   _category1.tilt_angle_max         0
+   _category1.nominal_magnification  50000
+   _category1.calibrated_magnification .
+   _category1.electron_source        'FEG'
+   _category1.energy_filter          .
+   _category1.energy_window          .
+   _category1.temperature            95
+   _category1.detector_distance      .
+   _category1.recording_temperature_minimum  .
+   _category1.recording_temperature_maximum  .
+;
+
+   #
+   _pdbx_category_context.type         EMDB_PUBLIC
+   _pdbx_category_context.category_id  category
+   #
+save_
+#
+save__category1.name1
+   _item_description.description  "  This data item is a pointer to _entry.id in the ENTRY category."
+   #
+   _item.name            "_category1.name1"
+   _item.category_id     category1
+   _item.mandatory_code  yes
+   #
+   _item_type.code  code
+   #
+   _item_linked.child_name   "_category1.name1"
+   _item_linked.parent_name  "_entry.id"
+   #
+save_
+#
+save__category1.name2
+   _item_description.description  "   PRIMARY KEY"
+   #
+   _item.name            "_category1.name2"
+   _item.category_id     category1
+   _item.mandatory_code  yes
+   #
+   _item_type.code  code
+   #
+save_
+#
+save__category1.name3
+   _item_description.description  "   astigmatism"
+   #
+   _item.name            "_category1.name3"
+   _item.category_id     category1
+   _item.mandatory_code  no
+   #
+   _item_type.code  text
+   #
+save_
+#
+save__category1.name4
+   _item_description.description  "   electron beam tilt params"
+   #
+   _item.name            "_category1.name4"
+   _item.category_id     category1
+   _item.mandatory_code  no
+   #
+   _item_type.code  text
+   #
+save_
+#
+save__category2.name1
+   _item_description.description  "   Residual tilt of the electron beam (in miliradians)"
+   #
+   _item.name            "_category2.name1"
+   _item.category_id     category2
+   _item.mandatory_code  no
+   #
+   _item_type.code  float
+   #
+   _item_units.code  milliradians
+   #
+   _item_range.minimum  0.0
+   _item_range.maximum  .
+   #
+save_
+#
+save__category2.name2
+   _item_description.description  
+; This data item is a pointer to _em_sample_support.id in
+  the EM_SAMPLE_SUPPORT category.
+;
+
+   #
+   _item.name            "_category2.name2"
+   _item.category_id     category2
+   _item.mandatory_code  no
+   #
+   _item_type.code  code
+   #
+   _pdbx_item_context.type       WWPDB_LOCAL
+   _pdbx_item_context.item_name  "_category1.name2"
+   #
+save_
+#
+save__category2.name3
+   _item_description.description  
+;   The value of _category1.name3 must uniquely identify
+    the type of detector used in the experiment.
+;
+
+   #
+   _item.name            "_category2.name3"
+   _item.category_id     category2
+   _item.mandatory_code  no
+   #
+   _item_type.code  code
+   #
+   _pdbx_item_context.type       WWPDB_LOCAL
+   _pdbx_item_context.item_name  "_category2.name3"
+   #
+save_
+#
+save__category3.name1
+   _item_description.description  
+; The value of _category1.scans_id must uniquely identify
+  the image_scans used in the experiment.
+;
+
+   #
+   _item.name            "_category3.name1"
+   _item.category_id     category
+   _item.mandatory_code  no
+   #
+   _item_type.code  code
+   #
+   _pdbx_item_context.type       WWPDB_LOCAL
+   _pdbx_item_context.item_name  "_category3.name1"
+   #
+save_
+#
+save__category1.name10
+   _item_description.description  
+; This data item is a pointer to _em_microscope.id in
+  the EM_MICROSCOPE category.
+;
+
+   #
+   _item.name            "_category1.name10"
+   _item.category_id     category
+   _item.mandatory_code  no
+   #
+   _item_type.code  code
+   #
+   _pdbx_item_context.type       WWPDB_LOCAL
+   _pdbx_item_context.item_name  "_category1.name10"
+   #
+   loop_
+   _pdbx_item_enumeration.name
+   _pdbx_item_enumeration.value
+   _pdbx_item_enumeration.detail
+     "_pdbx_database_status.author_approval_type"  explicit  .  
+     "_pdbx_database_status.author_approval_type"  implicit  .  
+   #
+   _item_examples.case  
+save_
+#
+save__category1.microscope_model
+   _item_description.description  "  The name of the model of microscope."
+   #
+   _item.name            "_category1.microscope_model"
+   _item.category_id     category
+   _item.mandatory_code  yes
+   #
+   _item_type.code  line
+   #
+   loop_
+   _item_enumeration.name
+   _item_enumeration.value
+   _item_enumeration.detail
+     "_category1.microscope_model"  "FEI TECNAI F30"               .  
+     "_category1.microscope_model"  "FEI TECNAI ARCTICA"           .  
+     "_category1.microscope_model"  "FEI TECNAI SPHERA"            .  
+     "_category1.microscope_model"  "FEI TECNAI SPIRIT"            .  
+     "_category1.microscope_model"  "FEI TITAN"                    .  
+     "_category1.microscope_model"  "FEI TITAN KRIOS"              .  
+     "_category1.microscope_model"  "FEI/PHILIPS CM10"             .  
+     "_category1.microscope_model"  "FEI/PHILIPS CM12"             .  
+     "_category1.microscope_model"  "FEI/PHILIPS CM120T"           .  
+     "_category1.microscope_model"  "FEI/PHILIPS CM200FEG"         .  
+     "_category1.microscope_model"  "FEI/PHILIPS CM200FEG/SOPHIE"  .  
+     "_category1.microscope_model"  "JEOL CRYO ARM 300"            .  
+     "_category1.microscope_model"  "SIEMENS SULEIKA"              .  
+     "_category1.microscope_model"  "TFS GLACIOS"                  .  
+     "_category1.microscope_model"  "TFS KRIOS"                    .  
+     "_category1.microscope_model"  "TFS TALOS"                    .  
+     "_category1.microscope_model"  "TFS TALOS F200C"              .  
+     "_category1.microscope_model"  "TFS TALOS L120C"              .  
+     "_category1.microscope_model"  "TFS TUNDRA"                   .  
+     "_category1.microscope_model"  "ZEISS LEO912"                 .  
+   #
+save_
+#
+save__category1.name11
+   _item_description.description  " The type of specimen holder used during imaging."
+   #
+   _item.name            "category1.name11"
+   _item.category_id     category1
+   _item.mandatory_code  no
+   #
+   _item_type.code  text
+   #
+   _item_examples.case  cryo
+   #
+save_
+#
+save__category1.specimen_holder_model
+   _item_description.description  " The name of the model of specimen holder used during imaging."
+   #
+   _item.name            "_category1.name11"
+   _item.category_id     category1
+   _item.mandatory_code  no
+   #
+   _item_type.code  line
+   #
+   loop_
+   _item_enumeration.name
+   _item_enumeration.value
+   _item_enumeration.detail
+     "_category1.specimen_holder_model"  "FEI TITAN KRIOS AUTOGRID HOLDER"                                             .  
+     "_category1.specimen_holder_model"  "FISCHIONE 2550"                                                              .  
+     "_category1.specimen_holder_model"  "FISCHIONE INSTRUMENTS DUAL AXIS TOMOGRAPHY HOLDER"                           .  
+     "_category1.specimen_holder_model"  "GATAN 626 SINGLE TILT LIQUID NITROGEN CRYO TRANSFER HOLDER"                  .  
+     "_category1.specimen_holder_model"  "GATAN 910 MULTI-SPECIMEN SINGLE TILT CRYO TRANSFER HOLDER"                   .  
+     "_category1.specimen_holder_model"  "GATAN 914 HIGH TILT LIQUID NITROGEN CRYO TRANSFER TOMOGRAPHY HOLDER"         .  
+     "_category1.specimen_holder_model"  "GATAN 915 DOUBLE TILT LIQUID NITROGEN CRYO TRANSFER HOLDER"                  .  
+     "_category1.specimen_holder_model"  "GATAN CHDT 3504 DOUBLE TILT HIGH RESOLUTION NITROGEN COOLING HOLDER"         .  
+     "_category1.specimen_holder_model"  "GATAN CT3500 SINGLE TILT LIQUID NITROGEN CRYO TRANSFER HOLDER"               .  
+     "_category1.specimen_holder_model"  "GATAN CT3500TR SINGLE TILT ROTATION LIQUID NITROGEN CRYO TRANSFER HOLDER"    .  
+     "_category1.specimen_holder_model"  "GATAN ELSA 698 SINGLE TILT LIQUID NITROGEN CRYO TRANSFER HOLDER"             .  
+     "_category1.specimen_holder_model"  "GATAN HC 3500 SINGLE TILT HEATING/NITROGEN COOLING HOLDER"                   .  
+     "_category1.specimen_holder_model"  "GATAN HCHDT 3010 DOUBLE TILT HIGH RESOLUTION HELIUM COOLING HOLDER"          .  
+     "_category1.specimen_holder_model"  "GATAN HCHST 3008 SINGLE TILT HIGH RESOLUTION HELIUM COOLING HOLDER"          .  
+     "_category1.specimen_holder_model"  "GATAN HELIUM"                                                                .  
+     "_category1.specimen_holder_model"  "GATAN LIQUID NITROGEN"                                                       .  
+     "_category1.specimen_holder_model"  "GATAN UHRST 3500 SINGLE TILT ULTRA HIGH RESOLUTION NITROGEN COOLING HOLDER"  .  
+     "_category1.specimen_holder_model"  "GATAN ULTDT ULTRA LOW TEMPERATURE DOUBLE TILT HELIUM COOLING HOLDER"         .  
+     "_category1.specimen_holder_model"  "GATAN ULTST ULTRA LOW TEMPERATURE SINGLE TILT HELIUM COOLING HOLDER"         .  
+     "_category1.specimen_holder_model"  "HOME BUILD"                                                                  .  
+     "_category1.specimen_holder_model"  JEOL                                                                          .  
+     "_category1.specimen_holder_model"  "JEOL CRYOSPECPORTER"                                                         .  
+     "_category1.specimen_holder_model"  "JEOL 3200FSC CRYOHOLDER"                                                     .  
+     "_category1.specimen_holder_model"  "PHILIPS ROTATION HOLDER"                                                     .  
+     "_category1.specimen_holder_model"  "SIDE ENTRY, EUCENTRIC"                                                       .  
+     "_category1.specimen_holder_model"  OTHER                                                                         .  
+   #
+save_
+#
+save__category1.date
+   _item_description.description  
+; Date (YYYY-MM-DD) of imaging experiment or the date at which
+  a series of experiments began.
+;
+
+   #
+   _item.name            "_category1.date"
+   _item.category_id     category
+   _item.mandatory_code  no
+   #
+   _item_type.code  yyyy-mm-dd
+   #
+   _item_examples.case  2001-05-08
+   #
+save_
+#
+save__category1.name_units
+   _item_description.description  "  A value of accelerating voltage (in kV) used for imaging."
+   #
+   _item.name            "_category1.name_units"
+   _item.category_id     category1
+   _item.mandatory_code  no
+   #
+   _pdbx_item.name            "_category1.name_units"
+   _pdbx_item.mandatory_code  yes
+   #
+   _item_type.code  int
+   #
+   _item_units.code  kilovolts
+   #
+   _item_examples.case  300
+   #
+   _item_range.maximum  .
+   _item_range.minimum  0
+   #
+   loop_
+   _pdbx_item_range.name
+   _pdbx_item_range.minimum
+   _pdbx_item_range.maximum
+     "_category1.accelerating_voltage"    0    0  
+     "_category1.accelerating_voltage"    0  400  
+     "_category1.accelerating_voltage"  400  400  
+   #
+save_
+#

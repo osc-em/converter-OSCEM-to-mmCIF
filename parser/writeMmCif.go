@@ -69,11 +69,19 @@ func validateDateIsRFC3339(date string) string {
 	return t.Format(time.DateOnly)
 }
 
-func validateRange(value string, rMin float64, rMax float64, unitOSCEM string, unitPDBx string, name string, name2 string) bool {
+func validateRange(value string, rMin string, rMax string, unitOSCEM string, unitPDBx string, name string, name2 string) bool {
 	if unitOSCEM == unitPDBx {
 		v, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			log.Fatal("JSON value not numeric, but supposed to be", err)
+		}
+		rMin, err := strconv.ParseFloat(rMin, 64)
+		if err != nil {
+			rMin = math.NaN()
+		}
+		rMax, err := strconv.ParseFloat(rMax, 64)
+		if err != nil {
+			rMax = math.NaN()
 		}
 		if math.IsNaN(rMin) && math.IsNaN(float64(rMax)) {
 			return true
@@ -120,7 +128,7 @@ func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, 
 	if dataItem.ValueType == "int" || dataItem.ValueType == "float" {
 		validateRange := validateRange(value, dataItem.RangeMin, dataItem.RangeMax, unitsOSCEM, dataItem.Unit, jsonKey, dataItem.Name)
 		if !validateRange {
-			log.Printf("Value %s of property %s is not in range of [ %f, %f ]!\n", value, jsonKey, dataItem.RangeMin, dataItem.RangeMax)
+			log.Printf("Value %s of property %s is not in range of [ %s, %s ]!\n", value, jsonKey, dataItem.RangeMin, dataItem.RangeMax)
 		}
 	} else if dataItem.ValueType == "yyyy-mm-dd" {
 		value = validateDateIsRFC3339(value)
@@ -206,7 +214,7 @@ func parseMmCIF(path string) (string, map[string]string) {
 	}
 	return dataName, mmCIFfields
 }
-func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string]any, OSCEMunits map[string]string, appendToMmCif bool, mmCIFpath string) string {
+func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string]any, OSCEMunits map[string]any, appendToMmCif bool, mmCIFpath string) string {
 	var dataName string
 	var mmCIFCategories map[string]string
 	if appendToMmCif {
@@ -261,7 +269,7 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 							continue // key was not required and not provided in OSCEM
 						}
 						if correctSlice, ok := valuesMap[jsonKey].([]string); ok {
-							valueString := checkValue(dataItem, correctSlice[v], jsonKey, OSCEMunits[jsonKey])
+							valueString := checkValue(dataItem, correctSlice[v], jsonKey, "e") // OSCEMunits[jsonKey])
 							fmt.Fprintf(&str, "%s", valueString)
 						}
 					}
@@ -279,7 +287,7 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 					formatString := fmt.Sprintf("%%-%ds", l)
 					fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
 					if jsonValue, ok := valuesMap[jsonKey].(string); ok {
-						valueString := checkValue(dataItem, jsonValue, jsonKey, OSCEMunits[jsonKey])
+						valueString := checkValue(dataItem, jsonValue, jsonKey, "e") //OSCEMunits[jsonKey])
 						fmt.Fprintf(&str, "%s", valueString)
 					}
 					str.WriteString("\n")

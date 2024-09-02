@@ -44,19 +44,21 @@ func main() {
 	jsonSample := flag.String("sample", "", "JSON file with sample data")
 	flag.Parse()
 
+	mapJson := make(map[string]any, 0)
+	unitsOSCEM := make(map[string]any, 0)
+
 	// read all input json files and create one map from them all
-	mapInstr := parser.FromJson(*jsonInstr)
-	mapSample := parser.FromJson(*jsonSample)
+	parser.FromJson(*jsonInstr, &mapJson, &unitsOSCEM)
+	parser.FromJson(*jsonSample, &mapJson, &unitsOSCEM)
 
-	// create one mapping for all the JSON contents: key - value
-	mapJson := make(map[string]any, len(mapInstr)+len(mapSample))
-	for i := range mapInstr {
-		mapJson[i] = mapInstr[i]
-	}
-	for i := range mapSample {
-		mapJson[i] = mapSample[i]
-	}
-
+	// // create one mapping for all the JSON contents: key - value
+	// mapJson := make(map[string]any, len(mapInstr)+len(mapSample))
+	// for i := range mapInstr {
+	// 	mapJson[i] = mapInstr[i]
+	// }
+	// for i := range mapSample {
+	// 	mapJson[i] = mapSample[i]
+	// }
 	// read the conversion table by column:
 	namesOSCEM, err := parser.ConversionTableReadColumn(*conversionFile, "OSCEM")
 	if err != nil {
@@ -68,24 +70,28 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	units, err := parser.ConversionTableReadColumn(*conversionFile, "unitsExplicit")
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	// units, err := parser.ConversionTableReadColumn(*conversionFile, "unitsExplicit")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
 	mapper := make(map[string]string, 0)
-	unitsOSCEM := make(map[string]string, 0)
+	//unitsOSCEM := make(map[string]string, 0)
 	// create a map containing OSCEM - PDBx naming mappings
 	for i := range namesOSCEM {
 		// skip values that have notation in OSCEM but not in PDBx
 		if namesPDBx[i] != "" {
 			mapper[namesOSCEM[i]] = namesPDBx[i]
-			unitsOSCEM[namesOSCEM[i]] = units[i]
+			//unitsOSCEM[namesOSCEM[i]] = units[i]
 		}
 	}
-
 	// parse PDBx dictionary to retrieve order of data items and units
-	dataItems := parser.PDBxDict(*dictFile, getValues(mapper))
+	dataItems, err := parser.PDBxDict(*dictFile, getValues(mapper))
+	if err != nil {
+		log.Fatal("Error while reading PDBx dictionary: ", err)
+		return
+
+	}
 	dataItemsPerCategory := parser.AssignCategories((dataItems))
 
 	// create mmCIF text and write it to a file

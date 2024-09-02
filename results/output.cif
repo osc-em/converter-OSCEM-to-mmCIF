@@ -2,14 +2,13 @@ data_myID
 #
 loop_
 _pdbx_contact_author.email
-_pdbx_contact_author.name_first
 _pdbx_contact_author.name_last
 _pdbx_contact_author.country
 _pdbx_contact_author.phone
 _pdbx_contact_author.organization_type
 _pdbx_contact_author.identifier_ORCID
-john.doe@gmail.com John Doe Switzerland +4132112312 academic ORCID_123124151231 
-jane.doe@gmail.com Jane Doe Switzerland +4132112312 academic ORCID_123124151221 
+john.doe@gmail.com John Switzerland +4132112312 academic ORCID_123124151231 
+jane.doe@gmail.com Jane Switzerland +4132112312 academic ORCID_123124151221 
 #
 _entity.formula_weight     3e+06 
 _entity.src_method         yeast 
@@ -24,39 +23,37 @@ _pdbx_entity_branch_descriptor.descriptor     Ribosome_
 #
 _pdbx_entry_details.has_ligand_of_interest     NO 
 #
-_em_imaging_optics.energyfilter_slit_width      10 
-_em_imaging_optics.energyfilter_name            Selectris 
+_em_entity_assembly_recombinant.ncbi_tax_id     GCA_003054445.1 
+_em_entity_assembly_recombinant.organism        'Pichia kudriavzevii' 
 #
-_em_imaging.microscope_model                  'TFS KRIOS' 
-_em_imaging.specimen_holder_model             'Autogrid holder' 
-_em_imaging.date                              2024-05-04 
-_em_imaging.accelerating_voltage              300 
-_em_imaging.illumination_mode                 FloodBeam 
-_em_imaging.mode                              Brightfield 
-_em_imaging.nominal_cs                        2.7 
-_em_imaging.nominal_defocus_min               -1 
-_em_imaging.nominal_defocus_max               -2.5 
-_em_imaging.calibrated_defocus_min            -1 
-_em_imaging.calibrated_defocus_max            -2.5 
-_em_imaging.tilt_angle_min                    0 
-_em_imaging.tilt_angle_max                    0 
-_em_imaging.nominal_magnification             125000 
-_em_imaging.calibrated_magnification          125666 
-_em_imaging.electron_source                   FEG 
-_em_imaging.recording_temperature_minimum     -190 
-_em_imaging.recording_temperature_maximum     -170 
-_em_imaging.c2_aperture_diameter              70 
-_em_imaging.cryogen                           LN2 
+_em_image_recording.average_exposure_time           1.526295 
+_em_image_recording.avg_electron_dose_per_image     20.140268760946135 
+_em_image_recording.film_or_detector_model          'Falcon 4i' 
+_em_image_recording.num_real_images                 25621 
 #
-_em_image_scans.frames_per_image     45 
+loop_
+_pdbx_audit_support.funding_organization
+SNF 
+SNF 
 #
 _em_entity_assembly.type     'None of these' 
 _em_entity_assembly.name     Ribosome 
 #
+_em_sample_support.grid_material      Au 
+_em_sample_support.grid_mesh_size     300 
+_em_sample_support.grid_type          Quantifoil 
+#
+_em_imaging_optics.energyfilter_slit_width      10 
+_em_imaging_optics.phase_plate                  false 
+#
 _em_buffer.pH          7 
 #
-_em_entity_assembly_recombinant.ncbi_tax_id     GCA_003054445.1 
-_em_entity_assembly_recombinant.organism        'Pichia kudriavzevii' 
+_em_vitrification.cryogen_name            None 
+_em_vitrification.humidity                90 
+_em_vitrification.chamber_temperature     300 
+#
+_em_entity_assembly_naturalsource.ncbi_tax_id     GCA_003054445.1 
+_em_entity_assembly_naturalsource.organism        yeast 
 #
 _em_specimen.concentration             0.3 
 _em_specimen.embedding_applied         NO 
@@ -64,31 +61,20 @@ _em_specimen.shadowing_applied         NO
 _em_specimen.staining_applied          NO 
 _em_specimen.vitrification_applied     NO 
 #
-_em_sample_support.grid_material      Au 
-_em_sample_support.grid_mesh_size     300 
-_em_sample_support.grid_type          Quantifoil 
-#
-_em_entity_assembly_naturalsource.ncbi_tax_id     GCA_003054445.1 
-_em_entity_assembly_naturalsource.organism        yeast 
-#
-_em_image_recording.average_exposure_time           3 
-_em_image_recording.avg_electron_dose_per_image     50 
-_em_image_recording.detector_mode                   COUNTING 
-_em_image_recording.film_or_detector_model          'Falcon 4i' 
-_em_image_recording.num_grids_imaged                1 
-_em_image_recording.num_real_images                 30000 
-#
-loop_
-_pdbx_audit_support.funding_organization
-_pdbx_audit_support.grant_number
-SNF SNF321 
-SNF Fundingofsomekind 
-#
-_em_vitrification.cryogen_name            None 
-_em_vitrification.humidity                90 
-_em_vitrification.chamber_temperature     300 
-#
 _em_grid_pretreatment.pressure       1e-06 
 _em_grid_pretreatment.time           30 
 _em_grid_pretreatment.type           'GLOW DISCHARGE' 
+#
+_em_imaging.microscope_model                  'TFS KRIOS' 
+_em_imaging.date                              2024-06-07 
+_em_imaging.accelerating_voltage              300 
+_em_imaging.illumination_mode                 Parallel 
+_em_imaging.mode                              BrightField 
+_em_imaging.nominal_defocus_min               -2000 
+_em_imaging.nominal_defocus_max               -300 
+_em_imaging.calibrated_defocus_min            -10311.9323311 
+_em_imaging.calibrated_defocus_max            -7364.9873855000005 
+_em_imaging.nominal_magnification             165000 
+_em_imaging.electron_source                   FieldEmission 
+_em_imaging.c2_aperture_diameter              20 
 #

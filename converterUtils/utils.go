@@ -1,7 +1,9 @@
 // Package converterUtils provides set of simple functions that are required in converter Package
 package converterUtils
 
-// GetKeys returns a slice of string arrays with values in map. A key must be a string value.
+import "math"
+
+// GetKeys returns a slice of string arrays with keys in map. A key must be a string value.
 func GetKeys[K string, V any](m map[string]V) []string {
 
 	keys := make([]string, 0)
@@ -9,6 +11,14 @@ func GetKeys[K string, V any](m map[string]V) []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+func AssertFloatEqual(a, b float64) bool {
+	if math.IsNaN(a) && math.IsNaN(b) {
+		return true
+	} else {
+		return a == b
+	}
 }
 
 // PDBxItem type defines attributes of the data item property in PDBx dictionary.
@@ -19,8 +29,8 @@ type PDBxItem struct {
 	Name       string
 	Unit       string
 	ValueType  string
-	RangeMin   float64
-	RangeMax   float64
+	RangeMin   string
+	RangeMax   string // will be converted only for comparison
 	EnumValues []string
 }
 

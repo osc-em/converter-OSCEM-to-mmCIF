@@ -16,57 +16,107 @@ func keyConcat(s1, s2 string) string {
 	}
 }
 
-func visit(mymap map[string]any, myJsonPath string, myLongProperties map[string]any, lenVal int, valI int) map[string]any {
-	keys := converterUtils.GetKeys(mymap)
+// visit recursively unwinds the nested JSON file.
+// map initial is the result of a simple unmarshalling on a json file
+// newJsonKey is the key for a map at the current level
+// mapResult is a map that accumulates a resulting dictionary
+// propertiesLen variable controls how many items are kept in the json value array
+// propertyI is the current index of iterated slice
+// return a mapResult
+func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]any, mapResultUnits map[string]any, propertiesLen int, propertyI int) (map[string]any, map[string]any) {
+	keys := converterUtils.GetKeys(mapInitial)
 	for _, k := range keys {
-		jsonFlat := keyConcat(myJsonPath, k)
-		switch nestedMap := mymap[k].(type) {
+		jsonFlat := keyConcat(newJsonKey, k)
+		switch nestedMap := mapInitial[k].(type) {
 		case map[string]any:
-			visit(nestedMap, jsonFlat, myLongProperties, lenVal, valI)
+			value, okV := nestedMap["value"]
+			unit, okU := nestedMap["unit"]
+			if okV && okU {
+				if propertiesLen == 1 {
+					mapResult[jsonFlat] = fmt.Sprint(value)
+					mapResultUnits[jsonFlat] = fmt.Sprint(unit)
+				} else {
+					if propertyI == 0 {
+						values := make([]string, propertiesLen)
+						values[0] = fmt.Sprint(value)
+						mapResult[jsonFlat] = values
+						units := make([]string, propertiesLen)
+						units[0] = fmt.Sprint(unit)
+						mapResultUnits[jsonFlat] = units
+					} else {
+						values := mapResult[jsonFlat]
+						if v, ok := values.([]string); ok {
+							v[propertyI] = fmt.Sprint(value)
+							mapResult[jsonFlat] = v
+						}
+						if u, ok := values.([]string); ok {
+							u[propertyI] = fmt.Sprint(unit)
+							mapResultUnits[jsonFlat] = u
+						}
+					}
+				}
+
+			} else {
+				visit(nestedMap, jsonFlat, mapResult, mapResultUnits, propertiesLen, propertyI)
+			}
 		case []any:
 			for i, jsonSlice := range nestedMap {
 				if js, ok := jsonSlice.(map[string]any); ok {
-					visit(js, jsonFlat, myLongProperties, len(nestedMap), i)
+					visit(js, jsonFlat, mapResult, mapResultUnits, len(nestedMap), i)
 				} else {
 					log.Fatal("Weird case ")
 				}
 			}
 		default:
-			if lenVal == 1 {
-				myLongProperties[jsonFlat] = fmt.Sprint(mymap[k])
+			if propertiesLen == 1 {
+				mapResult[jsonFlat] = fmt.Sprint(mapInitial[k])
 			} else {
-				if valI == 0 {
-					values := make([]string, lenVal)
-					values[0] = fmt.Sprint(mymap[k])
-					myLongProperties[jsonFlat] = values
+				if propertyI == 0 {
+					values := make([]string, propertiesLen)
+					values[0] = fmt.Sprint(mapInitial[k])
+					mapResult[jsonFlat] = values
 				} else {
-					values := myLongProperties[jsonFlat]
+					values := mapResult[jsonFlat]
 					if v, ok := values.([]string); ok {
-						v[valI] = fmt.Sprint(mymap[k])
-						myLongProperties[jsonFlat] = v
+						v[propertyI] = fmt.Sprint(mapInitial[k])
+						mapResult[jsonFlat] = v
 					}
 				}
 			}
 		}
 	}
-	return myLongProperties
+	return mapResult, mapResultUnits
 }
 
 // FromJson function creates a map from a JSON file. Nested data is flattend and keys are connected by a dot.
 // In cases where JSON has multiple values, final map's value will be a slice.
-func FromJson(jsonPath string) map[string]any {
-	// read json file and keep it in form of a map with keys consisting.of.joined.elements
-	var data []byte
+func FromJson(jsonPath string, mapAll *map[string]any, mapUnits *map[string]any) error {
+	// Read JSON file
 	data, err := os.ReadFile(jsonPath)
 	if err != nil {
-		log.Fatal("Error while reading the Json ", err)
+		return fmt.Errorf("error while reading the JSON file: %w", err)
 	}
-	// unmarshal json
+
+	// Unmarshal JSON
 	var jsonContent map[string]any
-	json.Unmarshal([]byte(data), &jsonContent)
+	if err := json.Unmarshal(data, &jsonContent); err != nil {
+		return fmt.Errorf("error while unmarshaling JSON: %w", err)
+	}
 
+	// Initialize flattened maps
 	jsonFlat := make(map[string]any)
-	jsonFlat = visit(jsonContent, "", jsonFlat, 1, 0)
+	jsonUnits := make(map[string]any)
 
-	return jsonFlat
+	// Process JSON content and populate the maps
+	jsonFlat, jsonUnits = visit(jsonContent, "", jsonFlat, jsonUnits, 1, 0)
+
+	// Update the provided maps
+	for k, v := range jsonFlat {
+		(*mapAll)[k] = v
+	}
+	for k, v := range jsonUnits {
+		(*mapUnits)[k] = v
+	}
+
+	return nil
 }

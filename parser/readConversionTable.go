@@ -9,12 +9,12 @@ import (
 
 func stringJoiner(stringsArray []string) string {
 	var joinedString string
-	for i := range stringsArray {
-		if stringsArray[i] != "" {
+	for _, s := range stringsArray {
+		if s != "" {
 			if joinedString != "" {
 				joinedString += "."
 			}
-			joinedString += strings.TrimSpace(stringsArray[i]) // trim all leading and trailing whitespaces
+			joinedString += strings.TrimSpace(s) // trim all leading and trailing whitespaces
 		}
 	}
 	return joinedString

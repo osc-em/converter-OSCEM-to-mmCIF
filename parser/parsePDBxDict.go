@@ -3,26 +3,28 @@ package parser
 import (
 	"bufio"
 	"converter/converterUtils"
-	"log"
-	"math"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-func extractRangeValue(line string) float64 {
+func extractRangeValue(line string) (string, error) {
 	if len(strings.Fields(line)) > 1 {
 		rangeVal := strings.Fields(line)[1]
-		if rangeVal != "." {
-			value, err := strconv.ParseFloat(rangeVal, 64) // ( how to distnguish 0 from +inf? --> happens more often)
+		if rangeVal != "." && rangeVal != "?" {
+			_, err := strconv.ParseFloat(rangeVal, 64) // ( how to distnguish 0 from +inf? --> happens more often)
 			if err != nil {
-				log.Fatal("not a numeric value found to be a range", err)
+				// log.Fatal("not a numeric value found to be a range", err)
+				return "?", fmt.Errorf("value %v is not numeric", rangeVal)
 			}
-			return value
+			return rangeVal, nil
+		} else {
+			return rangeVal, nil
 		}
 	}
-	return math.NaN()
+	return "?", nil
 }
 
 func AssignCategories(dataItems []converterUtils.PDBxItem) map[string][]converterUtils.PDBxItem {
@@ -43,11 +45,12 @@ func AssignCategories(dataItems []converterUtils.PDBxItem) map[string][]converte
 // This struct contains relevant properties of a data item in the dictionary.
 // PDBx contains a few thousands of data items. For a single experiment done with a certain technique it is redundant no keep track of most of data items as they are highly specific to this technique.
 // To avoid that relevantNames argument makes this functionrecord only data items references in the slice.
-func PDBxDict(path string, relevantNames []string) []converterUtils.PDBxItem {
-
+func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, error) {
+	var dataItems = make([]converterUtils.PDBxItem, 0)
 	dictFile, err := os.Open(path)
 	if err != nil {
-		log.Fatal("Error while reading the file ", err)
+		return dataItems, err
+		//log.Fatal("Error while reading the file ", err)
 	}
 	defer dictFile.Close()
 
@@ -64,8 +67,6 @@ func PDBxDict(path string, relevantNames []string) []converterUtils.PDBxItem {
 
 	scanner := bufio.NewScanner(dictFile)
 
-	var dataItems = make([]converterUtils.PDBxItem, 0)
-
 	var flagItem = false   // Am I within a PDBx property definition?
 	var details bool       // Am I inside of a multi-line comment
 	var presentInJson bool // Is this PDBx property present in OSC-EM?
@@ -79,9 +80,9 @@ func PDBxDict(path string, relevantNames []string) []converterUtils.PDBxItem {
 	var item string
 	var unit string
 	var valueType string
-	var rangeMinValue float64 = math.NaN()
-	var rangeMaxValue float64 = math.NaN()
-	var enumValues []string
+	var rangeMinValue string
+	var rangeMaxValue string
+	var enumValues = make([]string, 0)
 
 	enumMatchCount := 0
 	recordEnumFlag := false
@@ -122,8 +123,8 @@ func PDBxDict(path string, relevantNames []string) []converterUtils.PDBxItem {
 
 				//  reset dataItem property before collecting
 				unit = ""
-				rangeMinValue = math.NaN()
-				rangeMaxValue = math.NaN()
+				rangeMinValue = ""
+				rangeMaxValue = ""
 				enumValues = make([]string, 0)
 
 				dataItems = append(dataItems, newItem)
@@ -171,12 +172,12 @@ func PDBxDict(path string, relevantNames []string) []converterUtils.PDBxItem {
 
 			// .. if value needs to be in certain range
 			if reRangeMin.MatchString(scanner.Text()) {
-				rangeMinValue = extractRangeValue(scanner.Text())
+				rangeMinValue, err = extractRangeValue(scanner.Text())
 			}
 
 			// .. if value needs to be in certain range
 			if reRangeMax.MatchString(scanner.Text()) {
-				rangeMaxValue = extractRangeValue(scanner.Text())
+				rangeMaxValue, err = extractRangeValue(scanner.Text())
 			}
 
 			// .. if enum values are provided (and are not already supposed to be recorded)
@@ -208,7 +209,7 @@ func PDBxDict(path string, relevantNames []string) []converterUtils.PDBxItem {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		return dataItems, err
 	}
-	return dataItems
+	return dataItems, nil
 }

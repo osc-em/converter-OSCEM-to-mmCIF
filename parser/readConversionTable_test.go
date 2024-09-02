@@ -1,28 +1,38 @@
 package parser
 
 import (
+	"reflect"
 	"testing"
 )
 
-type addTest struct {
+type convTest struct {
 	path           string
 	col            string
 	expectedValues []string
 	expectedError  string
 }
 
-var addTests = []addTest{
-	addTest{"./testData/notCsv.cs", "PDBx", make([]string, 0), "open ./testData/notCsv.cs: no such file or directory"},
-	addTest{"./testData/notCsv.csv", "PDBx", make([]string, 0), "Column PDBx does not exist in table ./testData/notCsv.csv"},
-	addTest{"./testData/notCsv.csv", "mmCIF", make([]string, 0), "Column mmCIF does not exist in table ./testData/notCsv.csv"},
-	addTest{"./testData/OSCEMfirst.csv", "OSCEM", []string{"",
+// Tests:
+// * non-existing file
+// * broken csv - in seconf line remove bunch of fields defined in header
+// * extracting a column that does not exist
+// * trying to extract a column that exists but the file is not a true csv, in this case uses tabs, so the whole header is parsed as one column
+// * extract OSCEM column, that is the first column in the header
+// * extract OSCEM column, that is the middle of the header
+
+var convTableTest = []convTest{
+	{"./testData/notCsv.cs", "PDBx", make([]string, 0), "open ./testData/notCsv.cs: no such file or directory"},
+	{"./testData/badCsv.csv", "units", make([]string, 0), "record on line 2: wrong number of fields"},
+	{"./testData/notCsv.csv", "PDBx", make([]string, 0), "column PDBx does not exist in table ./testData/notCsv.csv"},
+	{"./testData/notCsv.csv", "units", make([]string, 0), "column units does not exist in table ./testData/notCsv.csv"},
+	{"./testData/OSCEMfirst.csv", "OSCEM", []string{"",
 		"Instrument.Microscope",
 		"Instrument.Illumination",
 		"Instrument.Imaging",
 		"Instrument.Electron_source",
 		"Instrument.Acceleration.Voltage"},
 		""},
-	addTest{"./testData/OSCEMmiddle.csv", "OSCEM", []string{"",
+	{"./testData/OSCEMmiddle.csv", "OSCEM", []string{"",
 		"Instrument.Microscope",
 		"Instrument.Illumination",
 		"Instrument.Imaging",
@@ -33,10 +43,8 @@ var addTests = []addTest{
 		""},
 }
 
-// because the delimiter used in this file is '\t' the whole table is read as one column, so PDBx column will not be found
 func TestConversionTableReadColumn(t *testing.T) {
-
-	for _, test := range addTests {
+	for _, test := range convTableTest {
 		gotValues, gotError := ConversionTableReadColumn(test.path, test.col)
 		if gotError == nil {
 			if len(test.expectedError) > 0 {
@@ -44,10 +52,8 @@ func TestConversionTableReadColumn(t *testing.T) {
 			} else if len(gotValues) != len(test.expectedValues) {
 				t.Errorf("Expected output slice: %q, got: %q", test.expectedValues, gotValues)
 			} else {
-				for i := range gotValues {
-					if gotValues[i] != test.expectedValues[i] {
-						t.Errorf("Expected output slice: %q, got: %q", test.expectedValues, gotValues)
-					}
+				if !reflect.DeepEqual(gotValues, test.expectedValues) {
+					t.Errorf("Expected output slice: %v, got: %v", test.expectedValues, gotValues)
 				}
 			}
 		} else {
