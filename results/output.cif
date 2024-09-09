@@ -7,74 +7,74 @@ _pdbx_contact_author.country
 _pdbx_contact_author.phone
 _pdbx_contact_author.organization_type
 _pdbx_contact_author.identifier_ORCID
-john.doe@gmail.com John Switzerland +4132112312 academic ORCID_123124151231 
-jane.doe@gmail.com Jane Switzerland +4132112312 academic ORCID_123124151221 
+
+
 #
-_entity.formula_weight     3e+06 
-_entity.src_method         yeast 
-_entity.type               Complex 
+_entity.formula_weight     
+_entity.src_method         
+_entity.type               
 #
-_entity_poly.type                         polypeptide 
-_entity_poly.pdbx_seq_one_letter_code     MMKNMMKYMMMYSYKEKSEKRRWMMKREMMKYLELLNMRMNKWVKRMMMSRKRLLSRMNRLEKKNHMNDYKLMSYNFNKNSMMMKSMLSKLMMNLLENVMNGVDLKSGKSKMSGGNMMMSKPVMKENLNTVNMLFYYFLPNNKSYKYFNRMNMYLNKHMKNYKKLVKLNKNYSKSSYLLQDKLMMSNMFNNMMFNRNNMKYMNNNVNNLMSSLNMNSNNKSLYLSLLNKTLNNNLSNLYSNNNINKSIINNTLVNMSMLNNNYNNNNTTFNINNNLFNLLNLLNNNYNNNNNYNNMMSNTNMLLNNYNNNNNNNNNNKCNMHSKMKLERKNMMLNYLLKNEMMNKNQMWMSKMENNKMNNINNNNNMLKMNKENDKTNMFGYMMSYMDMLLGNMMNKSKKSNDMKMMMSKYFGLKEVNMTGMNLKYEFNNTEMLLKLMRKGMSKRKRTLSRMFRFRLKNRMPLLNDKGMLKNKMSNNLLKNLALNNNILNVEYNIKNVLFNSINNNNINNNNNNNMYNDMKDYYNNMSLENKKDLSLNNELLYKNMVGWSLLLKGKVGARKGKNRSNRMLMTKGSFKNNNLYIYNIFDDNSNNNGYTKDRLRLNYMKNSNFISYMDKSTNNGKLGMTLKVNIL 
+_entity_poly.type                         
+_entity_poly.pdbx_seq_one_letter_code     
 #
-_entity_src_gen.pdbx_gene_src_gene     Rib 
+_entity_src_gen.pdbx_gene_src_gene     
 #
-_pdbx_entity_branch_descriptor.descriptor     Ribosome_ 
+_pdbx_entity_branch_descriptor.descriptor     
 #
-_pdbx_entry_details.has_ligand_of_interest     NO 
+_pdbx_entry_details.has_ligand_of_interest     
 #
-_em_entity_assembly_recombinant.ncbi_tax_id     GCA_003054445.1 
-_em_entity_assembly_recombinant.organism        'Pichia kudriavzevii' 
+_em_entity_assembly.type     
+_em_entity_assembly.name     
 #
-_em_image_recording.average_exposure_time           1.526295 
-_em_image_recording.avg_electron_dose_per_image     20.140268760946135 
-_em_image_recording.film_or_detector_model          'Falcon 4i' 
-_em_image_recording.num_real_images                 25621 
-#
-loop_
-_pdbx_audit_support.funding_organization
-SNF 
-SNF 
-#
-_em_entity_assembly.type     'None of these' 
-_em_entity_assembly.name     Ribosome 
-#
-_em_sample_support.grid_material      Au 
-_em_sample_support.grid_mesh_size     300 
-_em_sample_support.grid_type          Quantifoil 
-#
-_em_imaging_optics.energyfilter_slit_width      10 
-_em_imaging_optics.phase_plate                  false 
-#
-_em_buffer.pH          7 
-#
-_em_vitrification.cryogen_name            None 
-_em_vitrification.humidity                90 
-_em_vitrification.chamber_temperature     300 
-#
-_em_entity_assembly_naturalsource.ncbi_tax_id     GCA_003054445.1 
-_em_entity_assembly_naturalsource.organism        yeast 
-#
-_em_specimen.concentration             0.3 
-_em_specimen.embedding_applied         NO 
-_em_specimen.shadowing_applied         NO 
-_em_specimen.staining_applied          NO 
-_em_specimen.vitrification_applied     NO 
-#
-_em_grid_pretreatment.pressure       1e-06 
-_em_grid_pretreatment.time           30 
-_em_grid_pretreatment.type           'GLOW DISCHARGE' 
-#
-_em_imaging.microscope_model                  'TFS KRIOS' 
-_em_imaging.date                              2024-06-07 
+_em_imaging.microscope_model                  
+_em_imaging.date                              
 _em_imaging.accelerating_voltage              300 
-_em_imaging.illumination_mode                 Parallel 
-_em_imaging.mode                              BrightField 
+_em_imaging.illumination_mode                 
+_em_imaging.mode                              
 _em_imaging.nominal_defocus_min               -2000 
 _em_imaging.nominal_defocus_max               -300 
 _em_imaging.calibrated_defocus_min            -10311.9323311 
 _em_imaging.calibrated_defocus_max            -7364.9873855000005 
-_em_imaging.nominal_magnification             165000 
-_em_imaging.electron_source                   FieldEmission 
+_em_imaging.nominal_magnification             
+_em_imaging.electron_source                   
 _em_imaging.c2_aperture_diameter              20 
+#
+_em_specimen.concentration             
+_em_specimen.embedding_applied         
+_em_specimen.shadowing_applied         
+_em_specimen.staining_applied          
+_em_specimen.vitrification_applied     
+#
+_em_grid_pretreatment.pressure       
+_em_grid_pretreatment.time           
+_em_grid_pretreatment.type           
+#
+_em_sample_support.grid_material      
+_em_sample_support.grid_mesh_size     
+_em_sample_support.grid_type          
+#
+_em_entity_assembly_recombinant.ncbi_tax_id     
+_em_entity_assembly_recombinant.organism        
+#
+_em_imaging_optics.energyfilter_slit_width      10 
+_em_imaging_optics.phase_plate                  
+#
+loop_
+_pdbx_audit_support.funding_organization
+
+
+#
+_em_buffer.pH          
+#
+_em_vitrification.cryogen_name            
+_em_vitrification.humidity                
+_em_vitrification.chamber_temperature     
+#
+_em_entity_assembly_naturalsource.ncbi_tax_id     
+_em_entity_assembly_naturalsource.organism        
+#
+_em_image_recording.average_exposure_time           1.526295 
+_em_image_recording.avg_electron_dose_per_image     20.140268760946135 
+_em_image_recording.film_or_detector_model          
+_em_image_recording.num_real_images                 
 #

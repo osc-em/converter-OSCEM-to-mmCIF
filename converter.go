@@ -40,10 +40,12 @@ func main() {
 	// 	}
 	// }
 
+	// Parse JSON files
 	jsonInstr := flag.String("instrument", "", "JSON file with instrument data")
 	jsonSample := flag.String("sample", "", "JSON file with sample data")
 	flag.Parse()
 
+	// might be string or array of string depending on the size of json array
 	mapJson := make(map[string]any, 0)
 	unitsOSCEM := make(map[string]any, 0)
 
@@ -51,15 +53,7 @@ func main() {
 	parser.FromJson(*jsonInstr, &mapJson, &unitsOSCEM)
 	parser.FromJson(*jsonSample, &mapJson, &unitsOSCEM)
 
-	// // create one mapping for all the JSON contents: key - value
-	// mapJson := make(map[string]any, len(mapInstr)+len(mapSample))
-	// for i := range mapInstr {
-	// 	mapJson[i] = mapInstr[i]
-	// }
-	// for i := range mapSample {
-	// 	mapJson[i] = mapSample[i]
-	// }
-	// read the conversion table by column:
+	// read  conversion table by column:
 	namesOSCEM, err := parser.ConversionTableReadColumn(*conversionFile, "OSCEM")
 	if err != nil {
 		log.Fatal(err)
@@ -70,21 +64,16 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	// units, err := parser.ConversionTableReadColumn(*conversionFile, "unitsExplicit")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// 	return
-	// }
-	mapper := make(map[string]string, 0)
-	//unitsOSCEM := make(map[string]string, 0)
+
 	// create a map containing OSCEM - PDBx naming mappings
+	mapper := make(map[string]string, 0)
 	for i := range namesOSCEM {
 		// skip values that have notation in OSCEM but not in PDBx
 		if namesPDBx[i] != "" {
 			mapper[namesOSCEM[i]] = namesPDBx[i]
-			//unitsOSCEM[namesOSCEM[i]] = units[i]
 		}
 	}
+
 	// parse PDBx dictionary to retrieve order of data items and units
 	dataItems, err := parser.PDBxDict(*dictFile, getValues(mapper))
 	if err != nil {
@@ -92,7 +81,7 @@ func main() {
 		return
 
 	}
-	dataItemsPerCategory := parser.AssignCategories((dataItems))
+	dataItemsPerCategory := parser.AssignPDBxCategories((dataItems))
 
 	// create mmCIF text and write it to a file
 	mmCIFText := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM, *appendToMmCif, *mmCIFInputPath)

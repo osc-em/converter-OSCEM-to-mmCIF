@@ -27,7 +27,7 @@ func extractRangeValue(line string) (string, error) {
 	return "?", nil
 }
 
-func AssignCategories(dataItems []converterUtils.PDBxItem) map[string][]converterUtils.PDBxItem {
+func AssignPDBxCategories(dataItems []converterUtils.PDBxItem) map[string][]converterUtils.PDBxItem {
 	var itemsInCategory = make(map[string][]converterUtils.PDBxItem)
 	for i := range dataItems {
 		category := dataItems[i].CategoryID

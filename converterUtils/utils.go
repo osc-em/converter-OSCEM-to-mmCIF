@@ -34,6 +34,12 @@ type PDBxItem struct {
 	EnumValues []string
 }
 
+var unitsName = map[string]string{
+	"e/Å²": "electrons_angstrom_squared",
+	"s":    "seconds",
+	"eV":   "electron_volts",
+}
+
 var PDBxCategoriesOrder = []string{"entry",
 	"audit",
 	"audit_conform",

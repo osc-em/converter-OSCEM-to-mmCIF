@@ -269,8 +269,14 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 							continue // key was not required and not provided in OSCEM
 						}
 						if correctSlice, ok := valuesMap[jsonKey].([]string); ok {
-							valueString := checkValue(dataItem, correctSlice[v], jsonKey, "e") // OSCEMunits[jsonKey])
-							fmt.Fprintf(&str, "%s", valueString)
+
+							switch unit := OSCEMunits[jsonKey].(type) {
+							case string:
+								valueString := checkValue(dataItem, correctSlice[v], jsonKey, unit)
+								fmt.Fprintf(&str, "%s", valueString)
+							default:
+								log.Printf("%s property is defined to have no units in OSCEM", jsonKey)
+							}
 						}
 					}
 					str.WriteString("\n")
@@ -287,8 +293,14 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 					formatString := fmt.Sprintf("%%-%ds", l)
 					fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
 					if jsonValue, ok := valuesMap[jsonKey].(string); ok {
-						valueString := checkValue(dataItem, jsonValue, jsonKey, "e") //OSCEMunits[jsonKey])
-						fmt.Fprintf(&str, "%s", valueString)
+						switch unit := OSCEMunits[jsonKey].(type) {
+						case string:
+							valueString := checkValue(dataItem, jsonValue, jsonKey, unit) //OSCEMunits[jsonKey])
+							fmt.Fprintf(&str, "%s", valueString)
+						default:
+							log.Printf("%s property is defined to have no units in OSCEM is not a string", jsonKey)
+						}
+
 					}
 					str.WriteString("\n")
 				}
