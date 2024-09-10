@@ -70,32 +70,47 @@ func validateDateIsRFC3339(date string) string {
 }
 
 func validateRange(value string, rMin string, rMax string, unitOSCEM string, unitPDBx string, name string, name2 string) bool {
-	if unitOSCEM == unitPDBx {
-		v, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			log.Fatal("JSON value not numeric, but supposed to be", err)
-		}
-		rMin, err := strconv.ParseFloat(rMin, 64)
-		if err != nil {
-			rMin = math.NaN()
-		}
-		rMax, err := strconv.ParseFloat(rMax, 64)
-		if err != nil {
-			rMax = math.NaN()
-		}
-		if math.IsNaN(rMin) && math.IsNaN(float64(rMax)) {
-			return true
-		} else if math.IsNaN(rMin) {
-			return float64(v) <= rMax
-		} else if math.IsNaN(rMax) {
-			return float64(v) >= rMin
-		} else {
-
-			return float64(v) >= rMin && float64(v) <= rMax
-		}
-	} else {
-		log.Printf("Units in %s vs %s  don't match! Implement a converter from %s to %s units\n", name, name2, unitOSCEM, unitPDBx)
+	if unitOSCEM == "" && unitPDBx == "" {
+		// both OSCEM and PDBx have no units definition
 		return true
+	} else if unitOSCEM == "" && unitPDBx != "" {
+		log.Printf("No units defined for %s in OSCEM! Analogous property %s in PDBx has units %s units. Value will still be used in mmCIF file!\n", name, name2, unitPDBx)
+		return true
+	} else if unitOSCEM != "" && unitPDBx == "" {
+		log.Printf("No units defined for %s in PDBx! Analogous property %s in OSCEM has units %s units. Value will still be used in mmCIF file!\n", name2, name, unitOSCEM)
+		return true
+	} else {
+		explicitUnitOSCEM, ok := converterUtils.UnitsName[unitOSCEM]
+		if !ok {
+			log.Printf("No explicit unit name is specified for property %s in OSCEM, only a short name %s. Value will still be used in mmCIF file!\n", name, unitOSCEM)
+			return true
+		}
+		if explicitUnitOSCEM == unitPDBx {
+			v, err := strconv.ParseFloat(value, 64)
+			if err != nil {
+				log.Fatal("JSON value not numeric, but supposed to be", err)
+			}
+			rMin, err := strconv.ParseFloat(rMin, 64)
+			if err != nil {
+				rMin = math.NaN()
+			}
+			rMax, err := strconv.ParseFloat(rMax, 64)
+			if err != nil {
+				rMax = math.NaN()
+			}
+			if math.IsNaN(rMin) && math.IsNaN(float64(rMax)) {
+				return true
+			} else if math.IsNaN(rMin) {
+				return float64(v) <= rMax
+			} else if math.IsNaN(rMax) {
+				return float64(v) >= rMin
+			} else {
+				return float64(v) >= rMin && float64(v) <= rMax
+			}
+		} else {
+			log.Printf("Units for analogous properties %s in OSCEM and %s in PDBx  don't match! Implement a converter from %s in OSCEM to %s expected by PDBx. Value will still be used in mmCIF file!\n", name, name2, unitOSCEM, unitPDBx)
+			return true
+		}
 	}
 }
 func validateEnum(value string, enumFromPDBx []string, dataItem string) string {
@@ -126,8 +141,8 @@ func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, 
 
 	//now based on the found struct implement range matching, units matching and enum matching
 	if dataItem.ValueType == "int" || dataItem.ValueType == "float" {
-		validateRange := validateRange(value, dataItem.RangeMin, dataItem.RangeMax, unitsOSCEM, dataItem.Unit, jsonKey, dataItem.Name)
-		if !validateRange {
+		validatedRange := validateRange(value, dataItem.RangeMin, dataItem.RangeMax, unitsOSCEM, dataItem.Unit, jsonKey, dataItem.CategoryID+"."+dataItem.Name)
+		if !validatedRange {
 			log.Printf("Value %s of property %s is not in range of [ %s, %s ]!\n", value, jsonKey, dataItem.RangeMin, dataItem.RangeMax)
 		}
 	} else if dataItem.ValueType == "yyyy-mm-dd" {
@@ -275,8 +290,11 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 								valueString := checkValue(dataItem, correctSlice[v], jsonKey, unit)
 								fmt.Fprintf(&str, "%s", valueString)
 							default:
-								log.Printf("%s property is defined to have no units in OSCEM", jsonKey)
+								valueString := checkValue(dataItem, correctSlice[v], jsonKey, "")
+								fmt.Fprintf(&str, "%s", valueString)
+
 							}
+
 						}
 					}
 					str.WriteString("\n")
@@ -295,10 +313,11 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 					if jsonValue, ok := valuesMap[jsonKey].(string); ok {
 						switch unit := OSCEMunits[jsonKey].(type) {
 						case string:
-							valueString := checkValue(dataItem, jsonValue, jsonKey, unit) //OSCEMunits[jsonKey])
+							valueString := checkValue(dataItem, jsonValue, jsonKey, unit)
 							fmt.Fprintf(&str, "%s", valueString)
 						default:
-							log.Printf("%s property is defined to have no units in OSCEM is not a string", jsonKey)
+							valueString := checkValue(dataItem, jsonValue, jsonKey, "")
+							fmt.Fprintf(&str, "%s", valueString)
 						}
 
 					}

@@ -34,10 +34,20 @@ type PDBxItem struct {
 	EnumValues []string
 }
 
-var unitsName = map[string]string{
-	"e/Å²": "electrons_angstrom_squared",
-	"s":    "seconds",
-	"eV":   "electron_volts",
+var UnitsName = map[string]string{
+	"e/Å²":  "electrons_angstrom_squared",
+	"s":     "seconds",
+	"eV":    "electron_volts",
+	"kV":    "kilovolts",
+	"µm":    "micrometres",
+	"mm":    "millimeters",
+	"nm":    "nanometers",
+	"K":     "kelvins",
+	"°":     "degrees",
+	"mrad":  "milliradians",
+	"Da":    "daltons",
+	"mg/ml": "mg_per_ml",
+	"%":     "per cent",
 }
 
 var PDBxCategoriesOrder = []string{"entry",
