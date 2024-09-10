@@ -23,8 +23,22 @@ _pdbx_entity_branch_descriptor.descriptor     Ribosome_
 #
 _pdbx_entry_details.has_ligand_of_interest     NO 
 #
-_em_entity_assembly_naturalsource.ncbi_tax_id     GCA_003054445.1 
-_em_entity_assembly_naturalsource.organism        yeast 
+_em_entity_assembly.type     'None of these' 
+_em_entity_assembly.name     Ribosome 
+#
+_em_buffer.pH          7 
+#
+_em_vitrification.cryogen_name            None 
+_em_vitrification.humidity                90 
+_em_vitrification.chamber_temperature     300 
+#
+_em_imaging_optics.energyfilter_slit_width      10 
+_em_imaging_optics.phase_plate                  false 
+#
+loop_
+_pdbx_audit_support.funding_organization
+SNF 
+SNF 
 #
 _em_specimen.concentration             0.3 
 _em_specimen.embedding_applied         NO 
@@ -37,33 +51,9 @@ _em_image_recording.avg_electron_dose_per_image     20.140268760946135
 _em_image_recording.film_or_detector_model          'Falcon 4i' 
 _em_image_recording.num_real_images                 25621 
 #
-_em_entity_assembly.type     'None of these' 
-_em_entity_assembly.name     Ribosome 
-#
 _em_sample_support.grid_material      Au 
 _em_sample_support.grid_mesh_size     300 
 _em_sample_support.grid_type          Quantifoil 
-#
-_em_vitrification.cryogen_name            None 
-_em_vitrification.humidity                90 
-_em_vitrification.chamber_temperature     300 
-#
-_em_grid_pretreatment.pressure       1e-06 
-_em_grid_pretreatment.time           30 
-_em_grid_pretreatment.type           'GLOW DISCHARGE' 
-#
-_em_imaging_optics.energyfilter_slit_width      10 
-_em_imaging_optics.phase_plate                  false 
-#
-loop_
-_pdbx_audit_support.funding_organization
-SNF 
-SNF 
-#
-_em_buffer.pH          7 
-#
-_em_entity_assembly_recombinant.ncbi_tax_id     GCA_003054445.1 
-_em_entity_assembly_recombinant.organism        'Pichia kudriavzevii' 
 #
 _em_imaging.microscope_model                  'TFS KRIOS' 
 _em_imaging.date                              2024-06-07 
@@ -77,4 +67,14 @@ _em_imaging.calibrated_defocus_max            -7364.9873855000005
 _em_imaging.nominal_magnification             165000 
 _em_imaging.electron_source                   FieldEmission 
 _em_imaging.c2_aperture_diameter              20 
+#
+_em_entity_assembly_naturalsource.ncbi_tax_id     GCA_003054445.1 
+_em_entity_assembly_naturalsource.organism        yeast 
+#
+_em_entity_assembly_recombinant.ncbi_tax_id     GCA_003054445.1 
+_em_entity_assembly_recombinant.organism        'Pichia kudriavzevii' 
+#
+_em_grid_pretreatment.pressure       1e-06 
+_em_grid_pretreatment.time           30 
+_em_grid_pretreatment.type           'GLOW DISCHARGE' 
 #

@@ -4,7 +4,6 @@ import (
 	"converter/converterUtils"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -28,7 +27,7 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 	for _, k := range keys {
 		jsonFlat := keyConcat(newJsonKey, k)
 		switch nestedMap := mapInitial[k].(type) {
-		case map[string]any:
+		case map[string]any: //value is a nested json structure
 			value, okV := nestedMap["value"]
 			unit, okU := nestedMap["unit"]
 			if okV && okU {
@@ -45,11 +44,12 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 						mapResultUnits[jsonFlat] = units
 					} else {
 						values := mapResult[jsonFlat]
+						units := mapResultUnits[jsonFlat]
 						if v, ok := values.([]string); ok {
 							v[propertyI] = fmt.Sprint(value)
 							mapResult[jsonFlat] = v
 						}
-						if u, ok := values.([]string); ok {
+						if u, ok := units.([]string); ok {
 							u[propertyI] = fmt.Sprint(unit)
 							mapResultUnits[jsonFlat] = u
 						}
@@ -59,16 +59,18 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 			} else {
 				visit(nestedMap, jsonFlat, mapResult, mapResultUnits, propertiesLen, propertyI)
 			}
-		case []any:
+		case []any: // value is array
 			for i, jsonSlice := range nestedMap {
 				if js, ok := jsonSlice.(map[string]any); ok {
 					visit(js, jsonFlat, mapResult, mapResultUnits, len(nestedMap), i)
-				} else {
-					log.Fatal("Weird case ")
 				}
+				// else {
+				// 	log.Fatal("Weird case ") // should be covered by initially unmarshalling json. coming here would mean json was broken but that should have been checked
+				// }
 			}
-		default:
+		default: // the value is just a value
 			if propertiesLen == 1 {
+				// if it's an array that only contains one element, save instead as a value
 				mapResult[jsonFlat] = fmt.Sprint(mapInitial[k])
 			} else {
 				if propertyI == 0 {

@@ -72,7 +72,7 @@ func TestAssignCategories(t *testing.T) {
 
 		testname := fmt.Sprintf("%v", tt.name)
 		t.Run(testname, func(t *testing.T) {
-			ans := AssignCategories(tt.items)
+			ans := AssignPDBxCategories(tt.items)
 			eq := reflect.DeepEqual(ans, tt.want)
 			if !eq {
 				t.Errorf("got %v, want %v", ans, tt.want)
@@ -115,10 +115,6 @@ func TestPDBxDict(t *testing.T) {
 			} else if len(gotValues) != len(test.expectedValues) {
 				t.Errorf("Expected output slice: %v, got: %v", test.expectedValues, gotValues)
 			} else {
-				// if !reflect.DeepEqual(gotValues, test.expectedValues) {
-				// 	t.Errorf("Expected output slice: %v, got: %v", test.expectedValues, gotValues)
-				// }
-
 				for i := range gotValues {
 					if !equalPDBxItem(gotValues[i], test.expectedValues[i]) {
 						//if !reflect.DeepEqual(gotValues[i], test.expectedValues[i]) {
