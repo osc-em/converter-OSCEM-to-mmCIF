@@ -1,0 +1,236 @@
+{
+    "principalInvestigator": "spencer.bliven@psi.ch",
+    "creationLocation": "/UNIBAS/BIOEM/TITANG4",
+    "dataFormat": "TIFF image stacks",
+    "sourceFolder": "?",
+    "datasetName": "CryoEM of Apoferritin",
+    "owner": "Yves Tittes",
+    "ownerEmail": "yves.tittes@unibas.ch",
+    "type": "raw",
+    "description": "cryoEM micrographs of Apoferritin at 0.415 Angstrom pixelsize.",
+    "ownerGroup": "a-35632",
+    "scientificMetadata": {
+          "acquisition": {
+             "beamshift": {
+                "x_max": {
+                   "unit": "mrad",
+                   "value": 0.0404779464006424
+                },
+                "x_min": {
+                   "unit": "mrad",
+                   "value": -0.0430131442844868
+                },
+                "y_max": {
+                   "unit": "mrad",
+                   "value": 0.044228833168745
+                },
+                "y_min": {
+                   "unit": "mrad",
+                   "value": -0.0407845601439476
+                }
+             },
+             "beamtilt": {
+                "x_max": {
+                   "unit": "mrad",
+                   "value": -0.03006351739168167
+                },
+                "y_max": {
+                   "unit": "mrad",
+                   "value": 0.00539917079731822
+                }
+             },
+             "binning_camera": 1,
+             "calibrated_defocus": {
+                "maximal": {
+                   "unit": "nm",
+                   "value": 235.6449634
+                },
+                "minimal": {
+                   "unit": "nm",
+                   "value": -4092.2692738
+                }
+             },
+             "datetime": "2024-08-31T11:48:16+02:00",
+             "detector": "Falcon 4i",
+             "dose_per_movie": {
+                "unit": "e/Å²",
+                "value": 4.8221501034695535
+             },
+             "energy_filter": {
+                "used": true,
+                "width": {
+                   "unit": "eV",
+                   "value": 10
+                }
+             },
+             "exposure_time": {
+                "unit": "s",
+                "value": 0.619959
+             },
+             "gainref_flip_rotate": "none",
+             "image_size": {
+                "height": 4096,
+                "width": 4096
+             },
+             "images_generated": 21502,
+             "imageshift": {
+                "x_max": {
+                   "unit": "µm",
+                   "value": 0
+                },
+                "x_min": {
+                   "unit": "µm",
+                   "value": 0
+                },
+                "y_max": {
+                   "unit": "µm",
+                   "value": 0
+                },
+                "y_min": {
+                   "unit": "µm",
+                   "value": 0
+                }
+             },
+             "microscope_software": "EPU",
+             "nominal_defocus": {
+                "maximal": {
+                   "unit": "nm",
+                   "value": -400
+                },
+                "minimal": {
+                   "unit": "nm",
+                   "value": -1400
+                }
+             },
+             "nominal_magnification": 270000,
+             "pixel_size": {
+                "unit": "Å",
+                "value": 0.4150152790871608
+             },
+             "specialist_optics": {
+                "phaseplate": {
+                   "used": false
+                }
+             }
+          },
+          "instrument": {
+             "acceleration_voltage": {
+                "unit": "kV",
+                "value": 300
+             },
+             "c2_aperture": {
+                "unit": "µm",
+                "value": 20
+             },
+             "cs": {
+                "unit": "mm",
+                "value": 2.7
+             },
+             "electron_source": "FieldEmission",
+             "illumination": "Parallel",
+             "imaging": "BrightField",
+             "microscope": "TITAN52339260"
+          },
+          "grants": [
+               {   
+               "project_id": "OpEM",
+               "funder": "Swissuniversities,  CHORD track B"
+          },
+          {    "project_id": "OpenEM",
+               "funder": "ETHrat, ORD"}
+       ],
+           "authors": [
+               {
+                   "name": "Tittes",
+                   "first_name": "Yves",
+                   "email": "yves.tittes@unibas.ch",
+                   "orcid": "0000-0002-7026-7646",
+                   "name_org": "University of Basel",
+                   "type_org": "Academic",
+                   "country": "Switzerland"
+               },
+               {
+                "name": "Rodriguez",
+                "first_name": "Carlos F.",
+                "email": "cf.rodriguez@unibas.ch",
+                "orcid": "0000-0001-9166-0132",
+                "name_org": "University of Basel",
+                "type_org": "Academic",
+                "country": "Switzerland"
+            }
+           ],
+           "sample":{
+             "overall_molecule":{
+                "molecular_type": "Complex",
+                "name_sample": "Apoferritin",
+                "source":"Homo Sapiens",
+                "molecular_weight": {
+                   "value": 474,
+                   "unit": "kDa"
+                }
+             },
+             "molecule": [
+             {
+                "name_mol": "Apoferritin heavy chain",
+                "molecular_type": "polypeptide",
+                "molecular_class": "None of these",
+                "sequence": "MTTASTSQVR QNYHQDSEAA INRQINLELY ASYVYLSMSY YFDRDDVALK NFAKYFLHQS HEEREHAEKL MKLQNQRGGR IFLQDIKKPD CDDWESGLNA MECALHLEKN VNQSLLEFPS PISPSPSCWH HYTTNRPQPQ HHLLRPRRRK RPHSIPTPIL IFRSP",
+                "natural_source":"Homo Sapiens",
+                "taxonomy_id_source":"9606",
+                "expression_system": "E.Coli",
+                "taxonomy_id_expression":"562",
+                "gene_name": "ApoF"      
+             }
+             ],
+             "ligands": [{
+                "present":"false"
+             }],
+             "specimen":{
+                "concentration":{
+                   "value": 2.5,
+                   "unit": "M"
+                },
+                "ph": 7.2,
+                "vitrification": true,
+                "vitrification_cryogen": "Ethane",
+                "humidity": {
+                   "value": 90,
+                   "unit": "%"
+                },
+                "temperature": {
+                   "value": 296,
+                   "unit": "K"
+                },
+                "staining": false,
+                "embedding": false,
+                "shadowing": false
+             },
+             "grid": {
+                "manufacturer": "Quantifoil",
+                "material": "Cu",
+                "mesh": 200,
+                "holes": "2/1",
+                "film_support": false,
+                "pretreatment_type": "Glow discharge",
+                "pretreatment_time": {
+                   "value": 60,
+                   "unit": "s"
+                },
+                "current": {
+                   "value": 20,
+                   "unit": "mA"
+                },
+                "pretreatment_pressure": {
+                   "value": 10,
+                   "unit": "Pa"
+                }
+             }
+           }
+       
+    },
+    "license": "CC BY-SA 4.0",
+    "keywords": [
+      "OpenEM",
+      "Single Particle Analysis"
+    ]
+  }

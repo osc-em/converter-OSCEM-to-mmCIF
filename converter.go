@@ -25,33 +25,17 @@ func main() {
 	conversionFile := flag.String("conversions", "", "path to a CSV file with conversions table")
 	dictFile := flag.String("dic", "", "path to PDBx dictionary")
 	mmCIFOutputPath := flag.String("output", "", "path for a new mmCIF file")
-
-	// flag.StringVar(&json, "json", "", "pass any number of json files")
-	// flag.Parse()
-	// jsonFiles := flag.Args()
-	// fmt.Println(jsonFiles)
-
-	// // create one mapping for all the JSON contents: key - value
-	// mapJson := make(map[string]any, 0)
-	// for i := range jsonFiles {
-	// 	mapFromJson := parser.FromJson(jsonFiles[i])
-	// 	for j := range mapFromJson {
-	// 		mapJson[j] = mapFromJson[j]
-	// 	}
-	// }
+	metadataLevelNameInJson := flag.String("level", "scientificMetadata", "Name of JSON key, for which element the conversion will take place. It must be at first level")
 
 	// Parse JSON files
-	jsonInstr := flag.String("instrument", "", "JSON file with instrument data")
-	jsonSample := flag.String("sample", "", "JSON file with sample data")
+	json := flag.String("json", "", "JSON file containing metadata")
 	flag.Parse()
 
 	// might be string or array of string depending on the size of json array
 	mapJson := make(map[string]any, 0)
 	unitsOSCEM := make(map[string]any, 0)
 
-	// read all input json files and create one map from them all
-	parser.FromJson(*jsonInstr, &mapJson, &unitsOSCEM)
-	parser.FromJson(*jsonSample, &mapJson, &unitsOSCEM)
+	parser.FromJson(*json, &mapJson, &unitsOSCEM, *metadataLevelNameInJson)
 
 	// read  conversion table by column:
 	namesOSCEM, err := parser.ConversionTableReadColumn(*conversionFile, "OSCEM")

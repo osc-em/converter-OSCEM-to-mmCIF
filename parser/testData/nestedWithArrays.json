@@ -84,6 +84,7 @@
        "galaxies": [
         {
            "name": "MilkyWay",
+           "chocolate" : true,
            "diameter": {
               "value": 105700,
               "unit": "light years"

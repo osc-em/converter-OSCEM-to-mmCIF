@@ -1,0 +1,71 @@
+{
+    "astronomyData": {
+      "planets": [
+        {
+          "name": "Earth",
+          "measurements": [
+            {
+              "property": "distanceFromSun",
+              "measurement": {
+                "value": 149.6,
+                "unit": "million km"
+              }
+            },
+            {
+              "property": "radius",
+              "measurement": {
+                "value": 6371,
+                "unit": "km"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mars",
+          "measurements": [
+            {
+              "property": "distanceFromSun",
+              "measurement": {
+                "value": 227.9,
+                "unit": "million km"
+              }
+            },
+            {
+              "property": "radius",
+              "measurement": {
+                "value": 3389.5,
+                "unit": "km"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Jupiter",
+          "measurements": [
+            {
+              "property": "distanceFromSun",
+              "measurement": {
+                "value": 778.5,
+                "unit": "million km"
+              }
+            },
+            {
+              "property": "radius",
+              "measurement": {
+                "value": 69911,
+                "unit": "km"
+              }
+            },
+            {
+              "property": "mass",
+              "measurement": {
+                "value": 1.898,
+                "unit": "× 10^27 kg"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+  
