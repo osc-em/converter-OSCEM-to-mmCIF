@@ -173,7 +173,6 @@
             {
                "name_mol": "Apoferritin heavy chain",
                "molecular_type": "polypeptide",
-               "molecular_class": "None of these",
                "sequence": "MTTASTSQVR QNYHQDSEAA INRQINLELY ASYVYLSMSY YFDRDDVALK NFAKYFLHQS HEEREHAEKL MKLQNQRGGR IFLQDIKKPD CDDWESGLNA MECALHLEKN VNQSLLEFPS PISPSPSCWH HYTTNRPQPQ HHLLRPRRRK RPHSIPTPIL IFRSP",
                "natural_source":"Homo Sapiens",
                "taxonomy_id_source":"9606",

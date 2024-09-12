@@ -119,28 +119,34 @@ func validateEnum(value string, enumFromPDBx []string, dataCategory string, data
 	} else if value == "false" {
 		return "NO"
 	}
-	for i := range enumFromPDBx {
-		if dataCategory == "em_imaging" && dataItem == "microscope_model" {
-			reTitan := regexp.MustCompile(`(?i)titan`)
-			if reTitan.MatchString(value) {
-				return "TFS KRIOS"
-			} else {
-				return strings.ToUpper(value)
-			}
-		} else if dataCategory == "em_imaging" && dataItem == "mode" {
-			if value == "BrightField" {
-				return "BRIGHT FIELD"
-			}
-		} else if dataCategory == "em_imaging" && dataItem == "electron_source " {
-			if value == "FieldEmission" {
-				return "FIELD EMISSION GUN"
-			}
-		} else if strings.EqualFold(enumFromPDBx[i], value) {
-			return enumFromPDBx[i]
+
+	if dataCategory == "_em_imaging" && dataItem == "microscope_model" {
+		reTitan := regexp.MustCompile(`(?i)titan`)
+		if reTitan.MatchString(value) {
+			return "TFS KRIOS"
 		} else {
-			log.Printf("value %v is not in enum %s!", value, dataCategory+"."+dataItem) //make better logging
-			return value
+			return strings.ToUpper(value)
 		}
+	} else if dataCategory == "_em_imaging" && dataItem == "mode" {
+		if value == "BrightField" {
+			return "BRIGHT FIELD"
+		}
+	} else if dataCategory == "_em_imaging" && dataItem == "electron_source" {
+		if value == "FieldEmission" {
+			return "FIELD EMISSION GUN"
+		}
+	} else {
+		inEnum := false
+		for i := range enumFromPDBx {
+			if strings.EqualFold(enumFromPDBx[i], value) {
+				value = enumFromPDBx[i]
+				inEnum = true
+			}
+		}
+		if !inEnum {
+			log.Printf("value %v is not in enum %s!", value, dataCategory+"."+dataItem)
+		}
+		return value
 	}
 	return strings.ToUpper(value)
 }
@@ -310,9 +316,11 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 				str.WriteString("#\n")
 
 			case string:
+
 				l := getLongestPDBxItem(catDI) + 5
 				for _, dataItem := range catDI {
 					jsonKey := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+
 					if valuesMap[jsonKey] == nil {
 						continue // not required in mmCIF
 					}
