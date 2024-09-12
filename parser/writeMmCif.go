@@ -113,24 +113,32 @@ func validateRange(value string, rMin string, rMax string, unitOSCEM string, uni
 		}
 	}
 }
-func validateEnum(value string, enumFromPDBx []string, dataItem string) string {
+func validateEnum(value string, enumFromPDBx []string, dataCategory string, dataItem string) string {
 	if value == "true" {
 		return "YES"
 	} else if value == "false" {
 		return "NO"
 	}
 	for i := range enumFromPDBx {
-		if dataItem == "microscope_model" {
+		if dataCategory == "em_imaging" && dataItem == "microscope_model" {
 			reTitan := regexp.MustCompile(`(?i)titan`)
 			if reTitan.MatchString(value) {
 				return "TFS KRIOS"
 			} else {
 				return strings.ToUpper(value)
 			}
+		} else if dataCategory == "em_imaging" && dataItem == "mode" {
+			if value == "BrightField" {
+				return "BRIGHT FIELD"
+			}
+		} else if dataCategory == "em_imaging" && dataItem == "electron_source " {
+			if value == "FieldEmission" {
+				return "FIELD EMISSION GUN"
+			}
 		} else if strings.EqualFold(enumFromPDBx[i], value) {
 			return enumFromPDBx[i]
 		} else {
-			log.Println("value is not in enum!", value) //make better logging
+			log.Printf("value %v is not in enum %s!", value, dataCategory+"."+dataItem) //make better logging
 			return value
 		}
 	}
@@ -148,7 +156,7 @@ func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, 
 	} else if dataItem.ValueType == "yyyy-mm-dd" {
 		value = validateDateIsRFC3339(value)
 	} else if len(dataItem.EnumValues) > 0 {
-		value = validateEnum(value, dataItem.EnumValues, dataItem.Name)
+		value = validateEnum(value, dataItem.EnumValues, dataItem.CategoryID, dataItem.Name)
 	}
 
 	if strings.Contains(value, " ") {

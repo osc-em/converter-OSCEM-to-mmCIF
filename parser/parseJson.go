@@ -29,13 +29,14 @@ func keyConcat(s1, s2 string) string {
 // savedLevel a boolean variable that controls if that level was saved once, should turn off after that
 // arrayNestingLevel is a boolean that controls that elements array in json doea not have another array element inside. Multiple nesting is not supported
 // return a mapResult
-func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]any, mapResultUnits map[string]any, propertiesLen int, propertyI int, currentLevel int, level string, levelIndex int, save bool, savedLevel bool) (map[string]any, map[string]any) {
+func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]any, mapResultUnits map[string]any, propertiesLen int, propertyI int, currentLevel int, level string, levelIndex int, save bool, savedLevel bool, arrayNestingLevel int) (map[string]any, map[string]any) {
 	keys := converterUtils.GetKeys(mapInitial)
 	for _, k := range keys {
+
 		if !save && level != "" && level != k {
 			switch nestedMap := mapInitial[k].(type) {
 			case map[string]any:
-				visit(nestedMap, "", mapResult, mapResultUnits, propertiesLen, propertyI, currentLevel+1, level, levelIndex, false, savedLevel)
+				visit(nestedMap, "", mapResult, mapResultUnits, propertiesLen, propertyI, currentLevel+1, level, levelIndex, false, savedLevel, arrayNestingLevel)
 			default:
 				continue
 			}
@@ -45,7 +46,7 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 				// here we will enter the correct level
 				save = true
 				levelIndex = currentLevel
-				visit(nestedMap, "", mapResult, mapResultUnits, propertiesLen, propertyI, currentLevel+1, level, levelIndex, save, savedLevel)
+				visit(nestedMap, "", mapResult, mapResultUnits, propertiesLen, propertyI, currentLevel+1, level, levelIndex, save, savedLevel, arrayNestingLevel)
 			default:
 				log.Printf("Metadata Level '%s' is not a nested json structure", level)
 				return mapResult, mapResultUnits
@@ -56,6 +57,9 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 			jsonFlat := keyConcat(newJsonKey, k)
 			switch nestedMap := mapInitial[k].(type) {
 			case map[string]any: //value is a nested json structure
+				if arrayNestingLevel == currentLevel {
+					arrayNestingLevel = -1 //reset
+				}
 				value, okV := nestedMap["value"]
 				unit, okU := nestedMap["unit"]
 				if okV && okU {
@@ -85,19 +89,25 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 					}
 
 				} else {
-					visit(nestedMap, jsonFlat, mapResult, mapResultUnits, propertiesLen, propertyI, currentLevel+1, level, levelIndex, save, savedLevel)
+					visit(nestedMap, jsonFlat, mapResult, mapResultUnits, propertiesLen, propertyI, currentLevel+1, level, levelIndex, save, savedLevel, arrayNestingLevel)
 				}
 			case []any: // value is array
-
+				if arrayNestingLevel >= 0 && arrayNestingLevel < currentLevel {
+					log.Printf("MULTIPLE NESTING NOT SUPPORTED YET!")
+					break
+				}
 				for i, jsonSlice := range nestedMap {
 					if js, ok := jsonSlice.(map[string]any); ok {
-						visit(js, jsonFlat, mapResult, mapResultUnits, len(nestedMap), i, currentLevel+1, level, levelIndex, save, savedLevel)
+						visit(js, jsonFlat, mapResult, mapResultUnits, len(nestedMap), i, currentLevel+1, level, levelIndex, save, savedLevel, currentLevel)
 					}
 					// else {
 					// 	log.Fatal("Weird case ") // should be covered by initially unmarshalling json. coming here would mean json was broken but that should have been checked
 					// }
 				}
 			default: // the value is just a value
+				if arrayNestingLevel == currentLevel {
+					arrayNestingLevel = -1 //reset
+				}
 				if propertiesLen == 1 {
 					// if it's an array that only contains one element, save instead as a value
 					mapResult[jsonFlat] = fmt.Sprint(mapInitial[k])
@@ -142,7 +152,7 @@ func FromJson(jsonPath string, mapAll *map[string]any, mapUnits *map[string]any,
 	jsonUnits := make(map[string]any)
 
 	// Process JSON content and populate the maps
-	jsonFlat, jsonUnits = visit(jsonContent, "", jsonFlat, jsonUnits, 1, 0, 0, level, 0, false, false)
+	jsonFlat, jsonUnits = visit(jsonContent, "", jsonFlat, jsonUnits, 1, 0, 0, level, 0, false, false, -1)
 
 	// Update the provided maps
 	for k, v := range jsonFlat {

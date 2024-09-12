@@ -48,7 +48,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-
+	fmt.Println(mapJson)
 	// create a map containing OSCEM - PDBx naming mappings
 	mapper := make(map[string]string, 0)
 	for i := range namesOSCEM {

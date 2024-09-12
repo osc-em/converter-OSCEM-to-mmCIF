@@ -64,7 +64,7 @@ func TestFromJson(t *testing.T) {
 		{"nested JSON with values and units at different levels, no arrays in JSON", "./testData/simpleNested.json", "", values1, units1, ""},
 		{"nested JSON with values and units at different levels, start at 'earth'", "./testData/simpleNested.json", "earth", map[string]any{"properties.distanceFromSun.measurement": "149.6", "properties.radius.measurement": "6371"}, map[string]any{"properties.distanceFromSun.measurement": "million km", "properties.radius.measurement": "km"}, ""},
 		{"nested JSON with values and units at different levels and arrays", "./testData/nestedWithArrays.json", "", values2, units2, ""},
-		{"nested JSON with nested arrays ", "./testData/nestedArrays.json", "", make(map[string]any, 0), make(map[string]any, 0), ""},
+		{"nested JSON with nested arrays ", "./testData/nestedArrays.json", "", map[string]any{"astronomyData.planets.name": []string{"Earth", "Mars", "Jupiter"}}, make(map[string]any, 0), ""},
 		{"nested JSON with no nesting after starting with 'chocolate'", "./testData/nestedWithArrays.json", "chocolate", make(map[string]any, 0), make(map[string]any, 0), ""},
 	}
 

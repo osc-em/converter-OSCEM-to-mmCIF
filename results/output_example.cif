@@ -1,14 +1,20 @@
 data_myID
 #
 loop_
+_pdbx_audit_support.funding_organization
+_pdbx_audit_support.grant_number
+'Swissuniversities,  CHORD track B' OpEM 
+'ETHrat, ORD' OpenEM 
+#
+loop_
 _pdbx_contact_author.email
 _pdbx_contact_author.name_first
 _pdbx_contact_author.name_last
 _pdbx_contact_author.country
 _pdbx_contact_author.organization_type
 _pdbx_contact_author.identifier_ORCID
-yves.tittes@unibas.ch Tittes Yves Switzerland academic 0000-0002-7026-7646 
-cf.rodriguez@unibas.ch Rodriguez 'Carlos F.' Switzerland academic 0000-0001-9166-0132 
+yves.tittes@unibas.ch Yves Tittes Switzerland academic 0000-0002-7026-7646 
+cf.rodriguez@unibas.ch 'Carlos F.' Rodriguez Switzerland academic 0000-0001-9166-0132 
 #
 _entity.formula_weight     474 
 _entity.src_method         'Homo Sapiens' 
@@ -23,58 +29,54 @@ _pdbx_entity_branch_descriptor.descriptor     'Apoferritin heavy chain'
 #
 _pdbx_entry_details.has_ligand_of_interest     NO 
 #
-_em_specimen.concentration             2.5 
-_em_specimen.embedding_applied         NO 
-_em_specimen.shadowing_applied         NO 
-_em_specimen.staining_applied          NO 
-_em_specimen.vitrification_applied     YES 
+_em_entity_assembly_recombinant.organism        E.Coli 
+#
+_em_buffer.pH          7.2 
+#
+_em_vitrification.cryogen_name            Ethane 
+_em_vitrification.humidity                90 
+_em_vitrification.chamber_temperature     296 
 #
 _em_imaging_optics.energyfilter_slit_width      10 
 _em_imaging_optics.phase_plate                  false 
 #
-_em_entity_assembly.type     'None of these' 
-_em_entity_assembly.name     Apoferritin 
-#
-_em_entity_assembly_recombinant.organism        E.Coli 
-#
-_em_imaging.microscope_model                  'TFS KRIOS' 
-_em_imaging.date                              2024-08-31 
-_em_imaging.accelerating_voltage              300 
-_em_imaging.illumination_mode                 Parallel 
-_em_imaging.mode                              BrightField 
-_em_imaging.nominal_cs                        2.7 
-_em_imaging.nominal_defocus_min               -1400 
-_em_imaging.nominal_defocus_max               -400 
-_em_imaging.calibrated_defocus_min            -4092.2692738 
-_em_imaging.calibrated_defocus_max            235.6449634 
-_em_imaging.nominal_magnification             270000 
-_em_imaging.electron_source                   FieldEmission 
-_em_imaging.c2_aperture_diameter              20 
+_em_entity_assembly_naturalsource.organism        'Homo Sapiens' 
 #
 _em_image_recording.average_exposure_time           0.619959 
 _em_image_recording.avg_electron_dose_per_image     4.8221501034695535 
 _em_image_recording.film_or_detector_model          'Falcon 4i' 
 _em_image_recording.num_real_images                 21502 
 #
-_em_buffer.pH          7.2 
+_em_software.name     EPU 
 #
-_em_entity_assembly_naturalsource.organism        'Homo Sapiens' 
-#
-_em_grid_pretreatment.pressure       10 
-_em_grid_pretreatment.time           60 
-_em_grid_pretreatment.type           'GLOW DISCHARGE' 
-#
-loop_
-_pdbx_audit_support.funding_organization
-_pdbx_audit_support.grant_number
-'Swissuniversities,  CHORD track B' OpEM 
-'ETHrat, ORD' OpenEM 
+_em_entity_assembly.type     'None of these' 
+_em_entity_assembly.name     Apoferritin 
 #
 _em_sample_support.grid_material      Cu 
 _em_sample_support.grid_mesh_size     200 
 _em_sample_support.grid_type          Quantifoil 
 #
-_em_vitrification.cryogen_name            Ethane 
-_em_vitrification.humidity                90 
-_em_vitrification.chamber_temperature     296 
+_em_imaging.microscope_model                  TITAN52339260 
+_em_imaging.date                              2024-08-31 
+_em_imaging.accelerating_voltage              300 
+_em_imaging.illumination_mode                 Parallel 
+_em_imaging.mode                              BrightField 
+_em_imaging.nominal_cs                        2.7 
+_em_imaging.nominal_defocus_min               -400 
+_em_imaging.nominal_defocus_max               -1400 
+_em_imaging.calibrated_defocus_min            235.6449634 
+_em_imaging.calibrated_defocus_max            -4092.2692738 
+_em_imaging.nominal_magnification             270000 
+_em_imaging.electron_source                   FieldEmission 
+_em_imaging.c2_aperture_diameter              20 
+#
+_em_specimen.concentration             2.5 
+_em_specimen.embedding_applied         NO 
+_em_specimen.shadowing_applied         NO 
+_em_specimen.staining_applied          NO 
+_em_specimen.vitrification_applied     YES 
+#
+_em_grid_pretreatment.pressure       10 
+_em_grid_pretreatment.time           60 
+_em_grid_pretreatment.type           'GLOW DISCHARGE' 
 #
