@@ -25,13 +25,14 @@ func AssertFloatEqual(a, b float64) bool {
 // It contains most important fields, such as name of the item and its parental catrgory,
 // type of value it should take on and units, range or allowed values if there are any.
 type PDBxItem struct {
-	CategoryID string
-	Name       string
-	Unit       string
-	ValueType  string
-	RangeMin   string
-	RangeMax   string // will be converted only for comparison
-	EnumValues []string
+	CategoryID     string
+	Name           string
+	Unit           string
+	ValueType      string
+	RangeMin       string
+	RangeMax       string // will be converted only for comparison
+	EnumValues     []string
+	PDBxEnumValues []string
 }
 
 var UnitsName = map[string]string{

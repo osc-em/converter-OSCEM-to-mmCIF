@@ -65,7 +65,6 @@ func main() {
 
 	}
 	dataItemsPerCategory := parser.AssignPDBxCategories((dataItems))
-
 	// create mmCIF text and write it to a file
 	mmCIFText := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM, *appendToMmCif, *mmCIFInputPath)
 

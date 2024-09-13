@@ -63,6 +63,7 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 	reRangeMin := regexp.MustCompile(`_item_range.minimum`)
 	reRangeMax := regexp.MustCompile(`_item_range.maximum`)
 	reEnum := regexp.MustCompile(`_item_enumeration`) // we will require additional string matching to be sure which tab delimited entry it is
+	rePDBxEnum := regexp.MustCompile(`_pdbx_item_enumeration`)
 	reSplitEnum := regexp.MustCompile(`[\s]{2,}`)
 
 	scanner := bufio.NewScanner(dictFile)
@@ -83,9 +84,12 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 	var rangeMinValue string
 	var rangeMaxValue string
 	var enumValues = make([]string, 0)
+	var enumValuesPDBx = make([]string, 0)
 
 	enumMatchCount := 0
+	enumPDBxMatchCount := 0
 	recordEnumFlag := false
+	recordPDBxEnumFlag := false
 
 	for scanner.Scan() {
 		// ignore multi-line comment/detail lines
@@ -113,19 +117,21 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 			if presentInJson {
 				newItem := converterUtils.PDBxItem{
 					//categoryItem: categoryDataItem,
-					CategoryID: category,
-					Name:       item,
-					Unit:       unit,
-					ValueType:  valueType,
-					RangeMin:   rangeMinValue,
-					RangeMax:   rangeMaxValue,
-					EnumValues: enumValues}
+					CategoryID:     category,
+					Name:           item,
+					Unit:           unit,
+					ValueType:      valueType,
+					RangeMin:       rangeMinValue,
+					RangeMax:       rangeMaxValue,
+					EnumValues:     enumValues,
+					PDBxEnumValues: enumValuesPDBx}
 
 				//  reset dataItem property before collecting
 				unit = ""
 				rangeMinValue = ""
 				rangeMaxValue = ""
 				enumValues = make([]string, 0)
+				enumValuesPDBx = make([]string, 0)
 
 				dataItems = append(dataItems, newItem)
 			}
@@ -181,16 +187,24 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 			}
 
 			// .. if enum values are provided (and are not already supposed to be recorded)
-			if reEnum.MatchString(scanner.Text()) && !recordEnumFlag {
+			if reEnum.MatchString(scanner.Text()) && !recordEnumFlag && !rePDBxEnum.MatchString((scanner.Text())) {
 				if strings.Fields(scanner.Text())[0] == "_item_enumeration.value" {
 					recordEnumFlag = true // turn on the flag and start recording from the next one
-					continue
-				} else if strings.Split(strings.Fields(scanner.Text())[0], ".")[0] == "_pdbx_item_enumeration" {
 					continue
 				} else {
 					enumMatchCount += 1
 				}
 			} else if reEnum.MatchString(scanner.Text()) && recordEnumFlag {
+				continue
+			}
+			if rePDBxEnum.MatchString((scanner.Text())) && !recordPDBxEnumFlag {
+				if strings.Fields(scanner.Text())[0] == "_pdbx_item_enumeration.value" {
+					recordPDBxEnumFlag = true // turn on the flag and start recording from the next one
+					continue
+				} else {
+					enumPDBxMatchCount += 1
+				}
+			} else if rePDBxEnum.MatchString(scanner.Text()) && recordPDBxEnumFlag {
 				continue
 			}
 			if recordEnumFlag {
@@ -204,6 +218,19 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 						valueEnum = valueEnum[1 : len(valueEnum)-1]
 					}
 					enumValues = append(enumValues, valueEnum)
+				}
+			}
+			if recordPDBxEnumFlag {
+				if strings.Fields(scanner.Text())[0] == "#" { // end of enum iteration
+					recordPDBxEnumFlag = false
+					enumPDBxMatchCount = 0
+				} else {
+					splittedEnum := reSplitEnum.Split(scanner.Text(), -1)
+					valueEnum := splittedEnum[enumPDBxMatchCount+1]
+					if string(valueEnum[0]) == "\"" {
+						valueEnum = valueEnum[1 : len(valueEnum)-1]
+					}
+					enumValuesPDBx = append(enumValuesPDBx, valueEnum)
 				}
 			}
 		}
