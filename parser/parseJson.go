@@ -27,13 +27,14 @@ func keyConcat(s1, s2 string) string {
 // levelIndex is the nesting level of a propoerty that we should keep track of
 // save is a boolean variable that controls if the correct metadata level was entered already
 // savedLevel a boolean variable that controls if that level was saved once, should turn off after that
-// arrayNestingLevel is a boolean that controls that elements array in json doea not have another array element inside. Multiple nesting is not supported
+// arrayNestingLevel is a boolean that controls that elements array in json does not have another array element inside. Multiple nesting is not supported
 // return a mapResult
-func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]any, mapResultUnits map[string]any, propertiesLen int, propertyI int, currentLevel int, level string, levelIndex int, save bool, savedLevel bool, arrayNestingLevel int) (map[string]any, map[string]any) {
+func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string][]string, mapResultUnits map[string][]string, propertiesLen int, propertyI int, currentLevel int, level string, levelIndex int, save bool, savedLevel bool, arrayNestingLevel int) (map[string][]string, map[string][]string) {
 	keys := converterUtils.GetKeys(mapInitial)
 	for _, k := range keys {
-
+		// first we need to go down to the correct json level, that contains the property for metadata
 		if !save && level != "" && level != k {
+			// go down as the key is not found on this level
 			switch nestedMap := mapInitial[k].(type) {
 			case map[string]any:
 				visit(nestedMap, "", mapResult, mapResultUnits, propertiesLen, propertyI, currentLevel+1, level, levelIndex, false, savedLevel, arrayNestingLevel)
@@ -41,9 +42,9 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 				continue
 			}
 		} else if level != "" && level == k {
+			// here we will enter the correct level
 			switch nestedMap := mapInitial[k].(type) {
 			case map[string]any:
-				// here we will enter the correct level
 				save = true
 				levelIndex = currentLevel
 				visit(nestedMap, "", mapResult, mapResultUnits, propertiesLen, propertyI, currentLevel+1, level, levelIndex, save, savedLevel, arrayNestingLevel)
@@ -52,6 +53,7 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 				return mapResult, mapResultUnits
 			}
 		} else if level != "" && levelIndex == currentLevel && !savedLevel {
+			// here are the keys that are at the same level as the metadata, but we saved the metadata already
 			continue
 		} else {
 			jsonFlat := keyConcat(newJsonKey, k)
@@ -64,26 +66,25 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 				unit, okU := nestedMap["unit"]
 				if okV && okU {
 					if propertiesLen == 1 {
-						mapResult[jsonFlat] = fmt.Sprint(value)
-						mapResultUnits[jsonFlat] = fmt.Sprint(unit)
+						mapResult[jsonFlat] = []string{fmt.Sprint(value)}
+						mapResultUnits[jsonFlat] = []string{fmt.Sprint(unit)}
 					} else {
+						// if it's a first one, it needs initialization
 						if propertyI == 0 {
-							values := make([]string, propertiesLen)
-							values[0] = fmt.Sprint(value)
-							mapResult[jsonFlat] = values
-							units := make([]string, propertiesLen)
-							units[0] = fmt.Sprint(unit)
-							mapResultUnits[jsonFlat] = units
+							mapResult[jsonFlat] = make([]string, propertiesLen)
+							mapResult[jsonFlat][0] = fmt.Sprint(value)
+							mapResultUnits[jsonFlat] = make([]string, propertiesLen)
+							mapResultUnits[jsonFlat][0] = fmt.Sprint(unit)
 						} else {
-							values := mapResult[jsonFlat]
-							units := mapResultUnits[jsonFlat]
-							if v, ok := values.([]string); ok {
-								v[propertyI] = fmt.Sprint(value)
-								mapResult[jsonFlat] = v
-							}
-							if u, ok := units.([]string); ok {
-								u[propertyI] = fmt.Sprint(unit)
-								mapResultUnits[jsonFlat] = u
+							_, okMV := mapResult[jsonFlat]
+							if okMV {
+								mapResult[jsonFlat][propertyI] = fmt.Sprint(value)
+								mapResultUnits[jsonFlat][propertyI] = fmt.Sprint(unit)
+							} else {
+								mapResult[jsonFlat] = make([]string, propertiesLen)
+								mapResult[jsonFlat][propertyI] = fmt.Sprint(value)
+								mapResultUnits[jsonFlat] = make([]string, propertiesLen)
+								mapResultUnits[jsonFlat][propertyI] = fmt.Sprint(unit)
 							}
 						}
 					}
@@ -101,26 +102,27 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 						visit(js, jsonFlat, mapResult, mapResultUnits, len(nestedMap), i, currentLevel+1, level, levelIndex, save, savedLevel, currentLevel)
 					}
 					// else {
-					// 	log.Fatal("Weird case ") // should be covered by initially unmarshalling json. coming here would mean json was broken but that should have been checked
+					// 	log.Fatal("Unreachable case ") // should be covered by initially unmarshalling json. coming here would mean json was broken but that should have been checked
 					// }
 				}
-			default: // the value is just a value
+			default: // the value is just a value (just a value, as value/unit pairs fall into a map category)
 				if arrayNestingLevel == currentLevel {
 					arrayNestingLevel = -1 //reset
 				}
 				if propertiesLen == 1 {
 					// if it's an array that only contains one element, save instead as a value
-					mapResult[jsonFlat] = fmt.Sprint(mapInitial[k])
+					mapResult[jsonFlat] = []string{fmt.Sprint(mapInitial[k])}
 				} else {
 					if propertyI == 0 {
-						values := make([]string, propertiesLen)
-						values[0] = fmt.Sprint(mapInitial[k])
-						mapResult[jsonFlat] = values
+						mapResult[jsonFlat] = make([]string, propertiesLen)
+						mapResult[jsonFlat][0] = fmt.Sprint(mapInitial[k])
 					} else {
-						values := mapResult[jsonFlat]
-						if v, ok := values.([]string); ok {
-							v[propertyI] = fmt.Sprint(mapInitial[k])
-							mapResult[jsonFlat] = v
+						_, okMV := mapResult[jsonFlat]
+						if okMV {
+							mapResult[jsonFlat][propertyI] = fmt.Sprint(mapInitial[k])
+						} else {
+							mapResult[jsonFlat] = make([]string, propertiesLen)
+							mapResult[jsonFlat][propertyI] = fmt.Sprint(mapInitial[k])
 						}
 					}
 				}
@@ -134,7 +136,7 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string]an
 
 // FromJson function creates a map from a JSON file. Nested data is flattend and keys are connected by a dot.
 // In cases where JSON has multiple values, final map's value will be a slice.
-func FromJson(jsonPath string, mapAll *map[string]any, mapUnits *map[string]any, level string) error {
+func FromJson(jsonPath string, mapAll *map[string][]string, mapUnits *map[string][]string, level string) error {
 	// Read JSON file
 	data, err := os.ReadFile(jsonPath)
 	if err != nil {
@@ -148,8 +150,8 @@ func FromJson(jsonPath string, mapAll *map[string]any, mapUnits *map[string]any,
 	}
 
 	// Initialize flattened maps
-	jsonFlat := make(map[string]any)
-	jsonUnits := make(map[string]any)
+	jsonFlat := make(map[string][]string)
+	jsonUnits := make(map[string][]string)
 
 	// Process JSON content and populate the maps
 	jsonFlat, jsonUnits = visit(jsonContent, "", jsonFlat, jsonUnits, 1, 0, 0, level, 0, false, false, -1)

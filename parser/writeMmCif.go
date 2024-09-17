@@ -326,7 +326,7 @@ func parseMmCIF(path string) (string, map[string]string) {
 	}
 	return dataName, mmCIFfields
 }
-func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string]any, OSCEMunits map[string]any, appendToMmCif bool, mmCIFpath string) string {
+func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string, appendToMmCif bool, mmCIFpath string) string {
 	var dataName string
 	var mmCIFCategories map[string]string
 	if appendToMmCif {
@@ -362,8 +362,10 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 					break
 				}
 			}
-			switch jsonValueType := valuesMap[key].(type) {
-			case []string: // loop notation
+			size := len(valuesMap[key])
+			switch {
+			case size > 1:
+				// loop notation
 				str.WriteString("loop_\n")
 				for _, dataItem := range catDI {
 					// check the length of all first and throw an error in case that they have different length?? can that be? e.g two authors and for one the property Phone is not there?
@@ -373,20 +375,18 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 					}
 					fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
 				}
-				for v := range jsonValueType {
+				for v := range valuesMap[key] {
 					for _, dataItem := range catDI {
 						jsonKey := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
 
 						if valuesMap[jsonKey] == nil {
 							continue // key was not required and not provided in OSCEM
 						}
-						if correctSlice, ok := valuesMap[jsonKey].([]string); ok {
-
-							switch unit := OSCEMunits[jsonKey].(type) {
-							case string:
-								valueString := checkValue(dataItem, correctSlice[v], jsonKey, unit)
+						if correctSlice, ok := valuesMap[jsonKey]; ok {
+							if unit, ok := OSCEMunits[jsonKey]; ok {
+								valueString := checkValue(dataItem, correctSlice[v], jsonKey, unit[v])
 								fmt.Fprintf(&str, "%s", valueString)
-							default:
+							} else {
 								valueString := checkValue(dataItem, correctSlice[v], jsonKey, "")
 								fmt.Fprintf(&str, "%s", valueString)
 
@@ -397,9 +397,7 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 					str.WriteString("\n")
 				}
 				str.WriteString("#\n")
-
-			case string:
-
+			case size == 1:
 				l := getLongestPDBxItem(catDI) + 5
 				for _, dataItem := range catDI {
 					jsonKey := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
@@ -409,24 +407,23 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 					}
 					formatString := fmt.Sprintf("%%-%ds", l)
 					fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
-					if jsonValue, ok := valuesMap[jsonKey].(string); ok {
-						switch unit := OSCEMunits[jsonKey].(type) {
-						case string:
-							valueString := checkValue(dataItem, jsonValue, jsonKey, unit)
+					if jsonValue, ok := valuesMap[jsonKey]; ok {
+						if unit, ok := OSCEMunits[jsonKey]; ok {
+							valueString := checkValue(dataItem, jsonValue[0], jsonKey, unit[0]) // the 0th element, because it's the case where only one value is present
 							fmt.Fprintf(&str, "%s", valueString)
-						default:
-							valueString := checkValue(dataItem, jsonValue, jsonKey, "")
+						} else {
+							valueString := checkValue(dataItem, jsonValue[0], jsonKey, "")
 							fmt.Fprintf(&str, "%s", valueString)
-						}
 
+						}
 					}
 					str.WriteString("\n")
 				}
 				str.WriteString("#\n")
 			default:
-				log.Printf("Key %s is not present in this json file but it exists.\n", key)
+				// this key does not exist in the json
+				continue
 			}
-
 		}
 		mmCifLines, ok := mmCIFCategories[category]
 		if ok {

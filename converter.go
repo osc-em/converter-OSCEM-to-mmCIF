@@ -32,11 +32,10 @@ func main() {
 	flag.Parse()
 
 	// might be string or array of string depending on the size of json array
-	mapJson := make(map[string]any, 0)
-	unitsOSCEM := make(map[string]any, 0)
+	mapJson := make(map[string][]string, 0)
+	unitsOSCEM := make(map[string][]string, 0)
 
 	parser.FromJson(*json, &mapJson, &unitsOSCEM, *metadataLevelNameInJson)
-
 	// read  conversion table by column:
 	namesOSCEM, err := parser.ConversionTableReadColumn(*conversionFile, "OSCEM")
 	if err != nil {
