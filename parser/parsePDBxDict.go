@@ -179,11 +179,17 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 			// .. if value needs to be in certain range
 			if reRangeMin.MatchString(scanner.Text()) {
 				rangeMinValue, err = extractRangeValue(scanner.Text())
+				if err != nil {
+					return dataItems, err
+				}
 			}
 
 			// .. if value needs to be in certain range
 			if reRangeMax.MatchString(scanner.Text()) {
 				rangeMaxValue, err = extractRangeValue(scanner.Text())
+				if err != nil {
+					return dataItems, err
+				}
 			}
 
 			// .. if enum values are provided (and are not already supposed to be recorded)

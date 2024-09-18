@@ -41,6 +41,11 @@ func TestFromJson(t *testing.T) {
 		"astronomyData.galaxies.name":                                  {"MilkyWay"},
 		"astronomyData.galaxies.chocolate":                             {"true"},
 		"astronomyData.galaxies.diameter":                              {"105700"},
+		"astronomyData.spaceStation.name":                              {"ISS"},
+		"astronomyData.spaceStation.launch":                            {"1995"},
+		"astronomyData.spaceStation.agencies.name":                     {"NASA", "Roscosmos", "ESA", "JAXA", "CSA"},
+		"astronomyData.spaceStation.agencies.country":                  {"USA", "Russia", "Europe", "Japan", "Canada"},
+		"astronomyData.spaceStation.agencies.memeberStates":            {"", "", "22", "", ""},
 	}
 	units2 := map[string][]string{
 		"astronomyData.planets.properties.radius.measurement":          {"km", "km", "km"},

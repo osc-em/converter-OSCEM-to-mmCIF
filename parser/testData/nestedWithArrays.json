@@ -88,6 +88,33 @@
               "value": 105700,
               "unit": "light years"
            }
-        }
+        },
+        "spaceStation": {
+            "name": "ISS",
+            "launch": 1995,
+            "agencies":[
+               {
+                  "name": "NASA",
+                  "country": "USA"
+               },
+               {
+                  "name":"Roscosmos",
+                  "country":"Russia"
+               },
+               {
+                  "name":"ESA",
+                  "country":"Europe", 
+                  "memeberStates":22
+               },
+               {
+                  "name":"JAXA",
+                  "country":"Japan"
+               },
+               {
+                  "name":"CSA",
+                  "country":"Canada"
+               }
+            ]
+         }
     }
  }

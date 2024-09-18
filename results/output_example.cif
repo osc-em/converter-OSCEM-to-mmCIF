@@ -29,11 +29,19 @@ _pdbx_entity_branch_descriptor.descriptor     'Apoferritin heavy chain'
 #
 _pdbx_entry_details.has_ligand_of_interest     NO 
 #
-_em_grid_pretreatment.pressure       10 
-_em_grid_pretreatment.time           60 
-_em_grid_pretreatment.type           'GLOW DISCHARGE' 
+_em_entity_assembly_recombinant.ncbi_tax_id     562 
+_em_entity_assembly_recombinant.organism        E.Coli 
 #
-_em_entity_assembly.name     Apoferritin 
+_em_specimen.concentration             2.5 
+_em_specimen.embedding_applied         NO 
+_em_specimen.shadowing_applied         NO 
+_em_specimen.staining_applied          NO 
+_em_specimen.vitrification_applied     YES 
+#
+_em_imaging_optics.energyfilter_slit_width      10 
+_em_imaging_optics.phase_plate                  NO 
+#
+_em_buffer.pH          7.2 
 #
 _em_imaging.microscope_model                  'TFS KRIOS' 
 _em_imaging.date                              2024-08-31 
@@ -49,35 +57,27 @@ _em_imaging.nominal_magnification             270000
 _em_imaging.electron_source                   'FIELD EMISSION GUN' 
 _em_imaging.c2_aperture_diameter              20 
 #
-_em_entity_assembly_recombinant.ncbi_tax_id     562 
-_em_entity_assembly_recombinant.organism        E.Coli 
-#
-_em_sample_support.grid_material      COPPER 
-_em_sample_support.grid_mesh_size     200 
-_em_sample_support.grid_type          Quantifoil 
+_em_entity_assembly.name     Apoferritin 
 #
 _em_vitrification.cryogen_name            ETHANE 
 _em_vitrification.humidity                90 
 _em_vitrification.chamber_temperature     296 
 #
-_em_specimen.concentration             2.5 
-_em_specimen.embedding_applied         NO 
-_em_specimen.shadowing_applied         NO 
-_em_specimen.staining_applied          NO 
-_em_specimen.vitrification_applied     YES 
-#
-_em_software.name     EPU 
-#
-_em_buffer.pH          7.2 
-#
 _em_entity_assembly_naturalsource.ncbi_tax_id     9606 
 _em_entity_assembly_naturalsource.organism        'Homo Sapiens' 
+#
+_em_grid_pretreatment.pressure       10 
+_em_grid_pretreatment.time           60 
+_em_grid_pretreatment.type           'GLOW DISCHARGE' 
+#
+_em_sample_support.grid_material      COPPER 
+_em_sample_support.grid_mesh_size     200 
+_em_sample_support.grid_type          Quantifoil 
 #
 _em_image_recording.average_exposure_time           0.619959 
 _em_image_recording.avg_electron_dose_per_image     4.8221501034695535 
 _em_image_recording.film_or_detector_model          'FEI FALCON IV (4k x 4k)' 
 _em_image_recording.num_real_images                 21502 
 #
-_em_imaging_optics.energyfilter_slit_width      10 
-_em_imaging_optics.phase_plate                  NO 
+_em_software.name     EPU 
 #

@@ -194,7 +194,7 @@ save__category1.name10
    _pdbx_item_enumeration.name
    _pdbx_item_enumeration.value
    _pdbx_item_enumeration.detail
-     "_pdbx_database_status.author_approval_type"  explicit  .  
+     "_pdbx_database_status.author_approval_type"  "explicit"  .  
      "_pdbx_database_status.author_approval_type"  implicit  .  
    #
    _item_examples.case  
@@ -324,7 +324,7 @@ save__category1.name_units
    #
    _item_examples.case  300
    #
-   _item_range.maximum  .
+   _item_range.maximum  zero
    _item_range.minimum  0
    #
    loop_

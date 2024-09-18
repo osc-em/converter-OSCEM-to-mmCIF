@@ -65,7 +65,10 @@ func main() {
 	}
 	dataItemsPerCategory := parser.AssignPDBxCategories((dataItems))
 	// create mmCIF text and write it to a file
-	mmCIFText := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM, *appendToMmCif, *mmCIFInputPath)
+	mmCIFText, err := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM, *appendToMmCif, *mmCIFInputPath)
+	if err != nil {
+		fmt.Println("Couldn't create text in mmCIF format!")
+	}
 
 	// now write to cif file
 	// Open the file, create it if it doesn't exist, and truncate it if it does

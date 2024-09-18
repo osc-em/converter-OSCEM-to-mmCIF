@@ -13,29 +13,13 @@ import (
 	"time"
 )
 
-// for a property category.dataItem extract the category name i.e. string before dot
-func itemCategory(item string) string {
-	return strings.Split(item, ".")[0]
-}
-
-// find all data items that have the same category as item
-func findItemByCategory(item string, mapper map[string]string) []string {
-	itemsInCategory := make([]string, 0)
-	for _, v := range mapper {
-		if itemCategory(v) == item {
-			itemsInCategory = append(itemsInCategory, v)
-		}
-	}
-	return itemsInCategory
-}
-
-func getKeyByValue(value string, m map[string]string) string {
+func getKeyByValue(value string, m map[string]string) (string, error) {
 	for k, v := range m {
 		if v == value {
-			return k
+			return k, nil
 		}
 	}
-	return ""
+	return "", fmt.Errorf("value %v is not in the conversion table", value)
 }
 
 // is element e in the slice s?
@@ -326,7 +310,7 @@ func parseMmCIF(path string) (string, map[string]string) {
 	}
 	return dataName, mmCIFfields
 }
-func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string, appendToMmCif bool, mmCIFpath string) string {
+func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string, appendToMmCif bool, mmCIFpath string) (string, error) {
 	var dataName string
 	var mmCIFCategories map[string]string
 	if appendToMmCif {
@@ -356,7 +340,11 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 			// need to loop here through all data items in category, as it reflects the order of data items in PDBx, it still might not exist in json
 			// loop until we find first key that exists in json
 			for i := range catDI {
-				key = getKeyByValue(catDI[i].CategoryID+"."+catDI[i].Name, nameMapper)
+				k, err := getKeyByValue(catDI[i].CategoryID+"."+catDI[i].Name, nameMapper)
+				key = k
+				if err != nil {
+					return "", err
+				}
 				_, ok := valuesMap[key]
 				if ok {
 					break
@@ -369,7 +357,10 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 				str.WriteString("loop_\n")
 				for _, dataItem := range catDI {
 					// check the length of all first and throw an error in case that they have different length?? can that be? e.g two authors and for one the property Phone is not there?
-					jsonKey := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+					if err != nil {
+						return "", err
+					}
 					if valuesMap[jsonKey] == nil {
 						continue // not required and not provided in OSCEM
 					}
@@ -377,7 +368,10 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 				}
 				for v := range valuesMap[key] {
 					for _, dataItem := range catDI {
-						jsonKey := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+						jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+						if err != nil {
+							return "", err
+						}
 
 						if valuesMap[jsonKey] == nil {
 							continue // key was not required and not provided in OSCEM
@@ -400,7 +394,10 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 			case size == 1:
 				l := getLongestPDBxItem(catDI) + 5
 				for _, dataItem := range catDI {
-					jsonKey := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+					if err != nil {
+						return "", err
+					}
 
 					if valuesMap[jsonKey] == nil {
 						continue // not required in mmCIF
@@ -430,6 +427,6 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 			str.WriteString(mmCifLines)
 		}
 	}
-	return str.String()
+	return str.String(), nil
 
 }

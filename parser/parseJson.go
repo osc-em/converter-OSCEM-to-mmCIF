@@ -101,11 +101,8 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string][]
 					if js, ok := jsonSlice.(map[string]any); ok {
 						visit(js, jsonFlat, mapResult, mapResultUnits, len(nestedMap), i, currentLevel+1, level, levelIndex, save, savedLevel, currentLevel)
 					}
-					// else {
-					// 	log.Fatal("Unreachable case ") // should be covered by initially unmarshalling json. coming here would mean json was broken but that should have been checked
-					// }
 				}
-			default: // the value is just a value (just a value, as value/unit pairs fall into a map category)
+			default: // the value is just a value (as value/unit pairs fall into a map category)
 				if arrayNestingLevel == currentLevel {
 					arrayNestingLevel = -1 //reset
 				}

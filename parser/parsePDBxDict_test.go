@@ -8,7 +8,7 @@ import (
 )
 
 func equalPDBxItem(a, b converterUtils.PDBxItem) bool {
-	return a.CategoryID == b.CategoryID && a.Name == b.Name && a.Unit == b.Unit && a.ValueType == b.ValueType && a.RangeMin == b.RangeMin && a.RangeMax == b.RangeMax && reflect.DeepEqual(a.EnumValues, b.EnumValues)
+	return a.CategoryID == b.CategoryID && a.Name == b.Name && a.Unit == b.Unit && a.ValueType == b.ValueType && a.RangeMin == b.RangeMin && a.RangeMax == b.RangeMax && reflect.DeepEqual(a.EnumValues, b.EnumValues) && reflect.DeepEqual(a.PDBxEnumValues, b.PDBxEnumValues)
 }
 func TestExtractRangeValue(t *testing.T) {
 	var tests = []struct {
@@ -83,15 +83,17 @@ func TestAssignCategories(t *testing.T) {
 
 func TestPDBxDict(t *testing.T) {
 	items1 := []converterUtils.PDBxItem{
-		{CategoryID: "_category1", Name: "name1", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}},
-		{CategoryID: "_category1", Name: "name2", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}},
-		{CategoryID: "_category2", Name: "name1", Unit: "milliradians", ValueType: "float", RangeMin: "0.0", RangeMax: ".", EnumValues: []string{}},
-		{CategoryID: "_category2", Name: "name2", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}}}
+		{CategoryID: "_category1", Name: "name1", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "_category1", Name: "name2", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "_category2", Name: "name1", Unit: "milliradians", ValueType: "float", RangeMin: "0.0", RangeMax: ".", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "_category2", Name: "name2", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}, PDBxEnumValues: []string{}},
+	}
 	items2 := []converterUtils.PDBxItem{
-		{CategoryID: "_category1", Name: "name1", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}},
-		{CategoryID: "_category1", Name: "name10", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}},
-		{CategoryID: "_category1", Name: "microscope_model", Unit: "", ValueType: "line", RangeMin: "", RangeMax: "", EnumValues: []string{"FEI TECNAI F30", "FEI TECNAI ARCTICA", "FEI TECNAI SPHERA", "FEI TECNAI SPIRIT", "FEI TITAN", "FEI TITAN KRIOS", "FEI/PHILIPS CM10", "FEI/PHILIPS CM12", "FEI/PHILIPS CM120T", "FEI/PHILIPS CM200FEG", "FEI/PHILIPS CM200FEG/SOPHIE", "JEOL CRYO ARM 300", "SIEMENS SULEIKA", "TFS GLACIOS", "TFS KRIOS", "TFS TALOS", "TFS TALOS F200C", "TFS TALOS L120C", "TFS TUNDRA", "ZEISS LEO912"}},
-		{CategoryID: "_category1", Name: "name11", Unit: "", ValueType: "text", RangeMin: "", RangeMax: "", EnumValues: []string{}}}
+		{CategoryID: "_category1", Name: "name1", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "_category1", Name: "name10", Unit: "", ValueType: "code", RangeMin: "", RangeMax: "", EnumValues: []string{}, PDBxEnumValues: []string{"explicit", "implicit"}},
+		{CategoryID: "_category1", Name: "microscope_model", Unit: "", ValueType: "line", RangeMin: "", RangeMax: "", EnumValues: []string{"FEI TECNAI F30", "FEI TECNAI ARCTICA", "FEI TECNAI SPHERA", "FEI TECNAI SPIRIT", "FEI TITAN", "FEI TITAN KRIOS", "FEI/PHILIPS CM10", "FEI/PHILIPS CM12", "FEI/PHILIPS CM120T", "FEI/PHILIPS CM200FEG", "FEI/PHILIPS CM200FEG/SOPHIE", "JEOL CRYO ARM 300", "SIEMENS SULEIKA", "TFS GLACIOS", "TFS KRIOS", "TFS TALOS", "TFS TALOS F200C", "TFS TALOS L120C", "TFS TUNDRA", "ZEISS LEO912"}, PDBxEnumValues: []string{}},
+		{CategoryID: "_category1", Name: "name11", Unit: "", ValueType: "text", RangeMin: "", RangeMax: "", EnumValues: []string{}, PDBxEnumValues: []string{}},
+	}
 
 	var tests = []struct {
 		name           string
@@ -105,6 +107,7 @@ func TestPDBxDict(t *testing.T) {
 		{"comments only", "./testData/commented.dic", []string{"_category.name"}, []converterUtils.PDBxItem{}, ""},
 		{"no intersect with JSON properties", "./testData/sample.dic", []string{"_category.name1"}, []converterUtils.PDBxItem{}, ""},
 		{"intersect with JSON properties", "./testData/sample.dic", []string{"_category1.name1", "_category1.name2", "_category2.name1", "_category2.name2"}, items1, ""},
+		{"intersect with JSON properties range not numeric", "./testData/sample.dic", []string{"_category1.name_units"}, []converterUtils.PDBxItem{}, "value zero is not numeric"},
 		{"enum collection and order of items is mixed", "./testData/sample.dic", []string{"_category1.name1", "_category1.microscope_model", "_category1.name10", "_category1.name11"}, items2, ""},
 	}
 	for _, test := range tests {
