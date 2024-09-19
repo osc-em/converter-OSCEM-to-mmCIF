@@ -53,6 +53,7 @@ func main() {
 		// skip values that have notation in OSCEM but not in PDBx
 		if namesPDBx[i] != "" {
 			mapper[namesOSCEM[i]] = namesPDBx[i]
+
 		}
 	}
 
