@@ -134,9 +134,11 @@
          "grants": [
               {   
               "project_id": "OpEM",
+              "country":"Switzerland",
               "funder": "Swissuniversities,  CHORD track B"
          },
          {    "project_id": "OpenEM",
+              "country":"Switzerland",
               "funder": "ETHrat, ORD"}
       ],
           "authors": [
@@ -147,6 +149,7 @@
                   "orcid": "0000-0002-7026-7646",
                   "name_org": "University of Basel",
                   "type_org": "Academic",
+                  "role": "responsible scientist",
                   "country": "Switzerland"
               },
               {
@@ -156,6 +159,7 @@
                "orcid": "0000-0001-9166-0132",
                "name_org": "University of Basel",
                "type_org": "Academic",
+               "role": "investigator",
                "country": "Switzerland"
            }
           ],

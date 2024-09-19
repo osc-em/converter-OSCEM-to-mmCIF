@@ -43,18 +43,18 @@ func TestExtractRangeValue(t *testing.T) {
 
 func TestAssignCategories(t *testing.T) {
 	items1 := []converterUtils.PDBxItem{
-		{CategoryID: "cat1", Name: "name1", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}},
-		{CategoryID: "cat1", Name: "name2", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}},
-		{CategoryID: "cat1", Name: "name3", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}}}
+		{CategoryID: "cat1", Name: "name1", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "cat1", Name: "name2", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "cat1", Name: "name3", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}}}
 	items2 := []converterUtils.PDBxItem{
-		{CategoryID: "cat1", Name: "name1", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}},
-		{CategoryID: "cat1", Name: "name2", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}},
-		{CategoryID: "cat2", Name: "name3", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}},
-		{CategoryID: "cat2", Name: "name4", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}}}
+		{CategoryID: "cat1", Name: "name1", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "cat1", Name: "name2", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "cat2", Name: "name3", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "cat2", Name: "name4", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}}}
 	items3 := []converterUtils.PDBxItem{
-		{CategoryID: "cat1", Name: "name1", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}},
-		{CategoryID: "cat2", Name: "name2", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}},
-		{CategoryID: "cat3", Name: "name3", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}}}
+		{CategoryID: "cat1", Name: "name1", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "cat2", Name: "name2", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
+		{CategoryID: "cat3", Name: "name3", Unit: "u1", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}}}
 	var tests = []struct {
 		name  string
 		items []converterUtils.PDBxItem

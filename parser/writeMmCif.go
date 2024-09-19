@@ -3,6 +3,7 @@ package parser
 import (
 	"bufio"
 	"converter/converterUtils"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -53,159 +54,165 @@ func validateDateIsRFC3339(date string) string {
 	return t.Format(time.DateOnly)
 }
 
-func validateRange(value string, dataItem converterUtils.PDBxItem, unitOSCEM string, nameOSCEM string) bool {
+func validateRange(value string, dataItem converterUtils.PDBxItem, unitOSCEM string, nameOSCEM string) (bool, error) {
 	rMin := dataItem.RangeMin
 	rMax := dataItem.RangeMax
 	unitPDBx := dataItem.Unit
 	namePDBx := dataItem.CategoryID + "." + dataItem.Name
-
+	var unitsSame bool
+	var errorMessage string
+	var unitsError error
 	if unitOSCEM == "" && unitPDBx == "" {
 		// both OSCEM and PDBx have no units definition
-		return true
+		unitsSame = true
 	} else if unitOSCEM == "" && unitPDBx != "" {
-		log.Printf("No units defined for %s in OSCEM! Analogous property %s in PDBx has units %s units. Value will still be used in mmCIF file!\n", nameOSCEM, namePDBx, unitPDBx)
-		return true
+		errorMessage = fmt.Sprintf("No units defined for %s in OSCEM! Analogous property %s in PDBx has %s units. Value will still be used in mmCIF file!", nameOSCEM, namePDBx, unitPDBx)
+		unitsSame = false
+		unitsError = errors.New(errorMessage)
+		return true, unitsError
 	} else if unitOSCEM != "" && unitPDBx == "" {
-		log.Printf("No units defined for %s in PDBx! Analogous property %s in OSCEM has units %s units. Value will still be used in mmCIF file!\n", namePDBx, nameOSCEM, unitOSCEM)
-		return true
+		errorMessage = fmt.Sprintf("No units defined for %s in PDBx! Analogous property %s in OSCEM has %s units. Value will still be used in mmCIF file!", namePDBx, nameOSCEM, unitOSCEM)
+		unitsSame = false
+		unitsError = errors.New(errorMessage)
+		return true, unitsError
 	} else {
 		explicitUnitOSCEM, ok := converterUtils.UnitsName[unitOSCEM]
 		if !ok {
-			log.Printf("No explicit unit name is specified for property %s in OSCEM, only a short name %s. Value will still be used in mmCIF file!\n", nameOSCEM, unitOSCEM)
-			return true
-		}
-		if explicitUnitOSCEM == unitPDBx {
-			v, err := strconv.ParseFloat(value, 64)
-			if err != nil {
-				log.Fatal("JSON value not numeric, but supposed to be", err)
-			}
-			rMin, err := strconv.ParseFloat(rMin, 64)
-			if err != nil {
-				rMin = math.NaN()
-			}
-			rMax, err := strconv.ParseFloat(rMax, 64)
-			if err != nil {
-				rMax = math.NaN()
-			}
-
-			if math.IsNaN(rMin) && math.IsNaN(float64(rMax)) {
-				return true
-			} else if math.IsNaN(rMin) {
-				return float64(v) <= rMax
-			} else if math.IsNaN(rMax) {
-				return float64(v) >= rMin
-			} else {
-				return float64(v) >= rMin && float64(v) <= rMax
-			}
+			errorMessage = fmt.Sprintf("No explicit unit name is specified for property %s in OSCEM, only a short name %s. Value will still be used in mmCIF file!", nameOSCEM, unitOSCEM)
+			unitsSame = false
+			unitsError = errors.New(errorMessage)
+			return true, unitsError
 		} else {
-			log.Printf("Units for analogous properties %s in OSCEM and %s in PDBx  don't match! Implement a converter from %s in OSCEM to %s expected by PDBx. Value will still be used in mmCIF file!\n", nameOSCEM, namePDBx, unitOSCEM, unitPDBx)
-			return true
+			unitsError = nil
 		}
+		unitsSame = explicitUnitOSCEM == unitPDBx
 	}
+	// FIXME: when units are settled, do conversion when possible!
+	if unitsSame {
+		v, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			errorMessage = fmt.Sprintf("JSON value %s not numeric, but supposed to be", value)
+			return false, errors.New(errorMessage)
+		}
+		rMin, err := strconv.ParseFloat(rMin, 64)
+		if err != nil {
+			rMin = math.NaN()
+		}
+		rMax, err := strconv.ParseFloat(rMax, 64)
+		if err != nil {
+			rMax = math.NaN()
+		}
+		if math.IsNaN(rMin) && math.IsNaN(float64(rMax)) {
+			return true, unitsError
+		} else if math.IsNaN(rMin) {
+			return float64(v) <= rMax, unitsError
+		} else if math.IsNaN(rMax) {
+			return float64(v) >= rMin, unitsError
+		} else {
+			return float64(v) >= rMin && float64(v) <= rMax, unitsError
+		}
+	} else {
+		errorMessage = fmt.Sprintf("Units for analogous properties %s in OSCEM and %s in PDBx  don't match! Implement a converter from %s in OSCEM to %s expected by PDBx. Value will still be used in mmCIF file!", nameOSCEM, namePDBx, unitOSCEM, unitPDBx)
+		unitsError = errors.New(errorMessage)
+		return true, unitsError
+	}
+
 }
-func validateEnum(value string, enumFromEMDB []string, enumFromPDBx []string, dataCategory string, dataItem string) string {
+func validateEnum(value string, dataItem converterUtils.PDBxItem) string {
+	enumFromEMDB := dataItem.EnumValues
+	enumFromPDBx := dataItem.PDBxEnumValues
+	namePDBx := dataItem.CategoryID + "." + dataItem.Name
 	if value == "true" {
 		return "YES"
 	} else if value == "false" {
 		return "NO"
 	}
 
-	if dataCategory == "_em_imaging" && dataItem == "microscope_model" {
+	if namePDBx == "_em_imaging.microscope_model" {
 		reTitan := regexp.MustCompile(`(?i)titan`)
 		if reTitan.MatchString(value) {
 			return "TFS KRIOS"
-		} else {
-			return strings.ToUpper(value)
 		}
-	} else if dataCategory == "_em_imaging" && dataItem == "mode" {
+	} else if namePDBx == "_em_imaging.mode" {
 		if value == "BrightField" {
 			return "BRIGHT FIELD"
 		}
-	} else if dataCategory == "_em_imaging" && dataItem == "electron_source" {
+	} else if namePDBx == "_em_imaging.electron_source" {
 		if value == "FieldEmission" {
 			return "FIELD EMISSION GUN"
 		}
-	} else {
-		inEnum := false
-		for i := range enumFromEMDB {
-			if strings.EqualFold(enumFromEMDB[i], value) {
-				value = enumFromEMDB[i]
-				inEnum = true
-			}
-		}
-		// scan through both enums
-		for i := range enumFromPDBx {
-			if strings.EqualFold(enumFromPDBx[i], value) {
-				value = enumFromPDBx[i]
-				inEnum = true
-			}
-		}
-		// add additional matching mechanism for grid material by checmical element name/ regular expression
-		if dataCategory == "_em_sample_support" && dataItem == "grid_material" {
-
-			reGraphene := regexp.MustCompile(`(?i)graphene`)
-			reSilicon := regexp.MustCompile(`(?i)silicon`)
-			if reGraphene.MatchString(value) {
-				return "GRAPHENE OXIDE"
-			} else if reSilicon.MatchString(value) {
-				return "SILICON NITRIDE"
-			}
-			switch value {
-			case "Cu":
-				return "COPPER"
-			case "Cu/Pd":
-				return "COPPER/PALLADIUM"
-			case "Cu/Rh":
-				return "COPPER/RHODIUM"
-			case "Au":
-				return "GOLD"
-			case "Ni":
-				return "NICKEL"
-			case "Ni/Ti":
-				return "NICKEL/TITANIUM"
-			case "Pt":
-				return "PLATINUM"
-			case "W":
-				return "TUNGSTEN"
-			case "Ti":
-				return "TITANIUM"
-			case "Mo":
-				return "MOLYBDENUM"
-			default:
-				return strings.ToUpper(value)
-			}
-
-		} else if dataCategory == "_em_image_recording" && dataItem == "film_or_detector_model" {
-			// add additional matching mechanism for "Falcon" detector model by regular expression; other don't seem feasible
-
-			reFalconI := regexp.MustCompile(`(?i)falcon[\s_]*?(1|I)`)
-			reFalconII := regexp.MustCompile(`(?i)falcon[\s_]*?(2|II)`)
-			reFalconIII := regexp.MustCompile(`(?i)falcon[\s_]*?(3|III)`)
-			reFalconIV := regexp.MustCompile(`(?i)falcon[\s_]*?(4|IV)`)
-			switch {
-			case reFalconI.MatchString(value):
-				return "FEI FALCON I (4k x 4k)"
-			case reFalconII.MatchString(value):
-				return "FEI FALCON II (4k x 4k)"
-			case reFalconIII.MatchString(value):
-				return "FEI FALCON III (4k x 4k)"
-			case reFalconIV.MatchString(value):
-				return "FEI FALCON IV (4k x 4k)"
-			default:
-				return strings.ToUpper(value)
-			}
-
-		}
-		if !inEnum {
-			log.Printf("value %v is not in enum %s!", value, dataCategory+"."+dataItem)
-			// if not found in enum list and it's a funding organisation, put a certain string
-			if dataCategory == "_pdbx_audit_support" && dataItem == "funding_organization" {
-				return "Other government"
-			}
-		}
-
-		return value
 	}
+	for i := range enumFromEMDB {
+		if strings.EqualFold(enumFromEMDB[i], value) {
+			value = enumFromEMDB[i]
+			return value
+		}
+	}
+	// scan through both enums
+	for i := range enumFromPDBx {
+		if strings.EqualFold(enumFromPDBx[i], value) {
+			value = enumFromPDBx[i]
+			return value
+		}
+	}
+	// add additional matching mechanism for grid material by checmical element name/ regular expression
+	if namePDBx == "_em_sample_support.grid_material" {
+
+		reGraphene := regexp.MustCompile(`(?i)graphene`)
+		reSilicon := regexp.MustCompile(`(?i)silicon`)
+		if reGraphene.MatchString(value) {
+			return "GRAPHENE OXIDE"
+		} else if reSilicon.MatchString(value) {
+			return "SILICON NITRIDE"
+		}
+		switch value {
+		case "Cu":
+			return "COPPER"
+		case "Cu/Pd":
+			return "COPPER/PALLADIUM"
+		case "Cu/Rh":
+			return "COPPER/RHODIUM"
+		case "Au":
+			return "GOLD"
+		case "Ni":
+			return "NICKEL"
+		case "Ni/Ti":
+			return "NICKEL/TITANIUM"
+		case "Pt":
+			return "PLATINUM"
+		case "W":
+			return "TUNGSTEN"
+		case "Ti":
+			return "TITANIUM"
+		case "Mo":
+			return "MOLYBDENUM"
+		}
+
+	} else if namePDBx == "_em_image_recording.film_or_detector_model" {
+		// add additional matching mechanism for "Falcon" detector model by regular expression; other don't seem feasible
+
+		reFalconI := regexp.MustCompile(`(?i)falcon[\s_]*?(1|I)`)
+		reFalconII := regexp.MustCompile(`(?i)falcon[\s_]*?(2|II)`)
+		reFalconIII := regexp.MustCompile(`(?i)falcon[\s_]*?(3|III)`)
+		reFalconIV := regexp.MustCompile(`(?i)falcon[\s_]*?(4|IV)`)
+		switch {
+		case reFalconIV.MatchString(value):
+			return "FEI FALCON IV (4k x 4k)"
+		case reFalconIII.MatchString(value):
+			return "FEI FALCON III (4k x 4k)"
+		case reFalconII.MatchString(value):
+			return "FEI FALCON II (4k x 4k)"
+		case reFalconI.MatchString(value):
+			return "FEI FALCON I (4k x 4k)"
+		}
+	}
+
+	log.Printf("value %v is not in enum %s!", value, namePDBx)
+	// if not found in enum list and it's a funding organisation, put a certain string
+	if namePDBx == "_pdbx_audit_support.funding_organization" {
+		return "Other government"
+	}
+
 	return strings.ToUpper(value)
 }
 
@@ -222,14 +229,23 @@ func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, 
 				value = "-" + value
 			}
 		}
-		validatedRange := validateRange(value, dataItem, unitsOSCEM, jsonKey)
+		validatedRange, err := validateRange(value, dataItem, unitsOSCEM, jsonKey)
+		if err != nil {
+			errorNumeric := fmt.Sprintf("JSON value %s not numeric, but supposed to be", value)
+			if err.Error() == errorNumeric {
+				return "?"
+			} else {
+				// FIXME when units convertion is implemented, handle this error
+				log.Println(err.Error())
+			}
+		}
 		if !validatedRange {
 			log.Printf("Value %s of property %s is not in range of [ %s, %s ]!\n", value, jsonKey, dataItem.RangeMin, dataItem.RangeMax)
 		}
 	} else if dataItem.ValueType == "yyyy-mm-dd" {
 		value = validateDateIsRFC3339(value)
 	} else if len(dataItem.EnumValues) > 0 || len(dataItem.PDBxEnumValues) > 0 {
-		value = validateEnum(value, dataItem.EnumValues, dataItem.PDBxEnumValues, dataItem.CategoryID, dataItem.Name)
+		value = validateEnum(value, dataItem)
 	}
 
 	if strings.Contains(value, " ") {
