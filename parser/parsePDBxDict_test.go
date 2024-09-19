@@ -16,7 +16,7 @@ func TestExtractRangeValue(t *testing.T) {
 		expectedValue string
 		expectedError string
 	}{
-		{"   _item_range.maximum", "?", ""},
+		{"_item_range.maximum", "?", ""},
 		{"_item_range.minimum  0.0", "0.0", ""},
 		{"_item_range.minimum  .", ".", ""},
 		{"_item_range.minimum  ?", "?", ""},

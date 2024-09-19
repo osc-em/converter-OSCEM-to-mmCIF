@@ -77,7 +77,6 @@ func TestFromJson(t *testing.T) {
 
 	for _, tt := range tests {
 		testname := fmt.Sprintf("%v", tt.name)
-
 		gotValuesMap := make(map[string][]string, 0)
 		gotUnitsMap := make(map[string][]string, 0)
 		t.Run(testname, func(t *testing.T) {
