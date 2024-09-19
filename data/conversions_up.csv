@@ -1,0 +1,133 @@
+OSCEM,,,,from XML,From MDOC,from EMD,for PRZ,in PDBx/mmCIF,type,Ontology suggestions,comments,optionals,units,crunchfromxml,crunchfrommdoc,unitsExplicit
+,,,,,,,,,,,,,,,,
+instrument,microscope,,,MicroscopeImage.microscopeData.instrument.InstrumentModel,,InstrumentModel,,_em_imaging.microscope_model,String,,,,,,,
+instrument,illumination,,,MicroscopeImage.microscopeData.optics.IlluminationMode,,IlluminationMode,,_em_imaging.illumination_mode ,String,,,,,,,
+instrument,imaging,,,MicroscopeImage.microscopeData.optics.ColumnOperatingTemSubMode,ImagingMode,,,_em_imaging.mode,String,,,,,,,
+instrument,electron_source,,,MicroscopeImage.microscopeData.gun.Sourcetype,Source,SourceType,,_em_imaging.electron_source ,String,https://purls.helmholtz-metadaten.de/emg/EMG_00000045,,,,,,
+instrument,acceleration_voltage,,,MicroscopeImage.microscopeData.gun.AccelerationVoltage,Voltage,AccelerationVoltage,,_em_imaging.accelerating_voltage ,Int,https://purls.helmholtz-metadaten.de/emg/EMG_00000004,,,kV,0.001,,kilovolts
+instrument,c2_aperture,,,Aperture[C2].Name,,,,_em_imaging.c2_aperture_diameter,Int,,,,µm,,,micrometres
+instrument,cs,,,,CS,,,_em_imaging.nominal_cs ,Float64,,,,mm,,,millimetres
+,,,,,,,,,,,,,,,,
+acquisition,nominal_defocus,minimal,,AppliedDefocus_min,TargetDefocus_min,,,_em_imaging.nominal_defocus_min,Float64,,EMD: Only one Defocus value. No min and max. No calibrated value.,TargetDefocus,nm,1000000000,1000,nanometers
+acquisition,nominal_defocus,maximal,,AppliedDefocus_max,TargetDefocus_max,,,_em_imaging.nominal_defocus_max,Float64,,EMD: Only one Defocus value. No min and max. No calibrated value.,,nm,1000000000,1000,nanometers
+,,,,,,,,,,,,,,,,
+acquisition,calibrated_defocus,minimal,,MicroscopeImage.microscopeData.optics.Defocus_min,Defocus_min,,,_em_imaging.calibrated_defocus_min,Float64,,EMD: Only one Defocus value. No min and max. No calibrated value.,Defocus_min_min,nm,1000000000,1000,nanometers
+acquisition,calibrated_defocus,maximal,,MicroscopeImage.microscopeData.optics.Defocus_max,Defocus_max,,,_em_imaging.calibrated_defocus_max,Float64,,EMD: Only one Defocus value. No min and max. No calibrated value.,Defocus_max_max,nm,1000000000,1000,nanometers
+acquisition,nominal_magnification,,,MicroscopeImage.microscopeData.optics.TemMagnification.NominalMagnification,Magnification,,,_em_imaging.nominal_magnification ,Int,,,,,,,
+acquisition,calibrated_magnification,,,,,,,_em_imaging.calibrated_magnification,Int,,,,,,,
+acquisition,holder,,,,,,,_em_imaging.specimen_holder_model,String,,,,,,,
+acquisition,holder_cryogen,,,,,,,,String,,,,,,,
+,,,,,,,,,,,,,,,,
+acquisition,temperature,minimal,,,,,,_em_imaging.recording_temperature_minimum,Float64,,EMD: One Temperature value per Detector. No min and max.,,K,,,kelvins
+acquisition,temperature,maximal,,,,,,_em_imaging.recording_temperature_maximum,Float64,,EMD: One Temperature value per Detector. No min and max.,,K,,,kelvins
+acquisition,alignment_procedure,,,,,,,_em_imaging.alignment_procedure ,String,,,,,,,
+acquisition,microscope_software,,,MicroscopeImage.microscopeData.core.ApplicationSoftware,Software,ControlSoftwareVersion,,_em_software.category ['IMAGE ACQUISITION'],String,,,,,,,
+acquisition,detector,,,DetectorCommercialName,CameraUsed,DetectorName,"Acquisition_instrument.TEM.Detector, camera.detector_size",_em_image_recording.film_or_detector_model,String,,EMD: Potential overlap between Detector and DetectorMode. Multiple Detectors / PRZ: Acquisition_instrument.TEM.Detector does not always exist. If it doesnt then the only information about the Detector is the size.,,,,,
+acquisition,detector_mode,,,,,,,_em_image_recording.detector_mode  ,String,,EMD: Potential overlap between Detector and DetectorMode. Multiple Detectors,,,,,
+acquisition,dose_per_movie,,,DoseAverage,DoseAverage,,,_em_image_recording.avg_electron_dose_per_image,Float64,,,,e/Å²,,,electrons_angstrom_squared
+,,,,,,,,,,,,,,,,
+acquisition,energy_filter,used,,MicroscopeImage.microscopeData.optics.EnergyFilter.EnergySelectionSlitInserted,EnergyFilterUsed,,,,Bool,,,,,,,
+acquisition,energy_filter,model,,,,,,_em_imaging_optics.energyfilter_name,String,,,,,,,
+acquisition,energy_filter,width,,MicroscopeImage.microscopeData.optics.EnergyFilter.EnergySelectionSlitWidth,EnergyFilterSlitWidth,,filter.energy_offset,_em_imaging_optics.energyfilter_slit_width,Float64,,,,eV,,,electron_volts 
+,,,,,,,,,,,,,,,,
+acquisition,image_size,height,,MicroscopeImage.microscopeData.acquisition.camera.ReadoutArea.height,ImageDimensions_Y,,image_size[0],,Int,,,,,,,
+acquisition,image_size,width,,MicroscopeImage.microscopeData.acquisition.camera.ReadoutArea.width,ImageDimensions_X,,image_size[1],,Int,,,,,,,
+acquisition,datetime,,,MicroscopeImage.microscopeData.acquisition.acquisitionDateTime_start,DateTime_start,,scan_generator.start_time,_em_imaging.date,String,,,,,,,
+acquisition,exposure_time,,,MicroscopeImage.microscopeData.acquisition.camera.ExposureTime,ExposureTime,,camera.exposure_time,_em_image_recording.average_exposure_time,Float64,,,,s,,,seconds
+,,,,,,,,,,,,,,,,
+acquisition,tilt_angle,minimal,,,TiltAngle_min_min,,,_em_imaging.tilt_angle_min ,Float64,,,TiltAngle_min,°,,,degrees
+acquisition,tilt_angle,maximal,,,TiltAngle_max_max,,,_em_imaging.tilt_angle_max,Float64,,,TiltAngle_max,°,,,degrees
+acquisition,tilt_angle,increment,,,Tilt_increment_max,,,_em_imaging.tilt_angle_increment,Float64,,,Tilt_increment,°,,,degrees
+acquisition,cryogen,,,,,,,_em_imaging.cryogen,String,,,,,,,
+acquisition,frames_per_movie,,,,NumSubFrames,,,_em_image_scans.frames_per_image,Int,,,,,,,
+acquisition,grids_imaged,,,,,,,_em_image_recording.num_grids_imaged,Int,,,,,,,
+acquisition,images_generated,,,NumberOfMovies,,,camera.simplon_parameters.nimages,_em_image_recording.num_real_images,Int,,,,,,,
+acquisition,binning_camera,,,MicroscopeImage.microscopeData.acquisition.camera.Binning.x,Binning,,camera.binning,,Float64,,,,,,,
+acquisition,pixel_size,,,MicroscopeImage.SpatialScale.pixelSize.x.numericValue,PixelSpacing,PixelSize,camera.pixel_size,,Float64,,"while there are map related pixelsizes  - none of them refer to the original images, all to the reconstruction - see i.e. _em_3d_reconstruction.nominal_pixel_size",,Å,10000000000,,angstroms
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+acquisition,specialist_optics,phaseplate,used,PhasePlateUsed,,,,_em_imaging_optics.phase_plate,Bool,,,,,,,
+acquisition,specialist_optics,phaseplate,type,,,,,,String,,,,,,,
+,,,,,,,,,,,,,,,,
+acquisition,specialist_optics,spherical_aberration_corrector,used,,,,,_em_imaging_optics.sph_aberration_corrector,Bool,,,,,,,
+acquisition,specialist_optics,spherical_aberration_corrector,type,,,,,,String,,,,,,,
+,,,,,,,,,,,,,,,,
+acquisition,specialist_optics,chromatic_aberration_corrector,used,,,,,_em_imaging_optics.chr_aberration_corrector,Bool,,,,,,,
+acquisition,specialist_optics,chromatic_aberration_corrector,type,,,,,,String,,,,,,,
+,,,,,,,,,,,,,,,,
+acquisition,beamshift,x_max,,MicroscopeImage.microscopeData.optics.BeamShift._x_max,Beamshift_x_max_max,,,,Float64,,double check what unit this is,,mrad,,,milliradians
+acquisition,beamshift,x_min,,MicroscopeImage.microscopeData.optics.BeamShift._x_min,Beamshift_x_min_min,,,,Float64,,double check what unit this is,,mrad,,,milliradians
+acquisition,beamshift,y_max,,MicroscopeImage.microscopeData.optics.BeamShift._y_max,Beamshift_y_max_max,,,,Float64,,double check what unit this is,,mrad,,,milliradians
+acquisition,beamshift,y_min,,MicroscopeImage.microscopeData.optics.BeamShift._y_min,Beamshift_y_min_min,,,,Float64,,double check what unit this is,,mrad,,,milliradians
+,,,,,,,,,,,,,,,,
+acquisition,beamtilt,x_max,,MicroscopeImage.microscopeData.optics.BeamTilt._x,TBI,,,,Float64,,double check what unit this is,,mrad,,,milliradians
+acquisition,beamtilt,y_max,,MicroscopeImage.microscopeData.optics.BeamTilt._y,TBI,,,,Float64,,double check what unit this is,,mrad,,,milliradians
+,,,,,,,,,,,,,,,,
+acquisition,imageshift,x_max,,MicroscopeImage.microscopeData.optics.ImageShift._x_max,ImageShift_x_max_max,,,,Float64,,double check what unit this is,MicroscopeImage.microscopeData.optics.ImageShift._x,µm,,,micrometres
+acquisition,imageshift,x_min,,MicroscopeImage.microscopeData.optics.ImageShift._x_min,ImageShift_x_min_min,,,,Float64,,double check what unit this is,MicroscopeImage.microscopeData.optics.ImageShift._x,µm,,,micrometres
+acquisition,imageshift,y_max,,MicroscopeImage.microscopeData.optics.ImageShift._y_max,ImageShift_y_max_max,,,,Float64,,double check what unit this is,MicroscopeImage.microscopeData.optics.ImageShift._y,µm,,,micrometres
+acquisition,imageshift,y_min,,MicroscopeImage.microscopeData.optics.ImageShift._y_min,ImageShift_y_min_min,,,,Float64,,double check what unit this is,MicroscopeImage.microscopeData.optics.ImageShift._y,µm,,,micrometres
+acquisition,tilt_axis_angle,,,,TiltAxisAngle,,,,Float64,,,,°,,,degrees
+acquisition,beamtiltgroups,,,,,,,,Int,,,,,,,
+acquisition,gainref_flip_rotate,,,,,,,,String,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,String,https://schema.org/Grant,,,,,,
+grants,project_id,,,,,,,_pdbx_audit_support.grant_number ,String,https://schema.org/fundedItem,,,,,,
+grants,funder,,,,,,,_pdbx_audit_support.funding_organization,String,https://schema.org/funder,,,,,,
+grants,name,,,,,,,,String,,,,,,,
+,,,,,,,,,,,,,,,,
+authors,name,,,,,,,_pdbx_contact_author.name_first,String,https://schema.org/familyName,,,,,,
+authors,first_name,,,,,,,_pdbx_contact_author.name_last,String,https://schema.org/name,,,,,,
+authors,email,,,,,,,_pdbx_contact_author.email,String,https://schema.org/email,,,,,,
+authors,work_phone,,,,,,,_pdbx_contact_author.phone,String,http://semanticscience.org/resource/SIO_001324,,,,,,
+authors,orcid,,,,,,,_pdbx_contact_author.identifier_ORCID,String,http://purl.obolibrary.org/obo/IAO_0000708,,,,,,
+authors,role,,,,,,,_pdbx_contact_author.role,String,https://schema.org/jobTitle,,,,,,
+authors,country,,,,,,,_pdbx_contact_author.country,String,https://schema.org/Country,,,,,,
+authors,work_status,,,,,,,,String,,,,,,,
+,,,,,,,,,,,,,,,,
+authors,name_org,,,,,,,,String,,,,,,,
+authors,type_org,,,,,,,_pdbx_contact_author.organization_type,String,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+sample,overall_molecule,molecular_type,,,,,,_entity.type ,String,,,,,,,
+sample,overall_molecule,name_sample,,,,,,_em_entity_assembly.name,String,,,,,,,
+sample,overall_molecule,source,,,,,,_entity.src_method,String,,,,,,,
+sample,overall_molecule,molecular_weight,,,,,,_entity.formula_weight,Float64,,,,Da,,,daltons
+,,,,,,,,,,,,,,,,
+sample,molecule,name_mol,,,,,,_pdbx_entity_branch_descriptor.descriptor,String,,maybe better this? _pdbx_entity_branch_descriptor.type,,,,,
+sample,molecule,molecular_type,,,,,,_entity_poly.type,String,,,,,,,
+sample,molecule,molecular_class,,,,,,_em_entity_assembly.type,String,,,,,,,
+sample,molecule,sequence,,,,,,_entity_poly.pdbx_seq_one_letter_code,String,,,,,,,
+sample,molecule,natural_source,,,,,,_em_entity_assembly_naturalsource.organism,String,,,,,,,
+sample,molecule,taxonomy_ID_source,,,,,,_em_entity_assembly_naturalsource.ncbi_tax_id ,String,,,,,,,
+sample,molecule,expression_system,,,,,,_em_entity_assembly_recombinant.organism,String,,might also use this _entity_src_gen.pdbx_host_org_scientific_name,,,,,
+sample,molecule,taxonomy_ID_expression,,,,,,_em_entity_assembly_recombinant.ncbi_tax_id,String,,might also use this : _entity_src_gen.pdbx_host_org_ncbi_taxonomy_id,,,,,
+sample,molecule,gene_name,,,,,,_entity_src_gen.pdbx_gene_src_gene,String,,,,,,,
+,,,,,,,,,,,,,,,,
+sample,ligands,present,,,,,,_pdbx_entry_details.has_ligand_of_interest,Bool,,,,,,,
+sample,ligands,smiles,,,,,,_pdbx_chem_comp_depositor_info.descriptor,String,,,,,,,
+sample,ligands,reference,,,,,,,String,,I know the onedep system knows this but cant find the pdbx entry,,,,,
+,,,,,,,,,,,,,,,,
+sample,specimen,buffer,,,,,,_em_buffer.details,String,,,,,,,
+sample,specimen,concentration,,,,,,_em_specimen.concentration,Float64,,,,mg/ml,,,mg_per_ml
+sample,specimen,ph,,,,,,_em_buffer.pH,Float64,,,,,,,
+sample,specimen,vitrification,,,,,,_em_specimen.vitrification_applied,Bool,,,,,,,
+sample,specimen,vitrification_cryogen,,,,,,_em_vitrification.cryogen_name,String,,,,,,,
+sample,specimen,humidity,,,,,,_em_vitrification.humidity ,Float64,,,,%,,,per cent
+sample,specimen,temperature,,,,,,_em_vitrification.chamber_temperature,Float64,,,,,,,
+sample,specimen,staining,,,,,,_em_specimen.staining_applied,Bool,,,,,,,
+sample,specimen,embedding,,,,,,_em_specimen.embedding_applied ,Bool,,,,,,,
+sample,specimen,shadowing,,,,,,_em_specimen.shadowing_applied,Bool,,,,,,,
+,,,,,,,,,,,,,,,,
+sample,grid,manufacturer,,,,,,_em_sample_support.grid_type,String,,,,,,,
+sample,grid,material,,,,,,_em_sample_support.grid_material,String,,,,,,,
+sample,grid,mesh,,,,,,_em_sample_support.grid_mesh_size,Int,,,,,,,
+sample,grid,film_support,,,,,,,Bool,,,,,,,
+sample,grid,film_material,,,,,,_em_support_film.material,String,,,,,,,
+sample,grid,film_topology,,,,,,_em_support_film.topology ,String,,,,,,,
+sample,grid,film_thickness,,,,,,_em_support_film.thickness ,String,,,,Å,,,angstroms
+sample,grid,pretreatment_type,,,,,,_em_grid_pretreatment.type,String,,,,,,,
+sample,grid,pretreatment_time,,,,,,_em_grid_pretreatment.time,Float64,,,,,,,
+sample,grid,pretreatment_pressure,,,,,,_em_grid_pretreatment.pressure,Float64,,,,,,,
+sample,grid,pretreatment_atmosphere,,,,,,_em_grid_pretreatment.atmosphere ,String,,,,,,,

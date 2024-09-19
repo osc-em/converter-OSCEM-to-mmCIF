@@ -1,0 +1,60 @@
+{
+    "astronomyData": {
+      "planets": {
+        "earth": {
+          "properties": {
+            "distanceFromSun": {
+              "measurement": {
+                "value": 149.6,
+                "unit": "million km"
+              }
+            },
+            "radius": {
+              "measurement": {
+                "value": 6371,
+                "unit": "km"
+              }
+            }
+          }
+        },
+        "mars": {
+          "properties": {
+            "distanceFromSun": {
+              "measurement": {
+                "value": 227.9,
+                "unit": "million km"
+              }
+            },
+            "radius": {
+              "measurement": {
+                "value": 3389.5,
+                "unit": "km"
+              }
+            }
+          }
+        }
+      },
+      "stars": {
+        "sun": {
+          "radius": {
+            "value": 696340,
+            "unit": "km"
+          },
+          "mass": {
+            "value": 1.989,
+            "unit": "× 10^30 kg"
+          }
+        },
+        "proximaCentauri": {
+          "radius": {
+            "value": 200000,
+            "unit": "km"
+          },
+          "mass": {
+            "value": 0.123,
+            "unit": "× 10^30 kg"
+          }
+        }
+      }
+    }
+  }

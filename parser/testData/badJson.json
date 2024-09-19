@@ -1,0 +1,20 @@
+
+{
+    "microscope":
+        true,
+    "illumination":{
+        required: true
+    },
+    "imaging":{
+        "required": true
+    },
+    "electron_source":{
+        "required": true
+    },
+    "acceleration_voltage":{
+        "required": true
+    },
+    "cs":{
+        "required": true
+    }
+}

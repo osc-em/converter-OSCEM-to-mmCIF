@@ -1,0 +1,96 @@
+;
+save_em_imaging
+   _category.description     
+;  Data items in the EM_IMAGING category record details about
+   the parameters used in imaging the sample in the electron microscope.
+;
+
+   _category.id              em_imaging
+   _category.mandatory_code  no
+   #
+   loop_
+   _category_key.name
+     "_em_imaging.entry_id"  
+     "_em_imaging.id"  
+   #
+   loop_
+   _category_group.id
+     inclusive_group  
+     em_group         
+   #
+   _category_examples.detail  
+;  Example 1 - based on PDB entry 1DYL and laboratory records for the
+                structure corresponding to PDB entry 1DYL
+;
+
+   _category_examples.case    
+;
+   _em_imaging.entry_id               1DYL
+   _em_imaging.id                     1
+   _em_imaging.sample_support_id      1
+   _em_imaging.microscope_model       'FEI/PHILIPS CM200 FEG'
+   _em_imaging.specimen_holder_type   'cryotransfer'
+   _em_imaging.specimen_holder_model  'gatan 626-0300'
+   _em_imaging.details                .
+   _em_imaging.date                   1998-15-06
+   _em_imaging.accelerating_voltage   200
+   _em_imaging.illumination_mode      'bright field'
+   _em_imaging.mode                   'low dose'
+   _em_imaging.nominal_cs             2.0
+   _em_imaging.nominal_defocus_min    975
+   _em_imaging.nominal_defocus_max    7600
+   _em_imaging.tilt_angle_min         0
+   _em_imaging.tilt_angle_max         0
+   _em_imaging.nominal_magnification  50000
+   _em_imaging.calibrated_magnification .
+   _em_imaging.electron_source        'FEG'
+   _em_imaging.energy_filter          .
+   _em_imaging.energy_window          .
+   _em_imaging.temperature            95
+   _em_imaging.detector_distance      .
+   _em_imaging.recording_temperature_minimum  .
+   _em_imaging.recording_temperature_maximum  .
+;
+
+   #
+   _pdbx_category_context.type         EMDB_PUBLIC
+   _pdbx_category_context.category_id  em_imaging
+   #
+save_
+#
+save__em_imaging.entry_id
+   _item_description.description  "  This data item is a pointer to _entry.id in the ENTRY category."
+   #
+   _item.name            "_em_imaging.entry_id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  yes
+   #
+   _item_type.code  code
+   #
+   _item_linked.child_name   "_em_imaging.entry_id"
+   _item_linked.parent_name  "_entry.id"
+   #
+save_
+#
+save__em_imaging.id
+   _item_description.description  "   PRIMARY KEY"
+   #
+   _item.name            "_em_imaging.id"
+   _item.category_id     em_imaging
+   _item.mandatory_code  yes
+   #
+   _item_type.code  code
+   #
+save_
+#
+save__em_imaging.astigmatism
+   _item_description.description  "   astigmatism"
+   #
+   _item.name            "_em_imaging.astigmatism"
+   _item.category_id     em_imaging
+   _item.mandatory_code  no
+   #
+   _item_type.code  text
+   #
+save_
+;
