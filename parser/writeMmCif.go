@@ -9,6 +9,7 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -47,7 +48,7 @@ func getLongestPDBxItem(s []converterUtils.PDBxItem) int {
 func validateDateIsRFC3339(date string) string {
 	t, err := time.Parse(time.RFC3339, date)
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		log.Printf("Date seems to be in the wrong format! We expect RFC3339 format, provided date %s is not.", date)
 		return ""
 	}
@@ -223,6 +224,7 @@ func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, 
 		namePDBx := dataItem.CategoryID + "." + dataItem.Name
 		// in OSCEM defocus is negative value and overfocus is positive. In PDBx it's vice versa if string starts with  minus, ut it off, othersise add a - prefix
 		if namePDBx == "_em_imaging.nominal_defocus_min" || namePDBx == "_em_imaging.calibrated_defocus_min" || namePDBx == "_em_imaging.nominal_defocus_max" || namePDBx == "_em_imaging.calibrated_defocus_max" {
+			// change the sign negative to positiove and vice versa
 			if value[0] == 45 {
 				value = value[1:]
 			} else {
@@ -256,35 +258,41 @@ func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, 
 	return value
 }
 
-func getOrderCategories(parsedCategories []string) []string {
+func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []string {
 	var order []string
-	var processed []string
+	allCategories := append(parsedCategories, mmCIFCategories...)
+	sort.Slice(allCategories, func(i, j int) bool {
+		return allCategories[i] < allCategories[j]
+	})
 	// sort based on the pre-defined (administrative, polymer related entities, ligand (non-polymer) related instances, and structure level description)
 	for _, category := range converterUtils.PDBxCategoriesOrder {
 		category = "_" + category
-		if sliceContains(parsedCategories, category) {
+		if sliceContains(allCategories, category) {
 			order = append(order, category)
-			processed = append(processed, category)
 		}
 	}
 	// add the rest not atom-related in some order (it can be random)
-	for _, c := range parsedCategories {
-		if !sliceContains(processed, c) && !sliceContains(converterUtils.PDBxCategoriesOrderAtom, c) {
+	for _, c := range allCategories {
+		if !sliceContains(order, c) && !sliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) {
 			order = append(order, c)
 		}
+
 	}
 	// add atoms categories
 	for _, category := range converterUtils.PDBxCategoriesOrderAtom {
 		category = "_" + category
-		order = append(order, category)
+		if sliceContains(allCategories, category) {
+			order = append(order, category)
+		}
 	}
 	return order
 }
 
-func parseMmCIF(path string) (string, map[string]string) {
+func parseMmCIF(path string) (string, map[string]string, error) {
 	dictFile, err := os.Open(path)
 	if err != nil {
-		log.Fatal("Error while reading the file ", err)
+		errorString := fmt.Sprintf("mmCIF file %s does not exist!", path)
+		return "", map[string]string{}, errors.New(errorString)
 	}
 	defer dictFile.Close()
 	scanner := bufio.NewScanner(dictFile)
@@ -301,36 +309,41 @@ func parseMmCIF(path string) (string, map[string]string) {
 		// first line is the name
 		if l == 0 {
 			dataName = scanner.Text()
-		}
-		// break between categories is denoted by # in PDB-related software, Phenix uses an empty line.
-		if strings.HasPrefix(scanner.Text(), "#") || len(strings.Fields(scanner.Text())) == 0 {
-
-			//category ends, appends to the map
-			if category != "" {
-				mmCIFfields[category] = str.String()
-				str.Reset()
-				inCategoryFlag = true // record the next category name
-			}
 		} else {
-			if !strings.HasPrefix(scanner.Text(), "loop_") {
+			// break between categories is denoted by # in PDB-related software, Phenix uses an empty line.
+			if strings.HasPrefix(scanner.Text(), "#") || len(strings.Fields(scanner.Text())) == 0 {
 
-				if inCategoryFlag {
-					category = strings.Split(strings.Fields(scanner.Text())[0], ".")[0]
-					inCategoryFlag = false
+				//category ends, appends to the map
+				if category != "" {
+					mmCIFfields[category] = str.String()
+					str.Reset()
+					inCategoryFlag = true // record the next category name
 				}
-			}
-			str.WriteString(scanner.Text() + "\n")
+			} else {
+				if !strings.HasPrefix(scanner.Text(), "loop_") {
 
+					if inCategoryFlag {
+						category = strings.Split(strings.Fields(scanner.Text())[0], ".")[0]
+						inCategoryFlag = false
+					}
+				}
+				str.WriteString(scanner.Text() + "\n")
+			}
 		}
 		l++
 	}
-	return dataName, mmCIFfields
+	return dataName, mmCIFfields, nil
 }
 func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string, appendToMmCif bool, mmCIFpath string) (string, error) {
 	var dataName string
 	var mmCIFCategories map[string]string
 	if appendToMmCif {
-		dataName, mmCIFCategories = parseMmCIF(mmCIFpath)
+		name, categories, err := parseMmCIF(mmCIFpath)
+		if err != nil {
+			return "", err
+		}
+		dataName = name
+		mmCIFCategories = categories
 	} else {
 		dataName = "data_myID"
 	}
@@ -343,30 +356,35 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 	for k := range PDBxItems {
 		parsedCategories = append(parsedCategories, k)
 	}
-	allCategories := getOrderCategories(parsedCategories)
+	allCategories := getOrderCategories(parsedCategories, converterUtils.GetKeys(mmCIFCategories))
 	for _, category := range allCategories {
+		var duplicatedFlag bool = false
 		catDI, ok := PDBxItems[category]
 		if ok {
 			_, ok := mmCIFCategories[category]
 			if ok {
+				duplicatedFlag = true
 				log.Printf("Category %s exists both in metadata from JSON files and in existing mmCIF file! Data in mmCIF will be substituted by data from JSON", category)
 			}
-			// this category exists in PDBx items (as extracted only to relevant OSCEM names) --> extract this input
-			var key string
+			//
+			var size int
 			// need to loop here through all data items in category, as it reflects the order of data items in PDBx, it still might not exist in json
 			// loop until we find first key that exists in json
 			for i := range catDI {
 				k, err := getKeyByValue(catDI[i].CategoryID+"."+catDI[i].Name, nameMapper)
-				key = k
 				if err != nil {
-					return "", err
+					//shouldn't occur, because nameMapper holds correspondance for two standards
+					errorString := fmt.Sprintf("Value %s for PDBx is not in the names conversion!", catDI[i].CategoryID+"."+catDI[i].Name)
+					return "", errors.New(errorString)
 				}
-				_, ok := valuesMap[key]
+				//check if that key is present in json file and extract it's size
+				_, ok := valuesMap[k]
 				if ok {
+					size = len(valuesMap[k])
 					break
 				}
 			}
-			size := len(valuesMap[key])
+
 			switch {
 			case size > 1:
 				// loop notation
@@ -375,18 +393,20 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 					// check the length of all first and throw an error in case that they have different length?? can that be? e.g two authors and for one the property Phone is not there?
 					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
 					if err != nil {
-						return "", err
+						errorString := fmt.Sprintf("Value %s for PDBx is not in the names conversion!", dataItem.CategoryID+"."+dataItem.Name)
+						return "", errors.New(errorString)
 					}
 					if valuesMap[jsonKey] == nil {
 						continue // not required and not provided in OSCEM
 					}
 					fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
 				}
-				for v := range valuesMap[key] {
+				for v := range size {
 					for _, dataItem := range catDI {
 						jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
 						if err != nil {
-							return "", err
+							errorString := fmt.Sprintf("Value %s for PDBx is not in the names conversion!", dataItem.CategoryID+"."+dataItem.Name)
+							return "", errors.New(errorString)
 						}
 
 						if valuesMap[jsonKey] == nil {
@@ -412,7 +432,8 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 				for _, dataItem := range catDI {
 					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
 					if err != nil {
-						return "", err
+						errorString := fmt.Sprintf("Value %s for PDBx is not in the names conversion!", dataItem.CategoryID+"."+dataItem.Name)
+						return "", errors.New(errorString)
 					}
 
 					if valuesMap[jsonKey] == nil {
@@ -425,6 +446,7 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 							valueString := checkValue(dataItem, jsonValue[0], jsonKey, unit[0]) // the 0th element, because it's the case where only one value is present
 							fmt.Fprintf(&str, "%s", valueString)
 						} else {
+							// values that have no units definition in OSCEM
 							valueString := checkValue(dataItem, jsonValue[0], jsonKey, "")
 							fmt.Fprintf(&str, "%s", valueString)
 
@@ -434,13 +456,18 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 				}
 				str.WriteString("#\n")
 			default:
-				// this key does not exist in the json
+				// Based on conversion table, the correspondance in naming between OSCEM and PDBx exist. But for this PDBx data category not OSCEM propoerties are used in this JSON file.
 				continue
 			}
 		}
-		mmCifLines, ok := mmCIFCategories[category]
-		if ok {
-			str.WriteString(mmCifLines)
+		if !duplicatedFlag {
+			// this category is not present both in mmCIF and in a new metadata.
+			// We won't duplicate it from mmCIF since it was taken from new metadata!
+			mmCifLines, ok := mmCIFCategories[category]
+			if ok {
+				str.WriteString(mmCifLines)
+				str.WriteString("#\n")
+			}
 		}
 	}
 	return str.String(), nil

@@ -12,30 +12,31 @@ func equalPDBxItem(a, b converterUtils.PDBxItem) bool {
 }
 func TestExtractRangeValue(t *testing.T) {
 	var tests = []struct {
+		name          string
 		line          string
 		expectedValue string
 		expectedError string
 	}{
-		{"_item_range.maximum", "?", ""},
-		{"_item_range.minimum  0.0", "0.0", ""},
-		{"_item_range.minimum  .", ".", ""},
-		{"_item_range.minimum  ?", "?", ""},
-		{"_item_range.minimum  *", "?", "value * is not numeric"},
+		{"value missing maximum", "_item_range.maximum", "?", ""},
+		{"numeric value", "_item_range.minimum  0.0", "0.0", ""},
+		{"value emitested", "_item_range.minimum  .", ".", ""},
+		{"value missing minimum", "_item_range.minimum  ?", "?", ""},
+		{"value not numeric", "_item_range.minimum  *", "?", "value * is not numeric"},
 	}
 
-	for _, tt := range tests {
+	for _, test := range tests {
 
-		testname := fmt.Sprintf("%v", tt.line)
+		testname := fmt.Sprintf("%v", test.line)
 		t.Run(testname, func(t *testing.T) {
-			gotValue, gotError := extractRangeValue(tt.line)
+			gotValue, gotError := extractRangeValue(test.line)
 
 			if gotError != nil {
-				if gotError.Error() != tt.expectedError {
-					t.Errorf("got error %v, wanted %v", gotError.Error(), tt.expectedError)
+				if gotError.Error() != test.expectedError {
+					t.Errorf("got error %v, wanted %v", gotError.Error(), test.expectedError)
 				}
 			}
-			if gotValue != tt.expectedValue {
-				t.Errorf("got %v, want %v", gotValue, tt.expectedValue)
+			if gotValue != test.expectedValue {
+				t.Errorf("got %v, want %v", gotValue, test.expectedValue)
 			}
 		})
 	}
@@ -68,14 +69,13 @@ func TestAssignCategories(t *testing.T) {
 			"cat3": {items3[2]}}},
 	}
 
-	for _, tt := range tests {
-
-		testname := fmt.Sprintf("%v", tt.name)
+	for _, test := range tests {
+		testname := fmt.Sprintf("%v", test.name)
 		t.Run(testname, func(t *testing.T) {
-			ans := AssignPDBxCategories(tt.items)
-			eq := reflect.DeepEqual(ans, tt.want)
+			ans := AssignPDBxCategories(test.items)
+			eq := reflect.DeepEqual(ans, test.want)
 			if !eq {
-				t.Errorf("got %v, want %v", ans, tt.want)
+				t.Errorf("got %v, want %v", ans, test.want)
 			}
 		})
 	}
@@ -110,27 +110,32 @@ func TestPDBxDict(t *testing.T) {
 		{"intersect with JSON properties range not numeric", "./testData/sample.dic", []string{"_category1.name_units"}, []converterUtils.PDBxItem{}, "value zero is not numeric"},
 		{"enum collection and order of items is mixed", "./testData/sample.dic", []string{"_category1.name1", "_category1.microscope_model", "_category1.name10", "_category1.name11"}, items2, ""},
 	}
+
 	for _, test := range tests {
-		gotValues, gotError := PDBxDict(test.path, test.names)
-		if gotError == nil {
-			if len(test.expectedError) > 0 {
-				t.Errorf("Expected error: %q, but got no error", test.expectedError)
-			} else if len(gotValues) != len(test.expectedValues) {
-				t.Errorf("Expected output slice: %v, got: %v", test.expectedValues, gotValues)
-			} else {
-				for i := range gotValues {
-					if !equalPDBxItem(gotValues[i], test.expectedValues[i]) {
-						//if !reflect.DeepEqual(gotValues[i], test.expectedValues[i]) {
-						t.Errorf("index %v :Expected output slice: %v, got: %v", i, test.expectedValues[i], gotValues[i])
+		testname := fmt.Sprintf("%v", test.name)
+		t.Run(testname, func(t *testing.T) {
+
+			gotValues, gotError := PDBxDict(test.path, test.names)
+			if gotError == nil {
+				if len(test.expectedError) > 0 {
+					t.Errorf("Expected error: %q, but got no error", test.expectedError)
+				} else if len(gotValues) != len(test.expectedValues) {
+					t.Errorf("Expected output slice: %v, got: %v", test.expectedValues, gotValues)
+				} else {
+					for i := range gotValues {
+						if !equalPDBxItem(gotValues[i], test.expectedValues[i]) {
+							//if !reflect.DeepEqual(gotValues[i], test.expectedValues[i]) {
+							t.Errorf("index %v :Expected output slice: %v, got: %v", i, test.expectedValues[i], gotValues[i])
+						}
 					}
 				}
+			} else {
+				if test.expectedError == "" {
+					t.Errorf("Expected no error but got: %q", gotError.Error())
+				} else if gotError.Error() != test.expectedError {
+					t.Errorf("Expected error: %q, got: %q", test.expectedError, gotError.Error())
+				}
 			}
-		} else {
-			if test.expectedError == "" {
-				t.Errorf("Expected no error but got: %q", gotError.Error())
-			} else if gotError.Error() != test.expectedError {
-				t.Errorf("Expected error: %q, got: %q", test.expectedError, gotError.Error())
-			}
-		}
+		})
 	}
 }

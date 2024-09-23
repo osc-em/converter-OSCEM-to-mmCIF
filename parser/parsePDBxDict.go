@@ -44,7 +44,7 @@ func AssignPDBxCategories(dataItems []converterUtils.PDBxItem) map[string][]conv
 // PDBxDict parses full dictionary and returns a map, where key is data category name and value is slice of structs ordered the same way as in the dictionary.
 // This struct contains relevant properties of a data item in the dictionary.
 // PDBx contains a few thousands of data items. For a single experiment done with a certain technique it is redundant no keep track of most of data items as they are highly specific to this technique.
-// To avoid that relevantNames argument makes this functionrecord only data items references in the slice.
+// To avoid that relevantNames argument makes this function record only data items references in the slice.
 func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, error) {
 	var dataItems = make([]converterUtils.PDBxItem, 0)
 	dictFile, err := os.Open(path)

@@ -75,24 +75,24 @@ func TestFromJson(t *testing.T) {
 		{"nested JSON with no nesting after starting with 'chocolate'", "./testData/nestedWithArrays.json", "chocolate", make(map[string][]string, 0), make(map[string][]string, 0), ""},
 	}
 
-	for _, tt := range tests {
-		testname := fmt.Sprintf("%v", tt.name)
+	for _, test := range tests {
+		testname := fmt.Sprintf("%v", test.name)
 		gotValuesMap := make(map[string][]string, 0)
 		gotUnitsMap := make(map[string][]string, 0)
 		t.Run(testname, func(t *testing.T) {
-			gotError := FromJson(tt.file, &gotValuesMap, &gotUnitsMap, tt.level)
+			gotError := FromJson(test.file, &gotValuesMap, &gotUnitsMap, test.level)
 			if gotError != nil {
-				if gotError.Error() != tt.expectedError {
-					t.Errorf("got error '%v', wanted '%v'", gotError.Error(), tt.expectedError)
+				if gotError.Error() != test.expectedError {
+					t.Errorf("got error '%v', wanted '%v'", gotError.Error(), test.expectedError)
 				}
 
 			} else {
 
-				if !reflect.DeepEqual(gotValuesMap, tt.expectedValuesMap) {
-					t.Errorf("JSON values error: got '%v', want '%v'", gotValuesMap, tt.expectedValuesMap)
+				if !reflect.DeepEqual(gotValuesMap, test.expectedValuesMap) {
+					t.Errorf("JSON values error: got '%v', want '%v'", gotValuesMap, test.expectedValuesMap)
 				}
-				if !reflect.DeepEqual(gotUnitsMap, tt.expectedUnitsMap) {
-					t.Errorf("JSON units error: got '%v', want '%v'", gotUnitsMap, tt.expectedUnitsMap)
+				if !reflect.DeepEqual(gotUnitsMap, test.expectedUnitsMap) {
+					t.Errorf("JSON units error: got '%v', want '%v'", gotUnitsMap, test.expectedUnitsMap)
 				}
 			}
 		})
