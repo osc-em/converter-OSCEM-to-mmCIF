@@ -90,6 +90,6 @@ func main() {
 
 }
 
-// go run converter.go -append=false -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/output.cif -instrument data/data_instrument.json -sample data/data_sample.json
+// go run converter.go -append=false -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/output.cif -json data/data_instrument.json --level ""
 
-// go run converter.go -append=true -mmCIFfile /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/data/K3DAK4_full__real_space_refined_000.cif -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/outputAppended.cif -instrument data/data_instrument.json -sample data/data_sample.json
+// go run converter.go -append=true -mmCIFfile /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/data/K3DAK4_full__real_space_refined_000.cif -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/outputAppended.cif -json data/data_instrument.json --level ""
