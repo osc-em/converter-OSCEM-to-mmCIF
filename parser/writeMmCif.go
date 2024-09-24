@@ -24,16 +24,6 @@ func getKeyByValue(value string, m map[string]string) (string, error) {
 	return "", fmt.Errorf("value %v is not in the conversion table", value)
 }
 
-// is element e in the slice s?
-func sliceContains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
 // given a slice of PDBx items get the length of a longest data item name in it (because the category is the same)
 func getLongestPDBxItem(s []converterUtils.PDBxItem) int {
 	var l int
@@ -156,6 +146,18 @@ func validateEnum(value string, dataItem converterUtils.PDBxItem) string {
 			return value
 		}
 	}
+	if namePDBx == "_em_imaging.illumination_mode" {
+		reFloodBeam := regexp.MustCompile(`(?i)parallel`)
+		if reFloodBeam.MatchString(value) {
+			return "FLOOD BEAM"
+		}
+	}
+	if namePDBx == "_pdbx_contact_author.role" {
+		reFloodBeam := regexp.MustCompile(`(?i)(principal investigator|group leader|pi)}`)
+		if reFloodBeam.MatchString(value) {
+			return "principal investigator/group leader"
+		}
+	}
 	// add additional matching mechanism for grid material by checmical element name/ regular expression
 	if namePDBx == "_em_sample_support.grid_material" {
 
@@ -213,6 +215,10 @@ func validateEnum(value string, dataItem converterUtils.PDBxItem) string {
 	if namePDBx == "_pdbx_audit_support.funding_organization" {
 		return "Other government"
 	}
+	// // if no match and enum contains option for OTHER, choose it
+	// if converterUtils.SliceContains(enumFromEMDB, "OTHER") || converterUtils.SliceContains(enumFromPDBx, "OTHER"){
+	// 	return "OTHER"
+	// }
 
 	return strings.ToUpper(value)
 }
@@ -267,13 +273,13 @@ func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []s
 	// sort based on the pre-defined (administrative, polymer related entities, ligand (non-polymer) related instances, and structure level description)
 	for _, category := range converterUtils.PDBxCategoriesOrder {
 		category = "_" + category
-		if sliceContains(allCategories, category) {
+		if converterUtils.SliceContains(allCategories, category) {
 			order = append(order, category)
 		}
 	}
 	// add the rest not atom-related in some order (it can be random)
 	for _, c := range allCategories {
-		if !sliceContains(order, c) && !sliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) {
+		if !converterUtils.SliceContains(order, c) && !converterUtils.SliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) {
 			order = append(order, c)
 		}
 
@@ -281,7 +287,7 @@ func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []s
 	// add atoms categories
 	for _, category := range converterUtils.PDBxCategoriesOrderAtom {
 		category = "_" + category
-		if sliceContains(allCategories, category) {
+		if converterUtils.SliceContains(allCategories, category) {
 			order = append(order, category)
 		}
 	}

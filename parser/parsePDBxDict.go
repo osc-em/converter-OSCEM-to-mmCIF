@@ -65,6 +65,9 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 	reEnum := regexp.MustCompile(`_item_enumeration`) // we will require additional string matching to be sure which tab delimited entry it is
 	rePDBxEnum := regexp.MustCompile(`_pdbx_item_enumeration`)
 	reSplitEnum := regexp.MustCompile(`[\s]{2,}`)
+	reParentName := regexp.MustCompile(`_item_linked.parent_name`)
+	reChildName := regexp.MustCompile(`_item_linked.child_name`)
+	//reIsIdentifier := regexp.MustCompile(`\.((id)|([a-zA-Z0-9]+_id))`)
 
 	scanner := bufio.NewScanner(dictFile)
 
@@ -85,11 +88,17 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 	var rangeMaxValue string
 	var enumValues = make([]string, 0)
 	var enumValuesPDBx = make([]string, 0)
+	var parentName = make([]string, 0)
+	var childName = make([]string, 0)
 
 	enumMatchCount := 0
 	enumPDBxMatchCount := 0
+	enumParentCount := 0
+	enumChildCount := 0
 	recordEnumFlag := false
 	recordPDBxEnumFlag := false
+	recordChildFlag := false
+	recordParentFlag := false
 
 	for scanner.Scan() {
 		// ignore multi-line comment/detail lines
@@ -124,7 +133,9 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 					RangeMin:       rangeMinValue,
 					RangeMax:       rangeMaxValue,
 					EnumValues:     enumValues,
-					PDBxEnumValues: enumValuesPDBx}
+					PDBxEnumValues: enumValuesPDBx,
+					ParentName:     parentName,
+					ChildName:      childName}
 
 				//  reset dataItem property before collecting
 				unit = ""
@@ -132,6 +143,8 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 				rangeMaxValue = ""
 				enumValues = make([]string, 0)
 				enumValuesPDBx = make([]string, 0)
+				parentName = make([]string, 0)
+				childName = make([]string, 0)
 
 				dataItems = append(dataItems, newItem)
 			}
@@ -152,9 +165,9 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 			category = strings.Split(categoryDataItem, ".")[0]
 			item = strings.Split(categoryDataItem, ".")[1]
 
-			// only continue if it's relevant for our task
+			// only continue if it's relevant for our task or contains an "id"
 			for c := range relevantNames {
-				if relevantNames[c] == categoryDataItem {
+				if relevantNames[c] == category {
 					presentInJson = true
 					break
 				} else {
@@ -191,7 +204,37 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 					return dataItems, err
 				}
 			}
+			// if linkage to other PDBx terms exist by certain key, extract it:
+			if reParentName.MatchString(scanner.Text()) {
+				if len(strings.Fields(scanner.Text())) == 2 {
+					parentName = []string{strings.Fields(scanner.Text())[1]}
+				} else if !recordParentFlag {
+					if strings.Fields(scanner.Text())[0] == "_item_linked.parent_name" {
+						recordParentFlag = true
+						continue
+					} else {
+						enumParentCount += 1
+					}
+				} else if recordParentFlag {
+					continue
+				}
 
+			}
+			if reChildName.MatchString(scanner.Text()) {
+				if len(strings.Fields(scanner.Text())) == 2 {
+					childName = []string{strings.Fields(scanner.Text())[1]}
+				} else if !recordChildFlag {
+					if strings.Fields(scanner.Text())[0] == "_item_linked.child_name" {
+						recordChildFlag = true
+						continue
+					} else {
+						enumChildCount += 1
+					}
+				} else if recordChildFlag {
+					continue
+				}
+
+			}
 			// .. if enum values are provided (and are not already supposed to be recorded)
 			if reEnum.MatchString(scanner.Text()) && !recordEnumFlag && !rePDBxEnum.MatchString((scanner.Text())) {
 				if strings.Fields(scanner.Text())[0] == "_item_enumeration.value" {
@@ -237,6 +280,32 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 						valueEnum = valueEnum[1 : len(valueEnum)-1]
 					}
 					enumValuesPDBx = append(enumValuesPDBx, valueEnum)
+				}
+			}
+			if recordParentFlag {
+				if strings.Fields(scanner.Text())[0] == "#" { // end of enum iteration
+					recordParentFlag = false
+					enumParentCount = 0
+				} else {
+					splittedEnum := reSplitEnum.Split(scanner.Text(), -1)
+					valueEnum := splittedEnum[enumParentCount+1]
+					if string(valueEnum[0]) == "\"" {
+						valueEnum = valueEnum[1 : len(valueEnum)-1]
+					}
+					parentName = append(parentName, valueEnum)
+				}
+			}
+			if recordChildFlag {
+				if strings.Fields(scanner.Text())[0] == "#" { // end of enum iteration
+					recordChildFlag = false
+					enumChildCount = 0
+				} else {
+					splittedEnum := reSplitEnum.Split(scanner.Text(), -1)
+					valueEnum := splittedEnum[enumChildCount+1]
+					if string(valueEnum[0]) == "\"" {
+						valueEnum = valueEnum[1 : len(valueEnum)-1]
+					}
+					childName = append(childName, valueEnum)
 				}
 			}
 		}

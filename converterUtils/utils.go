@@ -21,6 +21,16 @@ func AssertFloatEqual(a, b float64) bool {
 	}
 }
 
+// is element e in the slice s?
+func SliceContains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 // PDBxItem type defines attributes of the data item property in PDBx dictionary.
 // It contains most important fields, such as name of the item and its parental catrgory,
 // type of value it should take on and units, range or allowed values if there are any.
@@ -33,6 +43,8 @@ type PDBxItem struct {
 	RangeMax       string // will be converted only for comparison
 	EnumValues     []string
 	PDBxEnumValues []string
+	ParentName     []string
+	ChildName      []string
 }
 
 var UnitsName = map[string]string{
