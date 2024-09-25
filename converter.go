@@ -1,13 +1,11 @@
 package main
 
 import (
-	"converter/converterUtils"
 	"converter/parser"
 	"flag"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 )
 
 // GetValues returns slice of strings with values in maps. In those maps both Key and Value are strings.
@@ -58,27 +56,19 @@ func main() {
 
 		}
 	}
-	dataItemsAll := getValues(mapper)
-	relevantCategories := make([]string, 0)
-	for _, item := range dataItemsAll {
-		category := strings.Split(item, ".")[0]
-		if !converterUtils.SliceContains(relevantCategories, category) {
-			relevantCategories = append(relevantCategories, category)
-		}
-	}
+
 	// parse PDBx dictionary to retrieve order of data items and units
-	dataItems, err := parser.PDBxDict(*dictFile, relevantCategories)
+	dataItems, err := parser.PDBxDict(*dictFile, getValues(mapper))
 	if err != nil {
 		log.Fatal("Error while reading PDBx dictionary: ", err)
 		return
 
 	}
-	fmt.Println(dataItems)
 	dataItemsPerCategory := parser.AssignPDBxCategories((dataItems))
 	// create mmCIF text and write it to a file
 	mmCIFText, err := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM, *appendToMmCif, *mmCIFInputPath)
 	if err != nil {
-		fmt.Println("Couldn't create text in mmCIF format!")
+		fmt.Println("Couldn't create text in mmCIF format!", err)
 	}
 
 	// now write to cif file

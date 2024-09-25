@@ -15,6 +15,31 @@ import (
 	"time"
 )
 
+func relevantId(PDBxItems map[string][]converterUtils.PDBxItem, dataItem converterUtils.PDBxItem) bool {
+	accessValues := PDBxItems[dataItem.CategoryID]
+	var parentValue string
+	for i := range len(accessValues) {
+		for r := range len(accessValues[i].ChildName) {
+			if accessValues[i].ChildName[r] == dataItem.CategoryID+"."+dataItem.Name {
+				//if accessValues[i].CategoryID == dataItem.CategoryID && accessValues[i].Name == dataItem.Name && len(accessValues[i].ParentName) != 0 {
+				parentValue = accessValues[i].ParentName[r]
+			}
+		}
+	}
+	if parentValue != "" {
+		catValues, ok := PDBxItems[strings.Split(parentValue, ".")[0]]
+		if ok {
+
+			for r := range len(catValues) {
+				if catValues[r].Name == strings.Split(parentValue, ".")[1] {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
 func getKeyByValue(value string, m map[string]string) (string, error) {
 	for k, v := range m {
 		if v == value {
@@ -153,8 +178,8 @@ func validateEnum(value string, dataItem converterUtils.PDBxItem) string {
 		}
 	}
 	if namePDBx == "_pdbx_contact_author.role" {
-		reFloodBeam := regexp.MustCompile(`(?i)(principal investigator|group leader|pi)}`)
-		if reFloodBeam.MatchString(value) {
+		reRole := regexp.MustCompile(`(?i)(principal investigator|group leader|pi)`)
+		if reRole.MatchString(value) {
 			return "principal investigator/group leader"
 		}
 	}
@@ -379,9 +404,8 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 			for i := range catDI {
 				k, err := getKeyByValue(catDI[i].CategoryID+"."+catDI[i].Name, nameMapper)
 				if err != nil {
-					//shouldn't occur, because nameMapper holds correspondance for two standards
-					errorString := fmt.Sprintf("Value %s for PDBx is not in the names conversion!", catDI[i].CategoryID+"."+catDI[i].Name)
-					return "", errors.New(errorString)
+					//occurs when this PDBx category not in the conversions table - contains the "id" and used to link data items -> use something else for counting
+					continue
 				}
 				//check if that key is present in json file and extract it's size
 				_, ok := valuesMap[k]
@@ -395,30 +419,36 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 			case size > 1:
 				// loop notation
 				str.WriteString("loop_\n")
+				var isRelevantID bool
 				for _, dataItem := range catDI {
 					// check the length of all first and throw an error in case that they have different length?? can that be? e.g two authors and for one the property Phone is not there?
 					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
 					if err != nil {
-						errorString := fmt.Sprintf("Value %s for PDBx is not in the names conversion!", dataItem.CategoryID+"."+dataItem.Name)
-						return "", errors.New(errorString)
-					}
-					if valuesMap[jsonKey] == nil {
+						// it is _id property -> check if we need it go through all data items andd see if it's a parent somewhere!
+						isRelevantID = relevantId(PDBxItems, dataItem)
+						if isRelevantID {
+							fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
+						}
+					} else if valuesMap[jsonKey] == nil {
 						continue // not required and not provided in OSCEM
+					} else {
+						fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
 					}
-					fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
 				}
 				for v := range size {
 					for _, dataItem := range catDI {
 						jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
 						if err != nil {
-							errorString := fmt.Sprintf("Value %s for PDBx is not in the names conversion!", dataItem.CategoryID+"."+dataItem.Name)
-							return "", errors.New(errorString)
-						}
+							// errorString := fmt.Sprintf("Value %s for PDBx is not in the names conversion!", dataItem.CategoryID+"."+dataItem.Name)
+							// return "", errors.New(errorString)
 
-						if valuesMap[jsonKey] == nil {
+							if isRelevantID {
+								fmt.Fprintf(&str, "%v ", v+1)
+							}
+
+						} else if valuesMap[jsonKey] == nil {
 							continue // key was not required and not provided in OSCEM
-						}
-						if correctSlice, ok := valuesMap[jsonKey]; ok {
+						} else if correctSlice, ok := valuesMap[jsonKey]; ok {
 							if unit, ok := OSCEMunits[jsonKey]; ok {
 								valueString := checkValue(dataItem, correctSlice[v], jsonKey, unit[v])
 								fmt.Fprintf(&str, "%s", valueString)
@@ -435,19 +465,30 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 				str.WriteString("#\n")
 			case size == 1:
 				l := getLongestPDBxItem(catDI) + 5
+				var isRelevantID bool
 				for _, dataItem := range catDI {
 					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
 					if err != nil {
-						errorString := fmt.Sprintf("Value %s for PDBx is not in the names conversion!", dataItem.CategoryID+"."+dataItem.Name)
-						return "", errors.New(errorString)
+						// it is _id property -> check if we need it go through all data items andd see if it's a parent somewhere!
+						isRelevantID = relevantId(PDBxItems, dataItem)
+						if isRelevantID {
+							formatString := fmt.Sprintf("%%-%ds", l)
+							fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
+
+							fmt.Fprintf(&str, "%v", 1)
+							str.WriteString("\n")
+							continue
+						}
 					}
 
 					if valuesMap[jsonKey] == nil {
 						continue // not required in mmCIF
 					}
-					formatString := fmt.Sprintf("%%-%ds", l)
-					fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
 					if jsonValue, ok := valuesMap[jsonKey]; ok {
+
+						formatString := fmt.Sprintf("%%-%ds", l)
+						fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
+
 						if unit, ok := OSCEMunits[jsonKey]; ok {
 							valueString := checkValue(dataItem, jsonValue[0], jsonKey, unit[0]) // the 0th element, because it's the case where only one value is present
 							fmt.Fprintf(&str, "%s", valueString)

@@ -53,7 +53,15 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 		//log.Fatal("Error while reading the file ", err)
 	}
 	defer dictFile.Close()
-
+	// relevant categori
+	// dataItemsAll := getValues(mapper)
+	// relevantCategories := make([]string, 0)
+	// for _, item := range dataItemsAll {
+	// 	category := strings.Split(item, ".")[0]
+	// 	if !converterUtils.SliceContains(relevantCategories, category) {
+	// 		relevantCategories = append(relevantCategories, category)
+	// 	}
+	// }
 	reSaveCategory := regexp.MustCompile(`save_[a-zA-Z0-9]+[a-zA-Z0-9]+`)
 	reSaveItem := regexp.MustCompile(`save__([a-zA-Z1-9_.]+)`)
 	reSaveEnd := regexp.MustCompile(`save_$`)
@@ -67,7 +75,7 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 	reSplitEnum := regexp.MustCompile(`[\s]{2,}`)
 	reParentName := regexp.MustCompile(`_item_linked.parent_name`)
 	reChildName := regexp.MustCompile(`_item_linked.child_name`)
-	//reIsIdentifier := regexp.MustCompile(`\.((id)|([a-zA-Z0-9]+_id))`)
+	reIsIdentifier := regexp.MustCompile(`\.((id)|([a-zA-Z0-9]+_id))`)
 
 	scanner := bufio.NewScanner(dictFile)
 
@@ -166,15 +174,20 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 			item = strings.Split(categoryDataItem, ".")[1]
 
 			// only continue if it's relevant for our task or contains an "id"
-			for c := range relevantNames {
-				if relevantNames[c] == category {
-					presentInJson = true
-					break
-				} else {
-					presentInJson = false
+			categoriesNamesRelevant := make([]string, 0)
+			for i := range relevantNames {
+				cat := strings.Split(relevantNames[i], ".")[0]
+				if !converterUtils.SliceContains(categoriesNamesRelevant, cat) {
+					categoriesNamesRelevant = append(categoriesNamesRelevant, cat)
 				}
 			}
-			continue
+			// if category is in re
+			if converterUtils.SliceContains(relevantNames, categoryDataItem) || (converterUtils.SliceContains(categoriesNamesRelevant, category) && reIsIdentifier.MatchString(scanner.Text())) {
+				presentInJson = true
+			} else {
+				presentInJson = false
+			}
+			continue // next line as this data item won't be recorded
 		}
 		// once a relevant category and data item were grabbed
 		if flagItem && presentInJson {
@@ -207,7 +220,7 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 			// if linkage to other PDBx terms exist by certain key, extract it:
 			if reParentName.MatchString(scanner.Text()) {
 				if len(strings.Fields(scanner.Text())) == 2 {
-					parentName = []string{strings.Fields(scanner.Text())[1]}
+					parentName = []string{strings.Replace(strings.Fields(scanner.Text())[1], "\"", "", 2)}
 				} else if !recordParentFlag {
 					if strings.Fields(scanner.Text())[0] == "_item_linked.parent_name" {
 						recordParentFlag = true
@@ -222,7 +235,7 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 			}
 			if reChildName.MatchString(scanner.Text()) {
 				if len(strings.Fields(scanner.Text())) == 2 {
-					childName = []string{strings.Fields(scanner.Text())[1]}
+					childName = []string{strings.Replace(strings.Fields(scanner.Text())[1], "\"", "", 2)}
 				} else if !recordChildFlag {
 					if strings.Fields(scanner.Text())[0] == "_item_linked.child_name" {
 						recordChildFlag = true
@@ -292,7 +305,7 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 					if string(valueEnum[0]) == "\"" {
 						valueEnum = valueEnum[1 : len(valueEnum)-1]
 					}
-					parentName = append(parentName, valueEnum)
+					parentName = append(parentName, strings.Replace(valueEnum, "\"", "", 2))
 				}
 			}
 			if recordChildFlag {
@@ -305,7 +318,7 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 					if string(valueEnum[0]) == "\"" {
 						valueEnum = valueEnum[1 : len(valueEnum)-1]
 					}
-					childName = append(childName, valueEnum)
+					childName = append(childName, strings.Replace(valueEnum, "\"", "", 2))
 				}
 			}
 		}
