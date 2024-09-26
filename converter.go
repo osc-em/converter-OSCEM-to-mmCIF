@@ -73,7 +73,7 @@ func main() {
 
 	// now write to cif file
 	// Open the file, create it if it doesn't exist, and truncate it if it does
-	file, err := os.OpenFile(*mmCIFOutputPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	file, err := os.OpenFile(*mmCIFOutputPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 	if err != nil {
 		log.Fatal("Error opening file: ", err)
 		return
