@@ -1,2 +1,59 @@
 data_myID
 #
+_entity.formula_weight     3e+06 
+_entity.src_method         YEAST 
+#
+_pdbx_entry_details.has_ligand_of_interest     NO 
+#
+_em_buffer.specimen_id     1
+_em_buffer.pH              7 
+#
+_em_grid_pretreatment.pressure       1e-06 
+_em_grid_pretreatment.time           30 
+_em_grid_pretreatment.type           'GLOW DISCHARGE' 
+#
+_em_image_recording.average_exposure_time           1.526295 
+_em_image_recording.avg_electron_dose_per_image     20.140268760946135 
+_em_image_recording.film_or_detector_model          'FEI FALCON IV (4k x 4k)' 
+_em_image_recording.imaging_id                      1
+_em_image_recording.num_real_images                 25621 
+#
+_em_image_scans.dimension_height     4096 
+_em_image_scans.dimension_width      4096 
+#
+_em_imaging.microscope_model                  'TFS KRIOS' 
+_em_imaging.accelerating_voltage              300 
+_em_imaging.illumination_mode                 'FLOOD BEAM' 
+_em_imaging.mode                              'BRIGHT FIELD' 
+_em_imaging.nominal_defocus_min               300 
+_em_imaging.nominal_defocus_max               2000 
+_em_imaging.calibrated_defocus_min            7364.9873855000005 
+_em_imaging.calibrated_defocus_max            10311.9323311 
+_em_imaging.nominal_magnification             165000 
+_em_imaging.electron_source                   'FIELD EMISSION GUN' 
+_em_imaging.c2_aperture_diameter              20 
+_em_imaging.specimen_id                       1
+#
+_em_imaging_optics.energyfilter_slit_width      10 
+_em_imaging_optics.imaging_id                   1
+#
+_em_sample_support.grid_material      GOLD 
+_em_sample_support.grid_mesh_size     300 
+_em_sample_support.grid_type          Quantifoil 
+_em_sample_support.specimen_id        1
+#
+_em_software.imaging_id     1
+_em_software.name           EPU 
+#
+_em_specimen.concentration             0.3 
+_em_specimen.embedding_applied         NO 
+_em_specimen.experiment_id             1
+_em_specimen.shadowing_applied         NO 
+_em_specimen.staining_applied          NO 
+_em_specimen.vitrification_applied     NO 
+#
+_em_vitrification.specimen_id             1
+_em_vitrification.cryogen_name            NONE 
+_em_vitrification.humidity                90 
+_em_vitrification.chamber_temperature     300 
+#
