@@ -16,17 +16,13 @@ before:
     - go generate ./...
 
 builds:
-  - id: "converter-oscem-to-mmcif"
   - env:
       - CGO_ENABLED=0
     goos:
       - linux
       - windows
-    goarch:
-      - amd64
     main: .
     binary: converter
-    gobinary: echo 
 
 archives:
   - format: tar.gz
