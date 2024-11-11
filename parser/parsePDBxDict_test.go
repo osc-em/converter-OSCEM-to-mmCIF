@@ -1,10 +1,11 @@
 package parser
 
 import (
-	"converter/converterUtils"
 	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
 )
 
 func equalPDBxItem(a, b converterUtils.PDBxItem) bool {

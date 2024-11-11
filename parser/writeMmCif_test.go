@@ -1,9 +1,10 @@
 package parser
 
 import (
-	"converter/converterUtils"
 	"fmt"
 	"testing"
+
+	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
 )
 
 func TestGetKeyByValue(t *testing.T) {

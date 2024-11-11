@@ -2,7 +2,6 @@ package parser
 
 import (
 	"bufio"
-	"converter/converterUtils"
 	"errors"
 	"fmt"
 	"log"
@@ -13,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
 )
 
 func relevantId(PDBxItems map[string][]converterUtils.PDBxItem, dataItem converterUtils.PDBxItem) bool {

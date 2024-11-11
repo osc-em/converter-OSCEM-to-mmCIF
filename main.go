@@ -1,11 +1,12 @@
 package main
 
 import (
-	"converter/parser"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/osc-em/converter-OSCEM-to-mmCIF/parser"
 )
 
 // GetValues returns slice of strings with values in maps. In those maps both Key and Value are strings.
@@ -90,6 +91,6 @@ func main() {
 
 }
 
-// go run . -append=false -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/output.cif -json data/data_instrument.json --level ""
+// go run . -append=false -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-OSCEM-to-mmCIF/results/output.cif -json data/data_instrument.json --level ""
 
-// go run . -append=true -mmCIFfile /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/data/K3DAK4_full__real_space_refined_000.cif -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-JSON-to-mmCIF/results/outputAppended.cif -json data/data_instrument.json --level ""
+// go run . -append=true -mmCIFfile /Users/sofya/Documents/openem/converter-OSCEM-to-mmCIF/data/K3DAK4_full__real_space_refined_000.cif -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-OSCEM-to-mmCIF/results/outputAppended.cif -json data/data_instrument.json --level ""

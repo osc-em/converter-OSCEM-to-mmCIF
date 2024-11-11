@@ -1,11 +1,12 @@
 package parser
 
 import (
-	"converter/converterUtils"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
 )
 
 func keyConcat(s1, s2 string) string {

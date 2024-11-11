@@ -2,12 +2,13 @@ package parser
 
 import (
 	"bufio"
-	"converter/converterUtils"
 	"fmt"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
 )
 
 func extractRangeValue(line string) (string, error) {
