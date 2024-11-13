@@ -1,7 +1,10 @@
 package parser
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -66,8 +69,8 @@ func TestFromJson(t *testing.T) {
 		expectedUnitsMap  map[string][]string
 		expectedError     string
 	}{
-		{"no JSON file", "./testData/noJson.json", "", make(map[string][]string, 0), make(map[string][]string, 0), "error while reading the JSON file: open ./testData/noJson.json: no such file or directory"},
-		{"broken JSON file: not quoted JSON propoerty", "./testData/badJson.json", "", make(map[string][]string, 0), make(map[string][]string, 0), "error while unmarshaling JSON: invalid character 'r' looking for beginning of object key string"},
+		// {"no JSON file", "./testData/noJson.json", "", make(map[string][]string, 0), make(map[string][]string, 0), "error while reading the JSON file: open ./testData/noJson.json: no such file or directory"},
+		// {"broken JSON file: not quoted JSON propoerty", "./testData/badJson.json", "", make(map[string][]string, 0), make(map[string][]string, 0), "error while unmarshaling JSON: invalid character 'r' looking for beginning of object key string"},
 		{"nested JSON with values and units at different levels, no arrays in JSON", "./testData/simpleNested.json", "", values1, units1, ""},
 		{"nested JSON with values and units at different levels, start at 'earth'", "./testData/simpleNested.json", "earth", map[string][]string{"properties.distanceFromSun.measurement": {"149.6"}, "properties.radius.measurement": {"6371"}}, map[string][]string{"properties.distanceFromSun.measurement": {"million km"}, "properties.radius.measurement": {"km"}}, ""},
 		{"nested JSON with values and units at different levels and arrays", "./testData/nestedWithArrays.json", "", values2, units2, ""},
@@ -80,7 +83,23 @@ func TestFromJson(t *testing.T) {
 		gotValuesMap := make(map[string][]string, 0)
 		gotUnitsMap := make(map[string][]string, 0)
 		t.Run(testname, func(t *testing.T) {
-			gotError := FromJson(test.file, &gotValuesMap, &gotUnitsMap, test.level)
+
+			// Read JSON file
+			data, err := os.ReadFile(test.file)
+			if err != nil {
+				errorText := fmt.Errorf("error while reading the JSON file: %w", err)
+				log.Fatal(errorText)
+				return
+			}
+
+			// Unmarshal JSON
+			var jsonContent map[string]any
+			if err := json.Unmarshal(data, &jsonContent); err != nil {
+				errorText := fmt.Errorf("error while unmarshaling JSON: %w", err)
+				log.Fatal(errorText)
+				return
+			}
+			gotError := FromJson(jsonContent, &gotValuesMap, &gotUnitsMap, test.level)
 			if gotError != nil {
 				if gotError.Error() != test.expectedError {
 					t.Errorf("got error '%v', wanted '%v'", gotError.Error(), test.expectedError)

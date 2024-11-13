@@ -47,10 +47,10 @@ func main() {
 		return
 	}
 
-	ConvertFromJson(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *appendToMmCif, *mmCIFInputPath, *mmCIFOutputPath)
+	FromJson(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *appendToMmCif, *mmCIFInputPath, *mmCIFOutputPath)
 }
 
-func ConvertFromJson(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, appendToMmCif bool, mmCIFInputPath string, mmCIFOutputPath string) {
+func FromJson(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, appendToMmCif bool, mmCIFInputPath string, mmCIFOutputPath string) {
 	// might be string or array of string depending on the size of json array
 	mapJson := make(map[string][]string, 0)
 	unitsOSCEM := make(map[string][]string, 0)
