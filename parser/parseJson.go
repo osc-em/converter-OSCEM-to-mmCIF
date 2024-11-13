@@ -1,10 +1,8 @@
 package parser
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
 )
@@ -134,19 +132,8 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string][]
 
 // FromJson function creates a map from a JSON file. Nested data is flattend and keys are connected by a dot.
 // In cases where JSON has multiple values, final map's value will be a slice.
-func FromJson(jsonPath string, mapAll *map[string][]string, mapUnits *map[string][]string, level string) error {
-	// Read JSON file
-	data, err := os.ReadFile(jsonPath)
-	if err != nil {
-		return fmt.Errorf("error while reading the JSON file: %w", err)
-	}
 
-	// Unmarshal JSON
-	var jsonContent map[string]any
-	if err := json.Unmarshal(data, &jsonContent); err != nil {
-		return fmt.Errorf("error while unmarshaling JSON: %w", err)
-	}
-
+func FromJson(jsonContent map[string]any, mapAll *map[string][]string, mapUnits *map[string][]string, level string) error {
 	// Initialize flattened maps
 	jsonFlat := make(map[string][]string)
 	jsonUnits := make(map[string][]string)

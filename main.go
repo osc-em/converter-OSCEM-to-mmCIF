@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -19,31 +20,49 @@ func getValues[K string, V string](m map[string]string) []string {
 }
 
 func main() {
-
-	//var json string
 	appendToMmCif := flag.Bool("append", true, "append metadata to existing mmCIF")
 	mmCIFInputPath := flag.String("mmCIFfile", "", "path to existing mmCIF file with atoms information")
 	conversionFile := flag.String("conversions", "", "path to a CSV file with conversions table")
 	dictFile := flag.String("dic", "", "path to PDBx dictionary")
 	mmCIFOutputPath := flag.String("output", "", "path for a new mmCIF file")
 	metadataLevelNameInJson := flag.String("level", "scientificMetadata", "Name of JSON key, for which element the conversion will take place. It must be at first level")
-
 	// Parse JSON files
-	json := flag.String("json", "", "JSON file containing metadata")
+	jsonPath := flag.String("json", "", "JSON file containing metadata")
+
 	flag.Parse()
 
+	// Read JSON file
+	data, err := os.ReadFile(*jsonPath)
+	if err != nil {
+		errorText := fmt.Errorf("error while reading the JSON file: %w", err)
+		log.Fatal(errorText)
+		return
+	}
+
+	// Unmarshal JSON
+	var jsonContent map[string]any
+	if err := json.Unmarshal(data, &jsonContent); err != nil {
+		errorText := fmt.Errorf("error while unmarshaling JSON: %w", err)
+		log.Fatal(errorText)
+		return
+	}
+
+	ConvertFromJson(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *appendToMmCif, *mmCIFInputPath, *mmCIFOutputPath)
+}
+
+func ConvertFromJson(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, appendToMmCif bool, mmCIFInputPath string, mmCIFOutputPath string) {
 	// might be string or array of string depending on the size of json array
 	mapJson := make(map[string][]string, 0)
 	unitsOSCEM := make(map[string][]string, 0)
 
-	parser.FromJson(*json, &mapJson, &unitsOSCEM, *metadataLevelNameInJson)
+	parser.FromJson(scientificMetadata, &mapJson, &unitsOSCEM, metadataLevelNameInJson)
 	// read  conversion table by column:
-	namesOSCEM, err := parser.ConversionTableReadColumn(*conversionFile, "OSCEM")
+	namesOSCEM, err := parser.ConversionTableReadColumn(conversionFile, "OSCEM")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	namesPDBx, err := parser.ConversionTableReadColumn(*conversionFile, "in PDBx/mmCIF")
+	namesPDBx, err := parser.ConversionTableReadColumn(conversionFile, "in PDBx/mmCIF")
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -59,7 +78,7 @@ func main() {
 	}
 
 	// parse PDBx dictionary to retrieve order of data items and units
-	dataItems, err := parser.PDBxDict(*dictFile, getValues(mapper))
+	dataItems, err := parser.PDBxDict(dictFile, getValues(mapper))
 	if err != nil {
 		log.Fatal("Error while reading PDBx dictionary: ", err)
 		return
@@ -67,14 +86,14 @@ func main() {
 	}
 	dataItemsPerCategory := parser.AssignPDBxCategories((dataItems))
 	// create mmCIF text and write it to a file
-	mmCIFText, err := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM, *appendToMmCif, *mmCIFInputPath)
+	mmCIFText, err := parser.ToMmCIF(mapper, dataItemsPerCategory, mapJson, unitsOSCEM, appendToMmCif, mmCIFInputPath)
 	if err != nil {
 		fmt.Println("Couldn't create text in mmCIF format!", err)
 	}
 
 	// now write to cif file
 	// Open the file, create it if it doesn't exist, and truncate it if it does
-	file, err := os.OpenFile(*mmCIFOutputPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
+	file, err := os.OpenFile(mmCIFOutputPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 	if err != nil {
 		log.Fatal("Error opening file: ", err)
 		return
@@ -88,9 +107,4 @@ func main() {
 		return
 	}
 	fmt.Println("String successfully written to the file.")
-
 }
-
-// go run . -append=false -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-OSCEM-to-mmCIF/results/output.cif -json data/data_instrument.json --level ""
-
-// go run . -append=true -mmCIFfile /Users/sofya/Documents/openem/converter-OSCEM-to-mmCIF/data/K3DAK4_full__real_space_refined_000.cif -conversions /Users/sofya/Documents/openem/LS_Metadata_reader/conversion/conversions.csv -dic ./data/mmcif_pdbx_v50.dic -output /Users/sofya/Documents/openem/converter-OSCEM-to-mmCIF/results/outputAppended.cif -json data/data_instrument.json --level ""
