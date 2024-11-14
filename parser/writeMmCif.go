@@ -320,13 +320,7 @@ func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []s
 	return order
 }
 
-func parseMmCIF(path string) (string, map[string]string, error) {
-	dictFile, err := os.Open(path)
-	if err != nil {
-		errorString := fmt.Sprintf("mmCIF file %s does not exist!", path)
-		return "", map[string]string{}, errors.New(errorString)
-	}
-	defer dictFile.Close()
+func parseMmCIF(dictFile *os.File) (string, map[string]string, error) {
 	scanner := bufio.NewScanner(dictFile)
 
 	var dataName string
@@ -366,19 +360,42 @@ func parseMmCIF(path string) (string, map[string]string, error) {
 	}
 	return dataName, mmCIFfields, nil
 }
-func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string, appendToMmCif bool, mmCIFpath string) (string, error) {
-	var dataName string
-	var mmCIFCategories map[string]string
-	if appendToMmCif {
-		name, categories, err := parseMmCIF(mmCIFpath)
-		if err != nil {
-			return "", err
-		}
-		dataName = name
-		mmCIFCategories = categories
-	} else {
-		dataName = "data_myID"
+
+func CreteMetadataCif(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string) (string, error) {
+	return createCifText("data_myID", map[string]string{}, nameMapper, PDBxItems, valuesMap, OSCEMunits)
+}
+func SupplementCoordinatesFromFile(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string, mmCIFpath *os.File) (string, error) {
+	var dataID string
+	var mmCIFvalues map[string]string
+
+	name, categories, err := parseMmCIF(mmCIFpath)
+	if err != nil {
+		return "", err
 	}
+	dataID = name
+	mmCIFvalues = categories
+	return createCifText(dataID, mmCIFvalues, nameMapper, PDBxItems, valuesMap, OSCEMunits)
+}
+
+func SupplementCoordinatesFromPath(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string, mmCIFpath string) (string, error) {
+	var dataID string
+	var mmCIFvalues map[string]string
+	dictFile, err := os.Open(mmCIFpath)
+	if err != nil {
+		errorString := fmt.Sprintf("mmCIF file %s does not exist!", mmCIFpath)
+		return "", errors.New(errorString)
+	}
+	defer dictFile.Close()
+
+	name, categories, err := parseMmCIF(dictFile)
+	if err != nil {
+		return "", err
+	}
+	dataID = name
+	mmCIFvalues = categories
+	return createCifText(dataID, mmCIFvalues, nameMapper, PDBxItems, valuesMap, OSCEMunits)
+}
+func createCifText(dataName string, mmCIFCategories map[string]string, nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string) (string, error) {
 
 	// keeps track of values from JSON that have already been mapped to the PDBx properties
 	var str strings.Builder
@@ -519,5 +536,4 @@ func ToMmCIF(nameMapper map[string]string, PDBxItems map[string][]converterUtils
 		}
 	}
 	return str.String(), nil
-
 }
