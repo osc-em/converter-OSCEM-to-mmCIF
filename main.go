@@ -37,9 +37,11 @@ func main() {
 		log.Fatal(errorText)
 		return
 	}
+	var mmCIFText string
 	if *appendToMmCif {
-		parser.PDBconvertFromPath(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *mmCIFInputPath, *mmCIFOutputPath)
+		mmCIFText = parser.PDBconvertFromPath(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *mmCIFInputPath)
 	} else {
-		parser.EMDBconvert(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *mmCIFOutputPath)
+		mmCIFText = parser.EMDBconvert(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile)
 	}
+	parser.WriteCif(mmCIFText, *mmCIFOutputPath)
 }

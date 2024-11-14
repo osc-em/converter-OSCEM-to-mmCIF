@@ -16,33 +16,33 @@ func getValues[K string, V string](m map[string]string) []string {
 	}
 	return values
 }
-func PDBconvertFromFile(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInput *os.File, mmCIFOutputPath string) {
+func PDBconvertFromFile(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInput *os.File) string {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
 	mmCIFText, err := SupplementCoordinatesFromFile(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInput)
 	if err != nil {
 		fmt.Println("Couldn't create text in mmCIF format!", err)
 	}
-	writeCif(mmCIFText, mmCIFOutputPath)
+	return mmCIFText
 }
-func PDBconvertFromPath(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInputPath string, mmCIFOutputPath string) {
+func PDBconvertFromPath(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInputPath string) string {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
 	mmCIFText, err := SupplementCoordinatesFromPath(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInputPath)
 	if err != nil {
 		fmt.Println("Couldn't create text in mmCIF format!", err)
 	}
-	writeCif(mmCIFText, mmCIFOutputPath)
+	return mmCIFText
 }
 
-func EMDBconvert(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFOutputPath string) {
+func EMDBconvert(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string) string {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
 	mmCIFText, err := CreteMetadataCif(mapper, PDBxdictvalues, jsonMeta, jsonUnits)
 	if err != nil {
 		fmt.Println("Couldn't create text in mmCIF format!", err)
 	}
-	writeCif(mmCIFText, mmCIFOutputPath)
+	return mmCIFText
 }
 
-func writeCif(mmCIFText string, mmCIFOutputPath string) {
+func WriteCif(mmCIFText string, mmCIFOutputPath string) {
 	// Open the file, create it if it doesn't exist, and truncate it if it does
 	file, err := os.OpenFile(mmCIFOutputPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 	if err != nil {
