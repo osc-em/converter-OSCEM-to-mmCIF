@@ -37,6 +37,9 @@ func main() {
 		log.Fatal(errorText)
 		return
 	}
-
-	parser.Convert(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *appendToMmCif, *mmCIFInputPath, *mmCIFOutputPath)
+	if *appendToMmCif {
+		parser.PDBconvertFromPath(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *mmCIFInputPath, *mmCIFOutputPath)
+	} else {
+		parser.EMDBconvert(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *mmCIFOutputPath)
+	}
 }

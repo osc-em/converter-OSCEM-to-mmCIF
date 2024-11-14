@@ -16,7 +16,7 @@ func getValues[K string, V string](m map[string]string) []string {
 	}
 	return values
 }
-func PDBconvertFromFile(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, appendToMmCif bool, mmCIFInput *os.File, mmCIFOutputPath string) {
+func PDBconvertFromFile(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInput *os.File, mmCIFOutputPath string) {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
 	mmCIFText, err := SupplementCoordinatesFromFile(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInput)
 	if err != nil {
@@ -24,7 +24,7 @@ func PDBconvertFromFile(scientificMetadata map[string]any, metadataLevelNameInJs
 	}
 	writeCif(mmCIFText, mmCIFOutputPath)
 }
-func PDBconvertFromPath(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, appendToMmCif bool, mmCIFInputPath string, mmCIFOutputPath string) {
+func PDBconvertFromPath(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInputPath string, mmCIFOutputPath string) {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
 	mmCIFText, err := SupplementCoordinatesFromPath(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInputPath)
 	if err != nil {
