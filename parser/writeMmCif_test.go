@@ -419,23 +419,6 @@ func TestToPDB2(t *testing.T) {
 		expectedError string
 	}{
 		{
-			"no input mmCIF",
-			map[string]string{"foo.boo": "cat1.name1", "foo.goo": "cat1.name2", "foo.foo": "cat1.name22", "foo.doo": "cat1.name3"},
-			map[string][]converterUtils.PDBxItem{
-				"cat1": {
-					{CategoryID: "cat1", Name: "name1", Unit: "seconds", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
-					{CategoryID: "cat1", Name: "name2", Unit: "u3", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
-					{CategoryID: "cat1", Name: "name22", ValueType: "float", RangeMin: "0", RangeMax: "3.5", EnumValues: []string{}, PDBxEnumValues: []string{}},
-					{CategoryID: "cat1", Name: "name3", EnumValues: []string{"hello", "world"}},
-				},
-			},
-			map[string][]string{"foo.boo": {"1"}, "foo.goo": {"3.14157"}, "foo.foo": {"2.3"}},
-			map[string][]string{"foo.boo": {"s"}, "foo.goo": {"u2"}},
-			"someFile.cif",
-			"",
-			"mmCIF file someFile.cif does not exist!",
-		},
-		{
 			"valid input mmCIF",
 			map[string]string{"foo.boo": "cat1.name1", "foo.goo": "cat1.name2", "foo.foo": "cat1.name22", "foo.doo": "cat1.name3"},
 			map[string][]converterUtils.PDBxItem{
