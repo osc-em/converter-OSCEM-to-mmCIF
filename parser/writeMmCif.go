@@ -361,9 +361,14 @@ func parseMmCIF(dictFile *os.File) (string, map[string]string, error) {
 	return dataName, mmCIFfields, nil
 }
 
+// CreteMetadataCif creates and mmCIF file content as a string. This function only converts metadata in the required format.
+// Meant for EMDB depositions where no other existing mmCIF is available
 func CreteMetadataCif(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string) (string, error) {
 	return createCifText("data_myID", map[string]string{}, nameMapper, PDBxItems, valuesMap, OSCEMunits)
 }
+
+// Given an mmCIF file create a new one with added scientific Metadata.
+// Meant for PDB depositions
 func SupplementCoordinatesFromFile(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string, mmCIFpath *os.File) (string, error) {
 	var dataID string
 	var mmCIFvalues map[string]string
@@ -377,6 +382,8 @@ func SupplementCoordinatesFromFile(nameMapper map[string]string, PDBxItems map[s
 	return createCifText(dataID, mmCIFvalues, nameMapper, PDBxItems, valuesMap, OSCEMunits)
 }
 
+// Given an mmCIF file path, open it and create a new one with added scientific Metadata.
+// Meant for PDB depositions
 func SupplementCoordinatesFromPath(nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string, mmCIFpath string) (string, error) {
 	var dataID string
 	var mmCIFvalues map[string]string
