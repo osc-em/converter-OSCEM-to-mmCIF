@@ -64,7 +64,6 @@ func getLongestPDBxItem(s []converterUtils.PDBxItem) int {
 func validateDateIsRFC3339(date string) string {
 	t, err := time.Parse(time.RFC3339, date)
 	if err != nil {
-		//fmt.Println(err)
 		log.Printf("Date seems to be in the wrong format! We expect RFC3339 format, provided date %s is not.", date)
 		return ""
 	}
@@ -305,7 +304,7 @@ func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []s
 	}
 	// add the rest not atom-related in some order (it can be random)
 	for _, c := range allCategories {
-		if !converterUtils.SliceContains(order, c) && !converterUtils.SliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) {
+		if !converterUtils.SliceContains(order, c) && !converterUtils.SliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) && c != "data_" {
 			order = append(order, c)
 		}
 
@@ -317,6 +316,8 @@ func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []s
 			order = append(order, category)
 		}
 	}
+	// append the rest of "unparsed" categories that were inside their own "data_" containers
+	order = append(order, "data_")
 	return order
 }
 
@@ -331,15 +332,22 @@ func parseMmCIF(dictFile *os.File) (string, map[string]string, error) {
 
 	l := 0
 	inCategoryFlag := true
+	recordAll := false
 	for scanner.Scan() {
 		// first line is the name
 		if l == 0 {
 			dataName = scanner.Text()
 		} else {
-			// break between categories is denoted by # in PDB-related software, Phenix uses an empty line.
-			if strings.HasPrefix(scanner.Text(), "#") || len(strings.Fields(scanner.Text())) == 0 {
-
-				//category ends, appends to the map
+			if recordAll {
+				str.WriteString(scanner.Text() + "\n")
+			} else if strings.HasPrefix(scanner.Text(), "data_") {
+				// new entry, e.g ligand data turn off the parsing and just record everything
+				category = "data_"
+				recordAll = true
+				str.WriteString(scanner.Text() + "\n")
+			} else if strings.HasPrefix(scanner.Text(), "#") || len(strings.Fields(scanner.Text())) == 0 {
+				// break between categories is denoted by # in PDB-related software, Phenix uses an empty line.
+				// category ends, appends to the map
 				if category != "" {
 					mmCIFfields[category] = str.String()
 					str.Reset()
@@ -357,6 +365,10 @@ func parseMmCIF(dictFile *os.File) (string, map[string]string, error) {
 			}
 		}
 		l++
+	}
+	if recordAll {
+		// add the last text that was just copied
+		mmCIFfields[category] = str.String()
 	}
 	return dataName, mmCIFfields, nil
 }
