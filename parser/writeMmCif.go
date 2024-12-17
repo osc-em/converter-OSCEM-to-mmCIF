@@ -292,6 +292,7 @@ func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, 
 func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []string {
 	var order []string
 	allCategories := append(parsedCategories, mmCIFCategories...)
+
 	sort.Slice(allCategories, func(i, j int) bool {
 		return allCategories[i] < allCategories[j]
 	})
@@ -304,7 +305,7 @@ func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []s
 	}
 	// add the rest not atom-related in some order (it can be random)
 	for _, c := range allCategories {
-		if !converterUtils.SliceContains(order, c) && !converterUtils.SliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) && c != "data_" {
+		if !converterUtils.SliceContains(order, c) && !converterUtils.SliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) && c[0:5] != "data_" {
 			order = append(order, c)
 		}
 
@@ -317,60 +318,86 @@ func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []s
 		}
 	}
 	// append the rest of "unparsed" categories that were inside their own "data_" containers
-	order = append(order, "data_")
+	for i := range mmCIFCategories {
+		if mmCIFCategories[i][0:5] == "data_" {
+			order = append(order, mmCIFCategories[i])
+		}
+	}
 	return order
 }
 
 func parseMmCIF(dictFile *os.File) (string, map[string]string, error) {
 	scanner := bufio.NewScanner(dictFile)
 
-	var dataName string
-	var category string
-	var mmCIFfields = make(map[string]string, 0)
+	var longestData uint32 = 0
+	var dataToStr = make(map[string]string, 0)
+	var mmCIFfieldsMain *map[string]string // should always point to the main model
+	var longestNameData string
+	// initialize first category
+	scanner.Scan()
+	firstName := scanner.Text()
+	// first run
+	longestNameData = firstName
+	mmCIFfields, bigString, l, new_data := LoopDataEntry(scanner, firstName)
+	mmCIFfieldsMain = &mmCIFfields
+	dataToStr[firstName] = bigString
+	longestData = l
 
+	for new_data != "" {
+		mmCIFfields, s, l, d := LoopDataEntry(scanner, new_data)
+		dataToStr[new_data] = s
+		if l > longestData {
+			mmCIFfieldsMain = &mmCIFfields
+			longestNameData = new_data
+		}
+		new_data = d
+	}
+
+	for k, v := range dataToStr {
+		if k != longestNameData {
+			// add the data_prefix back
+			(*mmCIFfieldsMain)[k] = k + "\n" + v
+		}
+	}
+
+	return longestNameData, mmCIFfields, nil
+}
+
+func LoopDataEntry(scanner *bufio.Scanner, category string) (map[string]string, string, uint32, string) { // return the categories, same as long string, the length and next category
+	var l uint32 = 0
 	var str strings.Builder
-
-	l := 0
+	var asText strings.Builder
 	inCategoryFlag := true
-	recordAll := false
+	var mmCIFfields = make(map[string]string, 0)
 	for scanner.Scan() {
-		// first line is the name
-		if l == 0 {
-			dataName = scanner.Text()
-		} else {
-			if recordAll {
-				str.WriteString(scanner.Text() + "\n")
-			} else if strings.HasPrefix(scanner.Text(), "data_") {
-				// new entry, e.g ligand data turn off the parsing and just record everything
-				category = "data_"
-				recordAll = true
-				str.WriteString(scanner.Text() + "\n")
-			} else if strings.HasPrefix(scanner.Text(), "#") || len(strings.Fields(scanner.Text())) == 0 {
-				// break between categories is denoted by # in PDB-related software, Phenix uses an empty line.
-				// category ends, appends to the map
-				if category != "" {
-					mmCIFfields[category] = str.String()
-					str.Reset()
-					inCategoryFlag = true // record the next category name
-				}
-			} else {
-				if !strings.HasPrefix(scanner.Text(), "loop_") {
-
-					if inCategoryFlag {
-						category = strings.Split(strings.Fields(scanner.Text())[0], ".")[0]
-						inCategoryFlag = false
-					}
-				}
-				str.WriteString(scanner.Text() + "\n")
-			}
+		line := scanner.Text()
+		if strings.HasPrefix(line, "data_") {
+			category = line
+			return mmCIFfields, asText.String(), l, category
 		}
 		l++
+		asText.WriteString(line + "\n")
+		if strings.HasPrefix(line, "#") || len(strings.Fields(line)) == 0 {
+			// break between categories is denoted by # in PDB-related software, Phenix uses an empty line.
+			// category ends, appends to the map
+			if category != "" {
+				mmCIFfields[category] = str.String()
+				str.Reset()
+				inCategoryFlag = true // record the next category name
+			}
+		} else {
+			if !strings.HasPrefix(line, "loop_") {
+
+				if inCategoryFlag {
+					category = strings.Split(strings.Fields(line)[0], ".")[0]
+					inCategoryFlag = false
+				}
+			}
+			str.WriteString(line + "\n")
+
+		}
 	}
-	if recordAll {
-		// add the last text that was just copied
-		mmCIFfields[category] = str.String()
-	}
-	return dataName, mmCIFfields, nil
+	return mmCIFfields, asText.String(), l, ""
 }
 
 // CreteMetadataCif creates and mmCIF file content as a string. This function only converts metadata in the required format.
