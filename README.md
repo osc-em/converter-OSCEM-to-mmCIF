@@ -37,6 +37,6 @@ Converter explicitly parser through the PDBx definitions to extract as much data
 * administrative categories sorted within mmCIF ( such as author information, grant, etc)
 * em-related categories are sorted randomly, as there is no definitive sorting in PDB team as well
 * file ends with information on atoms
-* units in OSCEM definition are comared to PDBx ( converter for units will be implemented)
+* units in OSCEM definition are compared to PDBx ( converter for units will be implemented)
 * numeric values are checked to be within a range allowed by PDBs
 * values  are checked to be within a list of attributes allowed by PDBx. This is additionally enhanced to match via regular expressions or ceratin logic. 
