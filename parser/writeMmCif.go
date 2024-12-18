@@ -305,7 +305,7 @@ func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []s
 	}
 	// add the rest not atom-related in some order (it can be random)
 	for _, c := range allCategories {
-		if !converterUtils.SliceContains(order, c) && !converterUtils.SliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) && c[0:5] != "data_" {
+		if !converterUtils.SliceContains(order, c) && !converterUtils.SliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) && (len(c) > 5 && c[0:5] != "data_") {
 			order = append(order, c)
 		}
 
@@ -331,7 +331,7 @@ func parseMmCIF(dictFile *os.File) (string, map[string]string, error) {
 
 	var longestData uint32 = 0
 	var dataToStr = make(map[string]string, 0)
-	var mmCIFfieldsMain *map[string]string // should always point to the main model
+	var mmCIFfieldsMain map[string]string // should always point to the main model
 	var longestNameData string
 	// initialize first category
 	scanner.Scan()
@@ -339,7 +339,7 @@ func parseMmCIF(dictFile *os.File) (string, map[string]string, error) {
 	// first run
 	longestNameData = firstName
 	mmCIFfields, bigString, l, new_data := LoopDataEntry(scanner, firstName)
-	mmCIFfieldsMain = &mmCIFfields
+	mmCIFfieldsMain = mmCIFfields
 	dataToStr[firstName] = bigString
 	longestData = l
 
@@ -347,7 +347,7 @@ func parseMmCIF(dictFile *os.File) (string, map[string]string, error) {
 		mmCIFfields, s, l, d := LoopDataEntry(scanner, new_data)
 		dataToStr[new_data] = s
 		if l > longestData {
-			mmCIFfieldsMain = &mmCIFfields
+			mmCIFfieldsMain = mmCIFfields
 			longestNameData = new_data
 		}
 		new_data = d
@@ -356,11 +356,11 @@ func parseMmCIF(dictFile *os.File) (string, map[string]string, error) {
 	for k, v := range dataToStr {
 		if k != longestNameData {
 			// add the data_prefix back
-			(*mmCIFfieldsMain)[k] = k + "\n" + v
+			mmCIFfieldsMain[k] = k + "\n" + v
 		}
 	}
 
-	return longestNameData, mmCIFfields, nil
+	return longestNameData, mmCIFfieldsMain, nil
 }
 
 func LoopDataEntry(scanner *bufio.Scanner, category string) (map[string]string, string, uint32, string) { // return the categories, same as long string, the length and next category
