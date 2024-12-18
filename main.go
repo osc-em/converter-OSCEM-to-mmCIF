@@ -39,9 +39,15 @@ func main() {
 	}
 	var mmCIFText string
 	if *appendToMmCif {
-		mmCIFText = parser.PDBconvertFromPath(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *mmCIFInputPath)
+		mmCIFText, err = parser.PDBconvertFromPath(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile, *mmCIFInputPath)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 	} else {
-		mmCIFText = parser.EMDBconvert(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile)
+		mmCIFText, err = parser.EMDBconvert(jsonContent, *metadataLevelNameInJson, *conversionFile, *dictFile)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 	}
 	parser.WriteCif(mmCIFText, *mmCIFOutputPath)
 }
