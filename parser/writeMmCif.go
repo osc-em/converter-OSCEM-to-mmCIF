@@ -292,7 +292,6 @@ func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, 
 func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []string {
 	var order []string
 	allCategories := append(parsedCategories, mmCIFCategories...)
-
 	sort.Slice(allCategories, func(i, j int) bool {
 		return allCategories[i] < allCategories[j]
 	})
@@ -305,7 +304,7 @@ func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []s
 	}
 	// add the rest not atom-related in some order (it can be random)
 	for _, c := range allCategories {
-		if !converterUtils.SliceContains(order, c) && !converterUtils.SliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) && (len(c) > 5 && c[0:5] != "data_") {
+		if !converterUtils.SliceContains(order, c) && !converterUtils.SliceContains(converterUtils.PDBxCategoriesOrderAtom, c[1:]) && !(len(c) > 5 && c[0:5] == "data_") {
 			order = append(order, c)
 		}
 
@@ -452,6 +451,7 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 		parsedCategories = append(parsedCategories, k)
 	}
 	allCategories := getOrderCategories(parsedCategories, converterUtils.GetKeys(mmCIFCategories))
+
 	for _, category := range allCategories {
 		var duplicatedFlag bool = false
 		catDI, ok := PDBxItems[category]
