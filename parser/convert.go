@@ -16,48 +16,47 @@ func getValues[K string, V string](m map[string]string) []string {
 	}
 	return values
 }
-func PDBconvertFromFile(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInput *os.File) string {
+func PDBconvertFromFile(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInput *os.File) (string, error) {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
 	mmCIFText, err := SupplementCoordinatesFromFile(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInput)
 	if err != nil {
-		fmt.Println("Couldn't create text in mmCIF format!", err)
+		return "", err
 	}
-	return mmCIFText
+	return mmCIFText, nil
 }
-func PDBconvertFromPath(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInputPath string) string {
+func PDBconvertFromPath(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInputPath string) (string, error) {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
 	mmCIFText, err := SupplementCoordinatesFromPath(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInputPath)
 	if err != nil {
-		fmt.Println("Couldn't create text in mmCIF format!", err)
+		return "", err
 	}
-	return mmCIFText
+	return mmCIFText, nil
 }
 
-func EMDBconvert(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string) string {
+func EMDBconvert(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string) (string, error) {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
 	mmCIFText, err := CreteMetadataCif(mapper, PDBxdictvalues, jsonMeta, jsonUnits)
 	if err != nil {
-		fmt.Println("Couldn't create text in mmCIF format!", err)
+		return "", err
 	}
-	return mmCIFText
+	return mmCIFText, nil
 }
 
-func WriteCif(mmCIFText string, mmCIFOutputPath string) {
+func WriteCif(mmCIFText string, mmCIFOutputPath string) error {
 	// Open the file, create it if it doesn't exist, and truncate it if it does
 	file, err := os.OpenFile(mmCIFOutputPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 	if err != nil {
-		log.Fatal("Error opening file: ", err)
-		return
+		return err
 	}
 	defer file.Close() // Ensure the file is closed after the operation
 
 	// Write the string to the file
 	_, err = file.WriteString(mmCIFText)
 	if err != nil {
-		log.Fatal("Error writing to file: ", err)
-		return
+		return err
 	}
 	fmt.Println("String successfully written to the file.")
+	return nil
 }
 
 func parseInputs(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string) (map[string]string, map[string][]converterUtils.PDBxItem, map[string][]string, map[string][]string) {

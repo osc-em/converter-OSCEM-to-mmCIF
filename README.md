@@ -17,7 +17,8 @@ You can download the executable from the releases and use it in terminal with th
 
 ** Option 2 **
 If using in another GO application, you can install this package with 
-```go get github.com/osc-em/converter-OSCEM-to-mmCIF 
+```
+go get github.com/osc-em/converter-OSCEM-to-mmCIF 
 ```
 and then run it with some of the 
 
