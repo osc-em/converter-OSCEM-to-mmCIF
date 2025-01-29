@@ -1,9 +1,13 @@
 package parser
 
 import (
+	"compress/gzip"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
 )
@@ -26,11 +30,47 @@ func PDBconvertFromFile(scientificMetadata map[string]any, metadataLevelNameInJs
 }
 func PDBconvertFromPath(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInputPath string) (string, error) {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
-	mmCIFText, err := SupplementCoordinatesFromPath(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInputPath)
-	if err != nil {
-		return "", err
+	fileName := strings.Split(mmCIFInputPath, ".")
+	extension := fileName[len(fileName)-1]
+	switch extension {
+	case "gz":
+		gzippedFile, err := os.Open(mmCIFInputPath)
+		if err != nil {
+			return "", err
+		}
+		defer gzippedFile.Close()
+		gzipReader, err := gzip.NewReader(gzippedFile)
+		if err != nil {
+			return "", err
+		}
+		defer gzipReader.Close()
+
+		// create a temporary cif file that will be used for a deposition
+		uncompressed, err := os.CreateTemp("", "metadata.cif")
+		if err != nil {
+			return "", err
+		}
+
+		fileUncompressed := uncompressed.Name()
+		_, err = io.Copy(uncompressed, gzipReader)
+		if err != nil {
+			return "", err
+		}
+		mmCIFText, err := SupplementCoordinatesFromPath(mapper, PDBxdictvalues, jsonMeta, jsonUnits, fileUncompressed)
+		if err != nil {
+			return "", err
+		}
+		defer os.Remove(fileUncompressed)
+		return mmCIFText, nil
+	case "bz2":
+		return "", errors.New("not implemented")
+	default:
+		mmCIFText, err := SupplementCoordinatesFromPath(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInputPath)
+		if err != nil {
+			return "", err
+		}
+		return mmCIFText, nil
 	}
-	return mmCIFText, nil
 }
 
 func EMDBconvert(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string) (string, error) {
