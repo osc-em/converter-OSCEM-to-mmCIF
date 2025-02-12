@@ -51,11 +51,17 @@ func getKeyByValue(value string, m map[string]string) (string, error) {
 }
 
 // given a slice of PDBx items get the length of a longest data item name in it (because the category is the same)
-func getLongestPDBxItem(s []converterUtils.PDBxItem) int {
+func getLongestPDBxItem(s []converterUtils.PDBxItem, s2 map[string]string) int {
+	s2keys := converterUtils.GetKeys[string](s2)
 	var l int
 	for i := range s {
 		if len(s[i].Name) > l {
 			l = len(s[i].Name)
+		}
+	}
+	for i := range s2keys {
+		if len(s2keys[i]) > l {
+			l = len(s2keys[i])
 		}
 	}
 	return l + len(s[0].CategoryID) + 1
@@ -559,17 +565,20 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 				}
 				str.WriteString("#\n")
 			case size == 1:
-				l := getLongestPDBxItem(catDI) + 5
+				l := getLongestPDBxItem(catDI, cifDIs) + 5
 				var isRelevantID bool
 				for _, dataItem := range catDI {
 					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
 					if err != nil {
-						// it is _id property -> check if we need it go through all data items andd see if it's a parent somewhere!
+						// it is _id property -> check if we need it go through all data items and see if it's a parent somewhere!
 						isRelevantID = relevantId(PDBxItems, dataItem)
 						if isRelevantID {
+							if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; ok {
+								// remove that key from list of parsed from mmCIF we will use one from metdata
+								delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+							}
 							formatString := fmt.Sprintf("%%-%ds", l)
 							fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
-
 							fmt.Fprintf(&str, "%v", 1)
 							str.WriteString("\n")
 							continue
