@@ -612,7 +612,13 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 					for k, v := range cifDIs {
 						formatString := fmt.Sprintf("%%-%ds", l)
 						fmt.Fprintf(&str, formatString, k)
-						fmt.Fprintf(&str, "%s", v)
+						var value string
+						if strings.Contains(v, " ") {
+							value = fmt.Sprintf("'%s' ", v) // if name contains whitespaces enclose it in single quotes
+						} else {
+							value = fmt.Sprintf("%s ", v) // take value as is
+						}
+						fmt.Fprintf(&str, "%s", value)
 						str.WriteString("\n")
 					}
 				}
