@@ -61,6 +61,35 @@ func getLongestPDBxItem(s []converterUtils.PDBxItem) int {
 	return l + len(s[0].CategoryID) + 1
 }
 
+func mmCIFStringToPDBxItem(s string) map[string]string {
+	cifDI := make(map[string]string, 0)
+	if strings.Contains(s, "loop_") {
+		return cifDI
+	}
+	lines := strings.Split(s, "\n")
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		parts := strings.SplitN(line, ".", 2)
+		if len(parts) < 2 {
+			continue
+		}
+		categoryID := parts[0]
+		nameValue := strings.SplitN(parts[1], " ", 2)
+		if len(nameValue) < 2 {
+			continue
+		}
+		name := nameValue[0]
+		value := strings.Trim(nameValue[1], "'")
+
+		key := categoryID + "." + name
+		cifDI[key] = value
+	}
+
+	return cifDI
+}
+
 func validateDateIsRFC3339(date string) string {
 	t, err := time.Parse(time.RFC3339, date)
 	if err != nil {
@@ -455,11 +484,13 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 	for _, category := range allCategories {
 		var duplicatedFlag bool = false
 		catDI, ok := PDBxItems[category]
+		cifDIs := map[string]string{}
 		if ok {
 			_, ok := mmCIFCategories[category]
 			if ok {
 				duplicatedFlag = true
 				log.Printf("Category %s exists both in metadata from JSON files and in existing mmCIF file! Data in mmCIF will be substituted by data from JSON", category)
+				cifDIs = mmCIFStringToPDBxItem(mmCIFCategories[category])
 			}
 			//
 			var size int
@@ -549,7 +580,10 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 						continue // not required in mmCIF
 					}
 					if jsonValue, ok := valuesMap[jsonKey]; ok {
-
+						if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; ok {
+							// remove that key from list of parsed from mmCIF we will use one from metdata
+							delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+						}
 						formatString := fmt.Sprintf("%%-%ds", l)
 						fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
 
@@ -564,6 +598,14 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 						}
 					}
 					str.WriteString("\n")
+				}
+				if len(cifDIs) != 0 {
+					for k, v := range cifDIs {
+						formatString := fmt.Sprintf("%%-%ds", l)
+						fmt.Fprintf(&str, formatString, k)
+						fmt.Fprintf(&str, "%s", v)
+						str.WriteString("\n")
+					}
 				}
 				str.WriteString("#\n")
 			default:
