@@ -137,10 +137,8 @@ func FromJson(jsonContent map[string]any, mapAll *map[string][]string, mapUnits 
 	// Initialize flattened maps
 	jsonFlat := make(map[string][]string)
 	jsonUnits := make(map[string][]string)
-
 	// Process JSON content and populate the maps
 	jsonFlat, jsonUnits = visit(jsonContent, "", jsonFlat, jsonUnits, 1, 0, 0, level, 0, false, false, -1)
-
 	// Update the provided maps
 	for k, v := range jsonFlat {
 		(*mapAll)[k] = v

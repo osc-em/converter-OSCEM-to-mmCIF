@@ -105,7 +105,6 @@ func parseInputs(scientificMetadata map[string]any, metadataLevelNameInJson stri
 	// might be string or array of string depending on the size of json array
 	mapJson := make(map[string][]string, 0)
 	unitsOSCEM := make(map[string][]string, 0)
-
 	FromJson(scientificMetadata, &mapJson, &unitsOSCEM, metadataLevelNameInJson)
 	// read  conversion table by column:
 	namesOSCEM, err := ConversionTableReadColumn(conversionFile, "OSCEM")
