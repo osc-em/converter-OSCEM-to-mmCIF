@@ -97,18 +97,22 @@ func mmCIFStringToPDBxItem(s string) (map[string][]string, []string, int) {
 		cifDIlen = indexData
 	} else {
 		cifDIlen = 1
+		var k, v string
 		for _, line := range lines {
 			if line == "" {
 				continue
 			}
 			fields := strings.Fields(line)
+			fmt.Println(fields)
 			if len(fields) != 2 {
-				continue
+				k, v = fields[0], strings.Join(fields[1:], " ")
+			} else {
+				k, v = fields[0], fields[1]
 			}
-			key, value := fields[0], fields[1]
-			keys = append(keys, key)
-			cifDI[key] = []string{strings.Replace(value, "'", "", -1)}
+			keys = append(keys, k)
+			cifDI[k] = []string{strings.Replace(v, "'", "", -1)}
 		}
+		fmt.Println(cifDI)
 	}
 	return cifDI, keys, cifDIlen
 }
@@ -514,8 +518,9 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 			_, ok := mmCIFCategories[category]
 			if ok {
 				duplicatedFlag = true
-				log.Printf("Category %s exists both in metadata from JSON files and in existing mmCIF file! Data in mmCIF will be substituted by data from JSON", category)
+				log.Printf("Category %s exists both in metadata from JSON files and in existing mmCIF file! Data in mmCIF will be used", category)
 				cifDIs, keys, cifDIlen = mmCIFStringToPDBxItem(mmCIFCategories[category])
+				fmt.Println(converterUtils.GetKeys(cifDIs))
 			}
 			//
 			var size int
@@ -550,14 +555,19 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 						isRelevantID = relevantId(PDBxItems, dataItem)
 						if isRelevantID {
 							// remove the ID entry key from list of parsed from mmCIF we will use one from metadata
-							delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
-							keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
-							fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
+							// delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+							// keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
+							// the next line shouldn't come then, we will be using one from cif
+							if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
+								fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
+							}
 						}
 					} else if valuesMap[jsonKey] == nil {
 						continue // not required and not provided in OSCEM
 					} else {
-						fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
+						if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
+							fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
+						}
 					}
 				}
 
@@ -570,23 +580,29 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 
 							if isRelevantID {
 								// check
-								delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
-								keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
-								fmt.Fprintf(&valuesStr, "%v ", v+1)
+								// delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+								// keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
+
+								if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
+									fmt.Fprintf(&valuesStr, "%v ", v+1)
+								}
 							}
 
 						} else if valuesMap[jsonKey] == nil {
 							continue // key was not required and not provided in OSCEM
 						} else if correctSlice, ok := valuesMap[jsonKey]; ok {
-							delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
-							keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
-							if unit, ok := OSCEMunits[jsonKey]; ok {
-								valueString := checkValue(dataItem, correctSlice[v], jsonKey, unit[v])
-								fmt.Fprintf(&valuesStr, "%s", valueString)
-							} else {
-								valueString := checkValue(dataItem, correctSlice[v], jsonKey, "")
-								fmt.Fprintf(&valuesStr, "%s", valueString)
+							// delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+							// keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
 
+							if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
+								if unit, ok := OSCEMunits[jsonKey]; ok {
+									valueString := checkValue(dataItem, correctSlice[v], jsonKey, unit[v])
+									fmt.Fprintf(&valuesStr, "%s", valueString)
+								} else {
+									valueString := checkValue(dataItem, correctSlice[v], jsonKey, "")
+									fmt.Fprintf(&valuesStr, "%s", valueString)
+
+								}
 							}
 
 						}
@@ -621,13 +637,16 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 						isRelevantID = relevantId(PDBxItems, dataItem)
 						if isRelevantID {
 							// remove the ID entry key from list of parsed from mmCIF we will use one from metadata
-							delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
-							keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
-							formatString := fmt.Sprintf("%%-%ds", l)
-							fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
-							fmt.Fprintf(&str, "%v", 1)
-							str.WriteString("\n")
-							continue
+							// delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+							// keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
+							if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
+								fmt.Println(dataItem.CategoryID+"."+dataItem.Name, "is not in cif, write data from metadata")
+								formatString := fmt.Sprintf("%%-%ds", l)
+								fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
+								fmt.Fprintf(&str, "%v", 1)
+								str.WriteString("\n")
+								continue
+							}
 						}
 					}
 
@@ -636,23 +655,28 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 					}
 					if jsonValue, ok := valuesMap[jsonKey]; ok {
 						// remove that key from list of parsed from mmCIF we will use one from metadata
-						delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
-						keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
+						// delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+						// keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
+						if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
+							fmt.Println(dataItem.CategoryID+"."+dataItem.Name, "is not in cif, write data from metadata")
+							formatString := fmt.Sprintf("%%-%ds", l)
+							fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
 
-						formatString := fmt.Sprintf("%%-%ds", l)
-						fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
+							if unit, ok := OSCEMunits[jsonKey]; ok {
+								valueString := checkValue(dataItem, jsonValue[0], jsonKey, unit[0]) // the 0th element, because it's the case where only one value is present
+								fmt.Fprintf(&str, "%s", valueString)
+							} else {
+								// values that have no units definition in OSCEM
+								valueString := checkValue(dataItem, jsonValue[0], jsonKey, "")
+								fmt.Fprintf(&str, "%s", valueString)
 
-						if unit, ok := OSCEMunits[jsonKey]; ok {
-							valueString := checkValue(dataItem, jsonValue[0], jsonKey, unit[0]) // the 0th element, because it's the case where only one value is present
-							fmt.Fprintf(&str, "%s", valueString)
-						} else {
-							// values that have no units definition in OSCEM
-							valueString := checkValue(dataItem, jsonValue[0], jsonKey, "")
-							fmt.Fprintf(&str, "%s", valueString)
-
+							}
 						}
 					}
-					str.WriteString("\n")
+
+					if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
+						str.WriteString("\n")
+					}
 				}
 				if len(cifDIs) != 0 && size == cifDIlen {
 					for _, k := range keys {
