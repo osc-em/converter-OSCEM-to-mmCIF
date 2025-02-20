@@ -38,6 +38,12 @@ Converter explicitly parser through the PDBx definitions to extract as much data
 * administrative categories sorted within mmCIF ( such as author information, grant, etc)
 * em-related categories are sorted randomly, as there is no definitive sorting in PDB team as well
 * file ends with information on atoms
-* units in OSCEM definition are compared to PDBx ( converter for units will be implemented)
+* units in OSCEM definition are compared to PDBx ( converter for units will be implemented )
 * numeric values are checked to be within a range allowed by PDBs
-* values  are checked to be within a list of attributes allowed by PDBx. This is additionally enhanced to match via regular expressions or ceratin logic. 
+* values  are checked to be within a list of attributes allowed by PDBx. This is additionally enhanced to match via regular expressions or other applicable logic. 
+
+### Behavior when _category_ and _data item_ is present in both metadata and provided mmCIF. 
+* There will be a logging message for this _category_
+* In case it is a single instance in metadata (not an array of properties) and also a single instance in mmCIF (not within _"loop"_) the values for respective _category_ are generally taken from **metadata**. However, if a certain _data item_ is present in mmCIF but not in metadata, it will still be added to the newly generated mmCIF
+* In cases, where there is a mismatch between number of instances: number of properties in JSON array, and number of entries within _"loop"_ in mmCIF, **only** the information from metadata will be used in newly generated mmCIF
+* In cases, where there is a match between number of instances, the values for respective _category_ are generally taken from **metadata** again and _data items_ present in mmCIF will be added. **CAUTION**: The order of items is not checked and will be appended as is!

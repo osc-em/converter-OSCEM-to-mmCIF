@@ -66,12 +66,13 @@ func getLongestPDBxItem(s []converterUtils.PDBxItem, s2keys []string) int {
 	return l + len(s[0].CategoryID) + 1
 }
 
-func mmCIFStringToPDBxItem(s string) (map[string][]string, int) {
+func mmCIFStringToPDBxItem(s string) (map[string][]string, []string, int) {
 	cifDI := make(map[string][]string, 0)
+	var keys []string
 	cifDIlen := 0
 	lines := strings.Split(s, "\n")
 	if strings.Contains(s, "loop_") {
-		var keys []string
+
 		indexData := 0
 		for _, line := range lines {
 			fields := strings.Fields(line)
@@ -83,7 +84,7 @@ func mmCIFStringToPDBxItem(s string) (map[string][]string, int) {
 			} else if len(fields) > 1 && indexData == 0 {
 				// data entries start, all keys were collected, assign them to map
 				for i := range keys {
-					cifDI[keys[i]] = []string{strings.Replace(fields[0], "'", "", -1)}
+					cifDI[keys[i]] = []string{strings.Replace(fields[i], "'", "", -1)}
 				}
 				indexData++
 			} else if len(fields) > 1 {
@@ -105,10 +106,11 @@ func mmCIFStringToPDBxItem(s string) (map[string][]string, int) {
 				continue
 			}
 			key, value := fields[0], fields[1]
+			keys = append(keys, key)
 			cifDI[key] = []string{strings.Replace(value, "'", "", -1)}
 		}
 	}
-	return cifDI, cifDIlen
+	return cifDI, keys, cifDIlen
 }
 
 func validateDateIsRFC3339(date string) string {
@@ -233,7 +235,7 @@ func validateEnum(value string, dataItem converterUtils.PDBxItem) string {
 			return "principal investigator/group leader"
 		}
 	}
-	// add additional matching mechanism for grid material by checmical element name/ regular expression
+	// add additional matching mechanism for grid material by chemical element name/ regular expression
 	if namePDBx == "_em_sample_support.grid_material" {
 
 		reGraphene := regexp.MustCompile(`(?i)graphene`)
@@ -490,6 +492,7 @@ func SupplementCoordinatesFromPath(nameMapper map[string]string, PDBxItems map[s
 	mmCIFvalues = categories
 	return createCifText(dataID, mmCIFvalues, nameMapper, PDBxItems, valuesMap, OSCEMunits)
 }
+
 func createCifText(dataName string, mmCIFCategories map[string]string, nameMapper map[string]string, PDBxItems map[string][]converterUtils.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string) (string, error) {
 	// keeps track of values from JSON that have already been mapped to the PDBx properties
 	var str strings.Builder
@@ -505,13 +508,14 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 		var duplicatedFlag bool = false
 		catDI, ok := PDBxItems[category]
 		cifDIs := map[string][]string{}
+		var keys []string
 		var cifDIlen int
 		if ok {
 			_, ok := mmCIFCategories[category]
 			if ok {
 				duplicatedFlag = true
 				log.Printf("Category %s exists both in metadata from JSON files and in existing mmCIF file! Data in mmCIF will be substituted by data from JSON", category)
-				cifDIs, cifDIlen = mmCIFStringToPDBxItem(mmCIFCategories[category])
+				cifDIs, keys, cifDIlen = mmCIFStringToPDBxItem(mmCIFCategories[category])
 			}
 			//
 			var size int
@@ -533,13 +537,10 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 
 			switch {
 			case size > 1:
-				//FIXME add the comparison between cifDIs and size, if they are not equal, continue as is
-				if size != cifDIlen {
-					// change to log
-					fmt.Println(category, cifDIlen, cifDIs)
-				}
+				var valuesStr strings.Builder
 				// loop notation
 				str.WriteString("loop_\n")
+				valuesStr.WriteString("")
 				var isRelevantID bool
 				for _, dataItem := range catDI {
 					// check the length of all first and throw an error in case that they have different length?? can that be? e.g two authors and for one the property Phone is not there?
@@ -550,6 +551,7 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 						if isRelevantID {
 							// remove the ID entry key from list of parsed from mmCIF we will use one from metadata
 							delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+							keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
 							fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
 						}
 					} else if valuesMap[jsonKey] == nil {
@@ -558,11 +560,7 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 						fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
 					}
 				}
-				if len(cifDIs) != 0 {
-					for k := range cifDIs {
-						fmt.Fprintf(&str, "%s\n", k)
-					}
-				}
+
 				for v := range size {
 					for _, dataItem := range catDI {
 						jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
@@ -573,40 +571,48 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 							if isRelevantID {
 								// check
 								delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
-								fmt.Fprintf(&str, "%v ", v+1)
+								keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
+								fmt.Fprintf(&valuesStr, "%v ", v+1)
 							}
 
 						} else if valuesMap[jsonKey] == nil {
 							continue // key was not required and not provided in OSCEM
 						} else if correctSlice, ok := valuesMap[jsonKey]; ok {
 							delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+							keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
 							if unit, ok := OSCEMunits[jsonKey]; ok {
 								valueString := checkValue(dataItem, correctSlice[v], jsonKey, unit[v])
-								fmt.Fprintf(&str, "%s", valueString)
+								fmt.Fprintf(&valuesStr, "%s", valueString)
 							} else {
 								valueString := checkValue(dataItem, correctSlice[v], jsonKey, "")
-								fmt.Fprintf(&str, "%s", valueString)
+								fmt.Fprintf(&valuesStr, "%s", valueString)
 
 							}
 
 						}
 					}
-					if len(cifDIs) != 0 {
-						for k := range cifDIs {
+					if len(cifDIs) != 0 && size == cifDIlen {
+						for _, k := range keys {
 							var value string
 							if strings.Contains(cifDIs[k][v], " ") {
 								value = fmt.Sprintf("'%s' ", cifDIs[k][v]) // if name contains whitespaces enclose it in single quotes
 							} else {
 								value = fmt.Sprintf("%s ", cifDIs[k][v]) // take value as is
 							}
-							fmt.Fprintf(&str, "%s", value)
+							fmt.Fprintf(&valuesStr, "%s", value)
 						}
 					}
-					str.WriteString("\n")
+					valuesStr.WriteString("\n")
 				}
+				if len(cifDIs) != 0 && size == cifDIlen {
+					for _, k := range keys { // write in the same order as extracted from the mmCIF
+						fmt.Fprintf(&str, "%s\n", k)
+					}
+				}
+				str.WriteString(valuesStr.String())
 				str.WriteString("#\n")
 			case size == 1:
-				l := getLongestPDBxItem(catDI, converterUtils.GetKeys[string](cifDIs)) + 5
+				l := getLongestPDBxItem(catDI, converterUtils.GetKeys(cifDIs)) + 5
 				var isRelevantID bool
 				for _, dataItem := range catDI {
 					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
@@ -616,6 +622,7 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 						if isRelevantID {
 							// remove the ID entry key from list of parsed from mmCIF we will use one from metadata
 							delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+							keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
 							formatString := fmt.Sprintf("%%-%ds", l)
 							fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
 							fmt.Fprintf(&str, "%v", 1)
@@ -630,6 +637,7 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 					if jsonValue, ok := valuesMap[jsonKey]; ok {
 						// remove that key from list of parsed from mmCIF we will use one from metadata
 						delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
+						keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
 
 						formatString := fmt.Sprintf("%%-%ds", l)
 						fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
@@ -646,8 +654,9 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 					}
 					str.WriteString("\n")
 				}
-				if len(cifDIs) != 0 {
-					for k, v := range cifDIs {
+				if len(cifDIs) != 0 && size == cifDIlen {
+					for _, k := range keys {
+						v := cifDIs[k]
 						formatString := fmt.Sprintf("%%-%ds", l)
 						fmt.Fprintf(&str, formatString, k)
 						var value string
