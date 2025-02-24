@@ -34,9 +34,6 @@ _em_imaging.electron_source                   'FIELD EMISSION GUN'
 _em_imaging.c2_aperture_diameter              20 
 _em_imaging.specimen_id                       1
 #
-_em_imaging_optics.energyfilter_slit_width      10 
-_em_imaging_optics.imaging_id                   1
-#
 _em_sample_support.grid_material      GOLD 
 _em_sample_support.grid_mesh_size     300 
 _em_sample_support.grid_type          Quantifoil 
