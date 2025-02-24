@@ -103,7 +103,6 @@ func mmCIFStringToPDBxItem(s string) (map[string][]string, []string, int) {
 				continue
 			}
 			fields := strings.Fields(line)
-			fmt.Println(fields)
 			if len(fields) != 2 {
 				k, v = fields[0], strings.Join(fields[1:], " ")
 			} else {
@@ -112,7 +111,6 @@ func mmCIFStringToPDBxItem(s string) (map[string][]string, []string, int) {
 			keys = append(keys, k)
 			cifDI[k] = []string{strings.Replace(v, "'", "", -1)}
 		}
-		fmt.Println(cifDI)
 	}
 	return cifDI, keys, cifDIlen
 }
@@ -520,7 +518,6 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 				duplicatedFlag = true
 				log.Printf("Category %s exists both in metadata from JSON files and in existing mmCIF file! Data in mmCIF will be used", category)
 				cifDIs, keys, cifDIlen = mmCIFStringToPDBxItem(mmCIFCategories[category])
-				fmt.Println(converterUtils.GetKeys(cifDIs))
 			}
 			//
 			var size int
@@ -539,7 +536,10 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 					break
 				}
 			}
-
+			if size != cifDIlen && cifDIlen != 0 {
+				fmt.Fprintf(&str, "%s", mmCIFCategories[category])
+				continue
+			}
 			switch {
 			case size > 1:
 				var valuesStr strings.Builder
@@ -640,7 +640,6 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 							// delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
 							// keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
 							if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
-								fmt.Println(dataItem.CategoryID+"."+dataItem.Name, "is not in cif, write data from metadata")
 								formatString := fmt.Sprintf("%%-%ds", l)
 								fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
 								fmt.Fprintf(&str, "%v", 1)
@@ -658,10 +657,8 @@ func createCifText(dataName string, mmCIFCategories map[string]string, nameMappe
 						// delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
 						// keys = converterUtils.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
 						if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
-							fmt.Println(dataItem.CategoryID+"."+dataItem.Name, "is not in cif, write data from metadata")
 							formatString := fmt.Sprintf("%%-%ds", l)
 							fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
-
 							if unit, ok := OSCEMunits[jsonKey]; ok {
 								valueString := checkValue(dataItem, jsonValue[0], jsonKey, unit[0]) // the 0th element, because it's the case where only one value is present
 								fmt.Fprintf(&str, "%s", valueString)
