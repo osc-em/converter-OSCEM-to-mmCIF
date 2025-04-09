@@ -54,19 +54,10 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 		//log.Fatal("Error while reading the file ", err)
 	}
 	defer dictFile.Close()
-	// relevant categori
-	// dataItemsAll := getValues(mapper)
-	// relevantCategories := make([]string, 0)
-	// for _, item := range dataItemsAll {
-	// 	category := strings.Split(item, ".")[0]
-	// 	if !converterUtils.SliceContains(relevantCategories, category) {
-	// 		relevantCategories = append(relevantCategories, category)
-	// 	}
-	// }
+
 	reSaveCategory := regexp.MustCompile(`save_[a-zA-Z0-9]+[a-zA-Z0-9]+`)
 	reSaveItem := regexp.MustCompile(`save__([a-zA-Z1-9_.]+)`)
 	reSaveEnd := regexp.MustCompile(`save_$`)
-	//resomeItem := regexp.MustCompile(`_item.`)
 	reUnits := regexp.MustCompile(`_item_units.code`)
 	reType := regexp.MustCompile(`_item_type.code`)
 	reRangeMin := regexp.MustCompile(`_item_range.minimum`)

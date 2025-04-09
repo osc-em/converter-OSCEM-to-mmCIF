@@ -131,53 +131,55 @@
          "imaging":"BrightField",
          "microscope":"TITAN52339260"
       },
-      "grants":[
-         {
-            "project_id":"OpEM",
-            "funder":"Swissuniversities,  CHORD track B",
-            "country":"Switzerland"
-         },
-         {
-            "project_id":"563418",
-            "funder":"ETHrat, ORD",
-            "country":"Switzerland"
-         }
-      ],
-      "authors":[
-         {
-            "name":"Tittes",
-            "first_name":"Yves",
-            "email":"yves.tittes@unibas.ch",
-            "orcid":"0000-0002-7026-7646",
-            "name_org":"University of Basel",
-            "type_org":"Academic",
-            "country":"Switzerland",
-            "work_phone":"+41 61 207 74 57",
-            "role":"responsible scientist"
-         },
-         {
-            "name":"Rodriguez",
-            "first_name":"Carlos F.",
-            "email":"cf.rodriguez@unibas.ch",
-            "orcid":"0000-0001-9166-0132",
-            "name_org":"University of Basel",
-            "type_org":"Academic",
-            "country":"Switzerland",
-            "work_phone":"+41 61 207 68 22",
-            "role":"investigator"
-         },
-         {
-            "name":"Bliven",
-            "first_name":"Spencer",
-            "email":"spencer.bliven@psi.ch",
-            "orcid":"0000-0002-1200-1698",
-            "name_org":"Paul Scherrer Institute",
-            "type_org":"Academic",
-            "country":"Switzerland",
-            "work_phone":"+41 56 310 36 03",
-            "role":"principal investigator"
-         }
-      ],
+      "organizational":{
+         "grants":[
+            {
+               "project_id":"OpEM",
+               "funder":"Swissuniversities,  CHORD track B",
+               "country":"Switzerland"
+            },
+            {
+               "project_id":"563418",
+               "funder":"ETHrat, ORD",
+               "country":"Switzerland"
+            }
+         ],
+         "authors":[
+            {
+               "name":"Tittes",
+               "first_name":"Yves",
+               "email":"yves.tittes@unibas.ch",
+               "orcid":"0000-0002-7026-7646",
+               "name_org":"University of Basel",
+               "type_org":"Academic",
+               "country":"Switzerland",
+               "work_phone":"+41 61 207 74 57",
+               "role":"responsible scientist"
+            },
+            {
+               "name":"Rodriguez",
+               "first_name":"Carlos F.",
+               "email":"cf.rodriguez@unibas.ch",
+               "orcid":"0000-0001-9166-0132",
+               "name_org":"University of Basel",
+               "type_org":"Academic",
+               "country":"Switzerland",
+               "work_phone":"+41 61 207 68 22",
+               "role":"investigator"
+            },
+            {
+               "name":"Bliven",
+               "first_name":"Spencer",
+               "email":"spencer.bliven@psi.ch",
+               "orcid":"0000-0002-1200-1698",
+               "name_org":"Paul Scherrer Institute",
+               "type_org":"Academic",
+               "country":"Switzerland",
+               "work_phone":"+41 56 310 36 03",
+               "role":"principal investigator"
+            }
+         ]
+      },
       "sample":{
          "overall_molecule":{
             "molecular_type":"Complex",

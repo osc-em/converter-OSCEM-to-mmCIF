@@ -31,6 +31,18 @@ func SliceContains(s []string, e string) bool {
 	return false
 }
 
+func DeleteElementFromList[V comparable](l []V, e V) []V {
+	n := 0
+	for _, x := range l {
+		if x != e {
+			l[n] = x
+			n++
+		}
+	}
+	l = l[:n]
+	return l
+}
+
 // PDBxItem type defines attributes of the data item property in PDBx dictionary.
 // It contains most important fields, such as name of the item and its parental catrgory,
 // type of value it should take on and units, range or allowed values if there are any.
