@@ -5,7 +5,7 @@ The JSON schema is defined in [OSCEM](https://github.com/osc-em/OSCEM_Schemas/) 
 
 
 ## Running the converter and required inputs:
-** Option 1 ** 
+**Option 1** 
 You can download the executable from the releases and use it in terminal with the following flags: 
 * with `--json` specify path to json file that contains metadata
 * with `--dic` specify path to the PDBx/mmCIF dictionary file
@@ -15,7 +15,7 @@ You can download the executable from the releases and use it in terminal with th
 * with `--mmCIFfile` specify the path to existing mmCIF file. Throws an error if --append is false and --mmCIFfile is not specified
 * with `--output` specify the file to write the newly created mmCIF with metadata entries
 
-** Option 2 **
+**Option 2**
 If using in another GO application, you can install this package with 
 ```
 go get github.com/osc-em/converter-OSCEM-to-mmCIF 
