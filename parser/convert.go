@@ -20,9 +20,9 @@ func getValues[K string, V string](m map[string]string) []string {
 	}
 	return values
 }
-func PDBconvertFromFile(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInput *os.File) (string, error) {
+func PDBconvertFromReader(scientificMetadata map[string]any, metadataLevelNameInJson string, conversionFile string, dictFile string, mmCIFInput io.Reader) (string, error) {
 	mapper, PDBxdictvalues, jsonMeta, jsonUnits := parseInputs(scientificMetadata, metadataLevelNameInJson, conversionFile, dictFile)
-	mmCIFText, err := SupplementCoordinatesFromFile(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInput)
+	mmCIFText, err := SupplementCoordinates(mapper, PDBxdictvalues, jsonMeta, jsonUnits, mmCIFInput)
 	if err != nil {
 		return "", err
 	}
