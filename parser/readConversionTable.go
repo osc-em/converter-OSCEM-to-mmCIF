@@ -23,18 +23,25 @@ func ConversionTableReadColumn(path string, column string) ([]string, error) {
 	if err != nil {
 		return columnValues, err
 	}
-
+	colIndex := 0
+	colExists := false
 	for j := range records[0] {
 		// Since conversions table is often handled from Microsoft Excel and saved in UTF-8, it adds a byte-order mark (BOM) at the beginning of file, which is invisible.
 		// for first column in header this needs to be removed from the name of column!
 		if j == 0 {
 			records[0][j] = strings.Trim(records[0][j], string('\uFEFF'))
 		}
+		if records[0][j] == column {
+			colIndex = j
+			colExists = true
+			break
+		}
 	}
-
+	if !colExists {
+		return columnValues, fmt.Errorf("column %s does not exist in table %s", column, path)
+	}
 	for _, r := range records[1:] {
-		columnValues = append(columnValues, r[0])
+		columnValues = append(columnValues, r[colIndex])
 	}
-	fmt.Println("Column values:", columnValues)
 	return columnValues, nil
 }

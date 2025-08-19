@@ -1,4 +1,4 @@
-from XML,From MDOC,from EMD,for PRZ,in PDBx/mmCIF,type,Ontology suggestions,OSCEM,,,,comments,optionals,units,crunchfromxml,crunchfrommdoc
+in PDBx/mmCIF,OSCEM
 ,,,,,,,
 MicroscopeImage.microscopeData.instrument.InstrumentModel,,"Instrument.InstrumentClass, Instrument.InstrumentId, Instrument.InstrumentModel, Instrument.Manufacturer",,_em_imaging.microscope_model,String,,Instrument,Microscope,,,,,,,
 MicroscopeImage.microscopeData.optics.IlluminationMode,,Optics.IlluminationMode,,_em_imaging.illumination_mode ,String,,Instrument,Illumination,,,,,,,
