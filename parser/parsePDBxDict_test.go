@@ -20,7 +20,7 @@ func TestExtractRangeValue(t *testing.T) {
 	}{
 		{"value missing maximum", "_item_range.maximum", "?", ""},
 		{"numeric value", "_item_range.minimum  0.0", "0.0", ""},
-		{"value emitested", "_item_range.minimum  .", ".", ""},
+		{"value emitted", "_item_range.minimum  .", ".", ""},
 		{"value missing minimum", "_item_range.minimum  ?", "?", ""},
 		{"value not numeric", "_item_range.minimum  *", "?", "value * is not numeric"},
 	}
