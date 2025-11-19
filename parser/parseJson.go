@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"log"
+	"maps"
 
 	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
 )
@@ -16,14 +17,14 @@ func keyConcat(s1, s2 string) string {
 }
 
 // visit recursively unwinds the nested JSON file.
-// map initial is the result of a simple unmarshalling on a json file
+// map initial is the result of a simple un-marshalling on a json file
 // newJsonKey is the key for a map at the current level
 // mapResult is a map that accumulates a resulting dictionary
 // propertiesLen variable controls how many items are kept in the json value array
 // propertyI is the current index of iterated slice
 // currentLevel is the level of nesting
 // level is an initial name where metadata is stored that needs to be converted
-// levelIndex is the nesting level of a propoerty that we should keep track of
+// levelIndex is the nesting level of a property that we should keep track of
 // save is a boolean variable that controls if the correct metadata level was entered already
 // savedLevel a boolean variable that controls if that level was saved once, should turn off after that
 // arrayNestingLevel is a boolean that controls that elements array in json does not have another array element inside. Multiple nesting is not supported
@@ -130,7 +131,7 @@ func visit(mapInitial map[string]any, newJsonKey string, mapResult map[string][]
 	return mapResult, mapResultUnits
 }
 
-// FromJson function creates a map from a JSON file. Nested data is flattend and keys are connected by a dot.
+// FromJson function creates a map from a JSON file. Nested data is flattened and keys are connected by a dot.
 // In cases where JSON has multiple values, final map's value will be a slice.
 
 func FromJson(jsonContent map[string]any, mapAll *map[string][]string, mapUnits *map[string][]string, level string) error {
@@ -140,12 +141,8 @@ func FromJson(jsonContent map[string]any, mapAll *map[string][]string, mapUnits 
 	// Process JSON content and populate the maps
 	jsonFlat, jsonUnits = visit(jsonContent, "", jsonFlat, jsonUnits, 1, 0, 0, level, 0, false, false, -1)
 	// Update the provided maps
-	for k, v := range jsonFlat {
-		(*mapAll)[k] = v
-	}
-	for k, v := range jsonUnits {
-		(*mapUnits)[k] = v
-	}
+	maps.Copy((*mapAll), jsonFlat)
+	maps.Copy((*mapUnits), jsonUnits)
 
 	return nil
 }
