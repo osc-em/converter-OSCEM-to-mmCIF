@@ -10,44 +10,10 @@ import (
 	"strings"
 
 	cU "github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
-	"golang.org/x/exp/slices"
 )
 
-func relevantId(PDBxItems map[string][]cU.PDBxItem, dataItem cU.PDBxItem) bool {
-	accessValues := PDBxItems[dataItem.CategoryID]
-	var parentValue string
-	for i := range len(accessValues) {
-		for r := range len(accessValues[i].ChildName) {
-			if accessValues[i].ChildName[r] == dataItem.CategoryID+"."+dataItem.Name {
-				//if accessValues[i].CategoryID == dataItem.CategoryID && accessValues[i].Name == dataItem.Name && len(accessValues[i].ParentName) != 0 {
-				parentValue = accessValues[i].ParentName[r]
-			}
-		}
-	}
-	if parentValue != "" {
-		catValues, ok := PDBxItems[strings.Split(parentValue, ".")[0]]
-		if ok {
-
-			for r := range len(catValues) {
-				if catValues[r].Name == strings.Split(parentValue, ".")[1] {
-					return true
-				}
-			}
-		}
-	}
-	return false
-}
-
-func getKeyByValue(value string, m map[string]string) (string, error) {
-	for k, v := range m {
-		if v == value {
-			return k, nil
-		}
-	}
-	return "", fmt.Errorf("value %v is not in the conversion table", value)
-}
-
-// given a slice of PDBx items get the length of a longest data item name in it (because the category is the same)
+// given a slice of PDBx items get the length of a longest data item name in it
+// used for nice formatting of mmCIF files
 func getLongestPDBxItem(s []cU.PDBxItem, s2keys []string) int {
 	var l int
 	for i := range s {
@@ -63,13 +29,13 @@ func getLongestPDBxItem(s []cU.PDBxItem, s2keys []string) int {
 	return l + len(s[0].CategoryID) + 1
 }
 
-func mmCIFStringToPDBxItem(s string) (map[string][]string, []string, int) {
-	cifDI := make(map[string][]string, 0)
-	var keys []string
-	cifDIlen := 0
-	lines := strings.Split(s, "\n")
-	if strings.Contains(s, "loop_") {
-
+// When existing cif with coordinates is passed,
+// for each category in terms of PDBx items, there is a long string with data items and values.
+// This method will break blocks of cif text within the same category into PDBxItems and save as struct members
+func (c *Category) breakToPDBxItem(cifLongString string) {
+	c.ParsedItems = make(map[string][]string)
+	lines := strings.Split(cifLongString, "\n")
+	if strings.Contains(cifLongString, LoopKeyword) {
 		indexData := 0
 		for _, line := range lines {
 
@@ -100,28 +66,28 @@ func mmCIFStringToPDBxItem(s string) (map[string][]string, []string, int) {
 				fields = strings.Split(line, " ")
 			}
 			if len(fields) == 1 {
-				if fields[0] == "loop_" {
+				if fields[0] == LoopKeyword {
 					continue
 				} else if fields[0] == "" {
 					continue
 				}
-				keys = append(keys, fields[0])
+				c.ParsedKeys = append(c.ParsedKeys, fields[0])
 			} else if len(fields) > 1 && indexData == 0 {
 				// data entries start, all keys were collected, assign them to map
-				for i := range keys {
-					cifDI[keys[i]] = []string{fields[i]}
+				for i := range c.ParsedKeys {
+					c.ParsedItems[c.ParsedKeys[i]] = []string{fields[i]}
 				}
 				indexData++
 			} else if len(fields) > 1 {
-				for i := range keys {
-					cifDI[keys[i]] = append(cifDI[keys[i]], fields[i])
+				for i := range c.ParsedKeys {
+					c.ParsedItems[c.ParsedKeys[i]] = append(c.ParsedItems[c.ParsedKeys[i]], fields[i])
 				}
 				indexData++
 			}
 		}
-		cifDIlen = indexData
+		c.ParsedLen = indexData
 	} else {
-		cifDIlen = 1
+		c.ParsedLen = 1
 		var k, v string
 		for _, line := range lines {
 			if line == "" {
@@ -133,49 +99,15 @@ func mmCIFStringToPDBxItem(s string) (map[string][]string, []string, int) {
 			} else {
 				k, v = fields[0], fields[1]
 			}
-			keys = append(keys, k)
-			cifDI[k] = []string{strings.Replace(v, "'", "", -1)}
+			c.ParsedKeys = append(c.ParsedKeys, k)
+			c.ParsedItems[k] = []string{strings.ReplaceAll(v, "'", "")}
+
 		}
 	}
-	return cifDI, keys, cifDIlen
 }
 
-func getOrderCategories(parsedCategories []string, mmCIFCategories []string) []string {
-	var order []string
-	allCategories := append(parsedCategories, mmCIFCategories...)
-	slices.Sort(allCategories)
-	// sort based on the pre-defined (administrative, polymer related entities, ligand (non-polymer) related instances, and structure level description)
-	for _, category := range cU.PDBxCategoriesOrder {
-		category = "_" + category
-		if cU.SliceContains(allCategories, category) {
-			order = append(order, category)
-		}
-	}
-	// add the rest not atom-related in some order (it can be random)
-	for _, c := range allCategories {
-		if !cU.SliceContains(order, c) && !cU.SliceContains(cU.PDBxCategoriesOrderAtom, c[1:]) && !(len(c) > 5 && c[0:5] == "data_") {
-			order = append(order, c)
-		}
-
-	}
-	// add atoms categories
-	for _, category := range cU.PDBxCategoriesOrderAtom {
-		category = "_" + category
-		if cU.SliceContains(allCategories, category) {
-			order = append(order, category)
-		}
-	}
-	// append the rest of "unparsed" categories that were inside their own "data_" containers
-	for i := range mmCIFCategories {
-		if len(mmCIFCategories[i]) > 5 {
-			if mmCIFCategories[i][0:5] == "data_" {
-				order = append(order, mmCIFCategories[i])
-			}
-		}
-	}
-	return order
-}
-
+// Reads an entire mmCIF file and organizes it by categories.
+// It keeps track of which data container has the most content
 func parseMmCIF(dictR io.Reader) (string, map[string]string, error) {
 	scanner := bufio.NewScanner(dictR)
 
@@ -228,7 +160,7 @@ func LoopDataEntry(scanner *bufio.Scanner, category string) (map[string]string, 
 		}
 		l++
 		asText.WriteString(line + "\n")
-		if strings.HasPrefix(line, "#") || len(strings.Fields(line)) == 0 {
+		if strings.HasPrefix(line, CategorySeparator) || len(strings.Fields(line)) == 0 {
 			// break between categories is denoted by # in PDB-related software, Phenix uses an empty line.
 			// category ends, appends to the map
 			if category != "" {
@@ -237,7 +169,7 @@ func LoopDataEntry(scanner *bufio.Scanner, category string) (map[string]string, 
 				inCategoryFlag = true // record the next category name
 			}
 		} else {
-			if !strings.HasPrefix(line, "loop_") {
+			if !strings.HasPrefix(line, LoopKeyword) {
 
 				if inCategoryFlag {
 					category = strings.Split(strings.Fields(line)[0], ".")[0]
@@ -285,209 +217,274 @@ func SupplementCoordinatesFromPath(nameMapper map[string]string, PDBxItems map[s
 	return SupplementCoordinates(nameMapper, PDBxItems, valuesMap, OSCEMunits, dictR)
 }
 
-func createCifText(dataName string, mmCIFCategories map[string]string, nameMapper map[string]string, PDBxItems map[string][]cU.PDBxItem, valuesMap map[string][]string, OSCEMunits map[string][]string) (string, error) {
+// handles json cases with array ( or loop_ in mmCIF)
+func (c *Category) createCategoryLoop(
+	str *strings.Builder,
+	nameMapper map[string]string,
+	PDBxItems map[string][]cU.PDBxItem,
+	OSCEMvalues map[string][]string,
+	OSCEMunits map[string][]string,
+) {
+	var valuesStr strings.Builder
+	str.WriteString(LoopKeyword)
+	str.WriteString("\n")
+	valuesStr.WriteString("")
+	var isRelevantID bool
+	for _, dataItem := range c.DataItems {
+		// In this for-loop we add a new data item name per line
+		if c.ParsedLen != 0 && c.Size == c.ParsedLen {
+			log.Printf(
+				"Category %s exists both in metadata from JSON files and in existing mmCIF file! "+
+					"Since your data has many instances of this category, I can't automatically complement "+
+					"the instance with data_item %s",
+				dataItem.CategoryID, dataItem.Name)
+			continue
+		}
+		fullItemName := dataItem.CategoryID + "." + dataItem.Name
+		OSCEMkey, err := getKeyByValue(fullItemName, nameMapper)
+		if err != nil {
+			// it is an _id property, check if we need it go through all data items
+			// and see if it's a parent of another data item, in which case we should add this data item
+			isRelevantID = isIdUsedAsParentKey(PDBxItems, dataItem)
+			if isRelevantID {
+				if _, ok := c.ParsedItems[fullItemName]; !ok {
+					fmt.Fprintf(str, "%s\n", fullItemName)
+				}
+			}
+		} else if OSCEMvalues[OSCEMkey] == nil {
+			continue // not required and not provided in OSCEM
+		} else {
+			// writes the data item name
+			if _, ok := c.ParsedItems[fullItemName]; !ok {
+				fmt.Fprintf(str, "%s\n", fullItemName)
+			}
+		}
+	}
+
+	for v := range c.Size {
+		// if this loop we build values one-line-string per instance of array:
+		for _, dataItem := range c.DataItems {
+			if c.ParsedLen != 0 && c.Size == c.ParsedLen {
+				// do not complement
+				continue
+			}
+			fullItemName := dataItem.CategoryID + "." + dataItem.Name
+			OSCEMkey, err := getKeyByValue(fullItemName, nameMapper)
+			if err != nil {
+				// similarly checks for _id properties
+				isRelevantID = isIdUsedAsParentKey(PDBxItems, dataItem)
+				if isRelevantID {
+					if _, ok := c.ParsedItems[fullItemName]; !ok {
+						fmt.Fprintf(&valuesStr, "%v ", v+1)
+					}
+				}
+			} else if OSCEMvalues[OSCEMkey] == nil {
+				// key was not required and not provided in OSCEM
+				continue
+			} else if correctSlice, ok := OSCEMvalues[OSCEMkey]; ok {
+				// writes the value from OSCEM json
+				if _, ok := c.ParsedItems[fullItemName]; !ok {
+					if unit, ok := OSCEMunits[OSCEMkey]; ok {
+						valueString := checkValue(dataItem, correctSlice[v], OSCEMkey, unit[v])
+						fmt.Fprintf(&valuesStr, "%s", valueString)
+					} else {
+						valueString := checkValue(dataItem, correctSlice[v], OSCEMkey, "")
+						fmt.Fprintf(&valuesStr, "%s", valueString)
+					}
+				}
+			}
+		}
+		// take care of additional info coming from existing mmCIF and add the **values** into the current string
+		if c.ParsedLen != 0 && c.Size == c.ParsedLen {
+			for _, k := range c.ParsedKeys {
+				var value string
+				if strings.Contains(c.ParsedItems[k][v], " ") {
+					// if name contains whitespaces enclose it in single quotes
+					value = fmt.Sprintf("'%s' ", c.ParsedItems[k][v])
+				} else {
+					value = fmt.Sprintf("%s ", c.ParsedItems[k][v])
+				}
+				fmt.Fprintf(&valuesStr, "%s", value)
+			}
+		}
+		valuesStr.WriteString("\n")
+	}
+	if c.ParsedLen != 0 && c.Size == c.ParsedLen {
+		// similarly, take care of additional info coming from existing mmCIF and add the **keys** into the current string
+		for _, k := range c.ParsedKeys {
+			// write in the same order as extracted from the mmCIF
+			fmt.Fprintf(str, "%s\n", k)
+		}
+	}
+	str.WriteString(valuesStr.String())
+	str.WriteString(CategorySeparator)
+	str.WriteString("\n")
+}
+
+// handles simple cases of key value pairs
+func (c *Category) createCategorySingleValue(
+	str *strings.Builder,
+	nameMapper map[string]string,
+	PDBxItems map[string][]cU.PDBxItem,
+	OSCEMvalues map[string][]string,
+	OSCEMunits map[string][]string,
+) {
+	l := getLongestPDBxItem(c.DataItems, cU.GetKeys(c.ParsedItems)) + ColumnPadding
+	var isRelevantID bool
+	for _, dataItem := range c.DataItems {
+		fullItemName := dataItem.CategoryID + "." + dataItem.Name
+		OSCEMkey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
+		if err != nil {
+			// it is an _id property, check if we need it go through all data items
+			// and see if it's a parent of another data item, in which case we should add this data item
+			isRelevantID = isIdUsedAsParentKey(PDBxItems, dataItem)
+			if isRelevantID {
+				if _, ok := c.ParsedItems[fullItemName]; !ok {
+					formatString := fmt.Sprintf("%%-%ds", l)
+					fmt.Fprintf(str, formatString, fullItemName)
+					fmt.Fprintf(str, "%v", 1)
+					str.WriteString("\n")
+					continue
+				}
+			}
+		}
+
+		if OSCEMvalues[OSCEMkey] == nil {
+			// not required in mmCIF
+			continue
+		}
+		if OSCEMvalue, ok := OSCEMvalues[OSCEMkey]; ok {
+			if _, ok := c.ParsedItems[fullItemName]; !ok {
+				formatString := fmt.Sprintf("%%-%ds", l)
+				fmt.Fprintf(str, formatString, fullItemName)
+				if unit, ok := OSCEMunits[OSCEMkey]; ok {
+					// the 0th element, because it's the case where only one value is present
+					valueString := checkValue(dataItem, OSCEMvalue[0], OSCEMkey, unit[0])
+					fmt.Fprintf(str, "%s", valueString)
+				} else {
+					// values that have no units definition in OSCEM
+					valueString := checkValue(dataItem, OSCEMvalue[0], OSCEMkey, "")
+					fmt.Fprintf(str, "%s", valueString)
+
+				}
+			}
+		}
+
+		if _, ok := c.ParsedItems[fullItemName]; !ok {
+			str.WriteString("\n")
+		}
+	}
+	if len(c.ParsedItems) != 0 && c.Size == c.ParsedLen {
+		// take care of additional info coming from existing mmCIF and add the **item** into the current string
+		for _, k := range c.ParsedKeys {
+			v := c.ParsedItems[k]
+			formatString := fmt.Sprintf("%%-%ds", l)
+			fmt.Fprintf(str, formatString, k)
+			var value string
+			if strings.Contains(v[0], " ") {
+				// if name contains whitespaces enclose it in single quotes
+				value = fmt.Sprintf("'%s' ", v[0])
+			} else {
+				value = fmt.Sprintf("%s ", v[0])
+			}
+			fmt.Fprintf(str, "%s", value)
+			str.WriteString("\n")
+		}
+	}
+	str.WriteString(CategorySeparator)
+	str.WriteString("\n")
+}
+
+// get size of the PDBx category based on OSCEM json values
+func (c *Category) getSize(nameMapper map[string]string, OSCEMvalues map[string][]string) {
+	// loop through all data items in category,
+	// as this reflects the order of data items in PDBx,
+	// certain items might not exist in OSCEM json
+	// loop until we find first key that exists in json
+	for i := range c.DataItems {
+		k, err := getKeyByValue(c.DataItems[i].CategoryID+"."+c.DataItems[i].Name, nameMapper)
+		if err != nil {
+			// occurs when this PDBx category not in the conversions table
+			continue
+		}
+		//check if that key is present in json file and extract it's size
+		_, ok := OSCEMvalues[k]
+		if ok {
+			c.Size = len(OSCEMvalues[k])
+			break
+		}
+	}
+}
+
+// data name is the name of data identifier at the top of the new file
+// mmCIFCategories is a map created from coordinates file cif. where key is a category name and value is a long string with the text that includes data items, their values and loop_ if applicable
+// nameMapper is a map that maps PDBx data items to json keys
+// PDBxItems is a map where key is category name and value is a slice of PDBxItems that belong to that category; this comes from PDBx dictionary
+// valuesMap is a map where key is json key and value is a slice of strings with values for that key from json metadata
+// OSCEMunits is a map where key is json key and value is a slice of strings with units for that key from json metadata
+func createCifText(
+	dataName string,
+	mmCIFCategories map[string]string,
+	nameMapper map[string]string,
+	PDBxItems map[string][]cU.PDBxItem,
+	valuesMap map[string][]string,
+	OSCEMunits map[string][]string,
+) (string, error) {
 	// keeps track of values from JSON that have already been mapped to the PDBx properties
 	var str strings.Builder
-	str.WriteString(dataName + "\n#\n") //write the data Identifier in the header
+	//write the data Identifier in the header
+	str.WriteString(dataName)
+	str.WriteString("\n")
+	str.WriteString(CategorySeparator)
+	str.WriteString("\n")
 
+	// join and sort all the categories (the parsed ones from existing mmCif file with coordinates and PDBx dictionary)
 	parsedCategories := make([]string, 0)
 	for k := range PDBxItems {
 		parsedCategories = append(parsedCategories, k)
 	}
 	allCategories := getOrderCategories(parsedCategories, cU.GetKeys(mmCIFCategories))
-
-	for _, category := range allCategories {
-		var duplicatedFlag bool = false
-		catDI, ok := PDBxItems[category]
-		cifDIs := map[string][]string{}
-		var keys []string
-		var cifDIlen int
+	// loop through all categories in order to write a file
+	for i := range allCategories {
+		var c Category
+		var ok bool
+		c.Name = allCategories[i]
+		c.DataItems, ok = PDBxItems[c.Name]
 		if ok {
-			_, ok := mmCIFCategories[category]
+			// check if that category exists in provided mmCIF with coordinates and initialize it accordingly
+			_, ok := mmCIFCategories[c.Name]
 			if ok {
-				duplicatedFlag = true
-				log.Printf("Category %s exists both in metadata from JSON files and in existing mmCIF file! Data in mmCIF will be used", category)
-				cifDIs, keys, cifDIlen = mmCIFStringToPDBxItem(mmCIFCategories[category])
+				c.DuplicatedFlag = true
+				log.Printf("Category %s exists both in metadata from JSON files and in existing mmCIF file! Data in mmCIF will be used", c.Name)
+				c.breakToPDBxItem(mmCIFCategories[c.Name])
 			}
-			//
-			var size int
-			// need to loop here through all data items in category, as it reflects the order of data items in PDBx, it still might not exist in json
-			// loop until we find first key that exists in json
-			for i := range catDI {
-				k, err := getKeyByValue(catDI[i].CategoryID+"."+catDI[i].Name, nameMapper)
-				if err != nil {
-					//occurs when this PDBx category not in the conversions table - contains the "id" and used to link data items -> use something else for counting
-					continue
-				}
-				//check if that key is present in json file and extract it's size
-				_, ok := valuesMap[k]
-				if ok {
-					size = len(valuesMap[k])
-					break
-				}
-			}
-			if size != cifDIlen && cifDIlen != 0 {
-				fmt.Fprintf(&str, "%s", mmCIFCategories[category])
+			c.getSize(nameMapper, valuesMap)
+			if c.Size != c.ParsedLen && c.ParsedLen != 0 {
+				fmt.Fprintf(&str, "%s", mmCIFCategories[c.Name])
 				continue
 			}
 			switch {
-			case size > 1:
-				var valuesStr strings.Builder
-				str.WriteString("loop_\n")
-				valuesStr.WriteString("")
-				var isRelevantID bool
-				for _, dataItem := range catDI {
-					if cifDIlen != 0 && size == cifDIlen {
-						log.Printf(
-							"Category %s exists both in metadata from JSON files and in existing mmCIF file! "+
-								"Since your data has many instances of this category, I can't automatically complement "+
-								"the instance with data_item %s",
-							dataItem.CategoryID, dataItem.Name)
-						continue
-					}
-					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
-					if err != nil {
-						// it is _id property -> check if we need it go through all data items and see if it's a parent somewhere!
-						isRelevantID = relevantId(PDBxItems, dataItem)
-						if isRelevantID {
-							if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
-								fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
-							}
-						}
-					} else if valuesMap[jsonKey] == nil {
-						continue // not required and not provided in OSCEM
-					} else {
-						if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
-							fmt.Fprintf(&str, "%s\n", dataItem.CategoryID+"."+dataItem.Name)
-						}
-					}
-				}
-
-				for v := range size {
-					for _, dataItem := range catDI {
-						if cifDIlen != 0 && size == cifDIlen {
-							// do not complement
-							continue
-						}
-						jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
-						if err != nil {
-							if isRelevantID {
-								if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
-									fmt.Fprintf(&valuesStr, "%v ", v+1)
-								}
-							}
-						} else if valuesMap[jsonKey] == nil {
-							continue // key was not required and not provided in OSCEM
-						} else if correctSlice, ok := valuesMap[jsonKey]; ok {
-							if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
-								if unit, ok := OSCEMunits[jsonKey]; ok {
-									valueString := checkValue(dataItem, correctSlice[v], jsonKey, unit[v])
-									fmt.Fprintf(&valuesStr, "%s", valueString)
-								} else {
-									valueString := checkValue(dataItem, correctSlice[v], jsonKey, "")
-									fmt.Fprintf(&valuesStr, "%s", valueString)
-								}
-							}
-						}
-					}
-					if cifDIlen != 0 && size == cifDIlen {
-						for _, k := range keys {
-							var value string
-							if strings.Contains(cifDIs[k][v], " ") {
-								value = fmt.Sprintf("'%s' ", cifDIs[k][v]) // if name contains whitespaces enclose it in single quotes
-							} else {
-								value = fmt.Sprintf("%s ", cifDIs[k][v]) // take value as is
-							}
-							fmt.Fprintf(&valuesStr, "%s", value)
-						}
-					}
-					valuesStr.WriteString("\n")
-				}
-				if cifDIlen != 0 && size == cifDIlen {
-					for _, k := range keys { // write in the same order as extracted from the mmCIF
-						fmt.Fprintf(&str, "%s\n", k)
-					}
-				}
-				str.WriteString(valuesStr.String())
-				str.WriteString("#\n")
-			case size == 1:
-				l := getLongestPDBxItem(catDI, cU.GetKeys(cifDIs)) + 5
-				var isRelevantID bool
-				for _, dataItem := range catDI {
-					jsonKey, err := getKeyByValue(dataItem.CategoryID+"."+dataItem.Name, nameMapper)
-					if err != nil {
-						// it is _id property -> check if we need it go through all data items and see if it's a parent somewhere!
-						isRelevantID = relevantId(PDBxItems, dataItem)
-						if isRelevantID {
-							// remove the ID entry key from list of parsed from mmCIF we will use one from metadata
-							// delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
-							// keys = cU.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
-							if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
-								formatString := fmt.Sprintf("%%-%ds", l)
-								fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
-								fmt.Fprintf(&str, "%v", 1)
-								str.WriteString("\n")
-								continue
-							}
-						}
-					}
-
-					if valuesMap[jsonKey] == nil {
-						continue // not required in mmCIF
-					}
-					if jsonValue, ok := valuesMap[jsonKey]; ok {
-						// remove that key from list of parsed from mmCIF we will use one from metadata
-						// delete(cifDIs, dataItem.CategoryID+"."+dataItem.Name)
-						// keys = cU.DeleteElementFromList(keys, dataItem.CategoryID+"."+dataItem.Name)
-						if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
-							formatString := fmt.Sprintf("%%-%ds", l)
-							fmt.Fprintf(&str, formatString, dataItem.CategoryID+"."+dataItem.Name)
-							if unit, ok := OSCEMunits[jsonKey]; ok {
-								// the 0th element, because it's the case where only one value is present
-								valueString := checkValue(dataItem, jsonValue[0], jsonKey, unit[0])
-								fmt.Fprintf(&str, "%s", valueString)
-							} else {
-								// values that have no units definition in OSCEM
-								valueString := checkValue(dataItem, jsonValue[0], jsonKey, "")
-								fmt.Fprintf(&str, "%s", valueString)
-
-							}
-						}
-					}
-
-					if _, ok := cifDIs[dataItem.CategoryID+"."+dataItem.Name]; !ok {
-						str.WriteString("\n")
-					}
-				}
-				if len(cifDIs) != 0 && size == cifDIlen {
-					for _, k := range keys {
-						v := cifDIs[k]
-						formatString := fmt.Sprintf("%%-%ds", l)
-						fmt.Fprintf(&str, formatString, k)
-						var value string
-						if strings.Contains(v[0], " ") {
-							value = fmt.Sprintf("'%s' ", v[0]) // if name contains whitespaces enclose it in single quotes
-						} else {
-							value = fmt.Sprintf("%s ", v[0]) // take value as is
-						}
-						fmt.Fprintf(&str, "%s", value)
-						str.WriteString("\n")
-					}
-				}
-				str.WriteString("#\n")
+			case c.Size > 1:
+				c.createCategoryLoop(
+					&str, nameMapper, PDBxItems, valuesMap, OSCEMunits,
+				)
+			case c.Size == 1:
+				c.createCategorySingleValue(
+					&str, nameMapper, PDBxItems, valuesMap, OSCEMunits)
 			default:
 				// Based on conversion table, the correspondence in naming between OSCEM and PDBx exist.
-				// But for this PDBx data category not OSCEM properties are used in this JSON file.
+				// But for this PDBx data category no OSCEM properties are used in this JSON file.
 				continue
 			}
 		}
-		if !duplicatedFlag {
+		if !c.DuplicatedFlag {
 			// this category is not present both in mmCIF and in a new metadata.
 			// We won't duplicate it from mmCIF since it was taken from new metadata!
-			mmCifLines, ok := mmCIFCategories[category]
+			mmCifLines, ok := mmCIFCategories[c.Name]
 			if ok {
 				str.WriteString(mmCifLines)
-				str.WriteString("#\n")
+				str.WriteString(CategorySeparator)
+				str.WriteString("\n")
 			}
 		}
 	}
