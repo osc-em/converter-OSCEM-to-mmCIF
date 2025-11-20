@@ -437,7 +437,6 @@ func createCifText(
 	str.WriteString("\n")
 	str.WriteString(CategorySeparator)
 	str.WriteString("\n")
-	fmt.Println(nameMapper)
 	// join and sort all the categories (the parsed ones from existing mmCif file with coordinates and PDBx dictionary)
 	parsedCategories := make([]string, 0)
 	for k := range PDBxItems {
