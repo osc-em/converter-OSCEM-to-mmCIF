@@ -249,6 +249,8 @@ func checkValue(dataItem converterUtils.PDBxItem, value string, jsonKey string, 
 
 	if strings.Contains(value, " ") {
 		value = fmt.Sprintf("'%s' ", value) // if name contains whitespaces enclose it in single quotes
+	} else if value == "" {
+		value = "? "
 	} else {
 		value = fmt.Sprintf("%s ", value) // take value as is
 	}

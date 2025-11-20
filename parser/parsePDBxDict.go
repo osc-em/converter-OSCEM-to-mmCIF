@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
+	"golang.org/x/exp/slices"
 )
 
 func extractRangeValue(line string) (string, error) {
@@ -169,12 +170,12 @@ func PDBxDict(path string, relevantNames []string) ([]converterUtils.PDBxItem, e
 			categoriesNamesRelevant := make([]string, 0)
 			for i := range relevantNames {
 				cat := strings.Split(relevantNames[i], ".")[0]
-				if !converterUtils.SliceContains(categoriesNamesRelevant, cat) {
+				if slices.Contains(categoriesNamesRelevant, cat) {
 					categoriesNamesRelevant = append(categoriesNamesRelevant, cat)
 				}
 			}
 			// if category is in re
-			if converterUtils.SliceContains(relevantNames, categoryDataItem) || (converterUtils.SliceContains(categoriesNamesRelevant, category) && reIsIdentifier.MatchString(scanner.Text())) {
+			if slices.Contains(relevantNames, categoryDataItem) || (slices.Contains(categoriesNamesRelevant, category) && reIsIdentifier.MatchString(scanner.Text())) {
 				presentInJson = true
 			} else {
 				presentInJson = false

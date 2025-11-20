@@ -38,30 +38,6 @@ func TestGetKeyByValue(t *testing.T) {
 	}
 }
 
-// func TestSliceContains(t *testing.T) {
-// 	var testSlice = []struct {
-// 		name           string
-// 		slice          []string
-// 		element        string
-// 		expectedResult bool
-// 	}{
-// 		{"element in slice", []string{"hello", "world"}, "hello", true},
-// 		{"element not in slice", []string{"hello", "world"}, "foo", false},
-// 	}
-
-// 	for _, test := range testSlice {
-
-// 		testname := fmt.Sprintf("%v", test.name)
-// 		t.Run(testname, func(t *testing.T) {
-// 			gotValue := sliceContains(test.slice, test.element)
-
-// 			if gotValue != test.expectedResult {
-// 				t.Errorf("got %v, want %v", gotValue, test.expectedResult)
-// 			}
-// 		})
-// 	}
-// }
-
 func TestToEMDB(t *testing.T) {
 	var testCases = []struct {
 		name          string

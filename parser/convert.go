@@ -112,6 +112,9 @@ func parseInputs(scientificMetadata map[string]any, metadataLevelNameInJson stri
 		log.Fatal(err)
 		return mapper, dataItemsPerCategory, mapJson, unitsOSCEM
 	}
+	for i, name := range namesOSCEM {
+		namesOSCEM[i] = strings.ReplaceAll(name, "[N]", "")
+	}
 	namesPDBx, err := ConversionTableReadColumn(conversionFile, "in PDBx/mmCIF")
 	if err != nil {
 		log.Fatal(err)

@@ -21,16 +21,6 @@ func AssertFloatEqual(a, b float64) bool {
 	}
 }
 
-// is element e in the slice s?
-func SliceContains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
 func DeleteElementFromList[V comparable](l []V, e V) []V {
 	n := 0
 	for _, x := range l {
