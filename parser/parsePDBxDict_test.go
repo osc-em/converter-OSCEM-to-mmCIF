@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
+	"github.com/osc-em/oscem-converter-mmcif/converterUtils"
 )
 
 func equalPDBxItem(a, b converterUtils.PDBxItem) bool {

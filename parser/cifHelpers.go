@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	cU "github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
+	cU "github.com/osc-em/oscem-converter-mmcif/converterUtils"
 	"golang.org/x/exp/slices"
 )
 

@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
+	"github.com/osc-em/oscem-converter-mmcif/converterUtils"
 )
 
 // GetValues returns slice of strings with values in maps. In those maps both Key and Value are strings.

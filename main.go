@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/osc-em/converter-OSCEM-to-mmCIF/parser"
+	"github.com/osc-em/oscem-converter-mmcif/parser"
 )
 
 func main() {

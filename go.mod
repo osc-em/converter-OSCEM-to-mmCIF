@@ -1,4 +1,4 @@
-module github.com/osc-em/converter-OSCEM-to-mmCIF
+module github.com/osc-em/oscem-converter-mmcif
 
 go 1.23.0
 
