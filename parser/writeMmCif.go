@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	cU "github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
+	cU "github.com/osc-em/oscem-converter-mmcif/converterUtils"
 )
 
 // given a slice of PDBx items get the length of a longest data item name in it

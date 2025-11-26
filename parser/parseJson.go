@@ -5,7 +5,7 @@ import (
 	"log"
 	"maps"
 
-	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
+	"github.com/osc-em/oscem-converter-mmcif/converterUtils"
 )
 
 func keyConcat(s1, s2 string) string {

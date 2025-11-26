@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
+	"github.com/osc-em/oscem-converter-mmcif/converterUtils"
 )
 
 func TestValidateDateIsRFC3339(t *testing.T) {

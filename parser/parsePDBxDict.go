@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/osc-em/converter-OSCEM-to-mmCIF/converterUtils"
+	"github.com/osc-em/oscem-converter-mmcif/converterUtils"
 	"golang.org/x/exp/slices"
 )
 
